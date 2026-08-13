@@ -223,7 +223,18 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 
 #measurementManagerModal { z-index: 200 !important; }
 #measurementFieldModal { z-index: 300 !important; }
+#deleteConfirmModal { z-index: 1000 !important; }
+#measurementSaveConfirmModal { z-index: 1000 !important; }
+#newMeasurementModal, #editMeasurementModal { z-index: 400 !important; }
 </style>
+
+<style id="measurement-v27-style">
+.body-hero-card .measurement-summary{background:var(--input-bg);border-radius:16px;padding:6px 14px}
+.body-hero-card .measurement-item{padding:12px 0}
+.body-action-row button{min-height:46px}
+#newMeasurementModal, #editMeasurementModal{z-index:400!important}
+</style>
+
 </head>
 <body>
 <div class="container" id="app">
@@ -658,6 +669,7 @@ let pendingImportData = null;
 let currentAchievements = {};
 let progressPeriod = 30;
 let pendingMeasurementSave = null;
+let pendingMeasurementEditIndex = null;
 let currentBodyGraphKey = null;
 let editingCatalogProduct = null;
 let currentFoodMode = 'portion';
@@ -889,35 +901,231 @@ function escapeHtml(value) {
 function renderMeasurementScreen() {
     const form = document.getElementById('measurementForm');
     const fields = getMeasurementFields();
-    const last = data.measurements.slice(-1)[0] || {};
+    const lastIndex = data.measurements.length - 1;
+    const last = lastIndex >= 0 ? data.measurements[lastIndex] : null;
+    const prev = lastIndex > 0 ? data.measurements[lastIndex - 1] : null;
+
+    if (!last) {
+        form.innerHTML = `
+            <div class="body-hero-card">
+                <div class="body-card-head">
+                    <div>
+                        <div class="body-card-title">📏 Параметры тела</div>
+                        <div class="body-card-subtitle">Здесь будут отображаться последние сохранённые значения.</div>
+                    </div>
+                    <button class="body-settings-btn" onclick="openMeasurementManager()">⚙️ Параметры</button>
+                </div>
+                <div style="padding:18px 4px;color:var(--subtext);text-align:center;">
+                    Пока нет сохранённых замеров
+                </div>
+                <button class="body-save-btn" onclick="openNewMeasurementModal()">＋ Новый замер</button>
+            </div>
+        `;
+        document.getElementById('comparisonBlock').innerHTML = '';
+        renderMeasurementHistory();
+        return;
+    }
+
+    const dateText = new Date(last.date).toLocaleDateString('ru-RU', {
+        day:'2-digit', month:'long', year:'numeric'
+    });
+
+    const rows = fields.map(f => {
+        const cur = last[f.key];
+        if (cur === null || cur === undefined || cur === '') return '';
+        const old = prev ? prev[f.key] : null;
+        let change = '';
+        if (old !== null && old !== undefined && old !== '' && Number.isFinite(Number(cur)) && Number.isFinite(Number(old))) {
+            change = formatMeasurementDiff(cur, old);
+        } else {
+            change = `<div class="measurement-change same"><span class="measurement-arrow">●</span><span>${prev ? 'Нет прошлого значения' : 'Первое значение'}</span></div>`;
+        }
+        return `
+            <div class="measurement-item">
+                <div>
+                    <div style="font-weight:700;">${escapeHtml(f.label)}</div>
+                    ${change}
+                </div>
+                <div style="font-size:18px;font-weight:800;">${escapeHtml(cur)}</div>
+            </div>`;
+    }).join('');
 
     form.innerHTML = `
         <div class="body-hero-card">
             <div class="body-card-head">
-                <div><div class="body-card-title">Текущий замер</div><div class="body-card-subtitle">Последнее сохранённое значение подставляется автоматически</div></div>
+                <div>
+                    <div class="body-card-title">📏 Параметры тела</div>
+                    <div class="body-card-subtitle">Последний замер · ${dateText}</div>
+                </div>
                 <button class="body-settings-btn" onclick="openMeasurementManager()">⚙️ Параметры</button>
             </div>
-            ${fields.map(f => `
-                <div class="measurement-input">
-                    <label>${escapeHtml(f.label)}</label>
-                    <input type="number" step="any" id="meas_${escapeHtml(f.key)}" placeholder="Введите значение" value="${last[f.key] != null ? escapeHtml(last[f.key]) : ''}">
-                </div>
-            `).join('')}
-            <button class="body-save-btn" onclick="saveMeasurements()">💾 Сохранить замер</button>
+
+            <div class="measurement-summary" style="margin-top:14px;">
+                ${rows || '<div style="color:var(--subtext);">Нет заполненных параметров.</div>'}
+            </div>
+
+            <div class="body-action-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+                <button class="body-save-btn" style="margin-top:0;" onclick="openLastMeasurementEdit()">✏️ Изменить последний</button>
+                <button class="body-save-btn gray" style="margin-top:0;" onclick="openNewMeasurementModal()">＋ Новый замер</button>
+            </div>
         </div>
+
         <div id="comparisonBlock"></div>
+
         <div class="body-history-card">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-    <div class="body-history-title" style="margin:0;">История замеров</div>
-    <button class="body-graph-btn gray" onclick="openBodyGraph()">📈 График</button>
-</div>
-            <div style="color:var(--subtext);font-size:12px;margin-bottom:4px;">Каждый новый замер сравнивается с предыдущим значением каждого параметра.</div>
+                <div class="body-history-title" style="margin:0;">История замеров</div>
+                <button class="body-graph-btn gray" onclick="openBodyGraph()">📈 Динамика</button>
+            </div>
+            <div style="color:var(--subtext);font-size:12px;margin-bottom:4px;">
+                Предыдущие замеры сохраняются отдельно.
+            </div>
             <div id="measurementHistory"></div>
         </div>
     `;
 
     renderMeasurementHistory();
-    if (data.measurements.length) showLatestMeasurementComparison();
+    showLatestMeasurementComparison();
+}
+
+function openNewMeasurementModal() {
+    const fields = getMeasurementFields();
+    let modal = document.getElementById('newMeasurementModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'newMeasurementModal';
+        modal.className = 'catalog-modal hidden';
+        modal.onclick = function(e){ if(e.target === modal) closeNewMeasurementModal(); };
+        document.body.appendChild(modal);
+    }
+
+    const today = new Date().toISOString().slice(0,10);
+    modal.innerHTML = `
+        <div class="catalog-modal-content measurement-manager-modal-content">
+            <span class="close-btn" onclick="closeNewMeasurementModal()">&times;</span>
+            <div style="font-size:21px;font-weight:800;margin-bottom:4px;">＋ Новый замер</div>
+            <div class="measurement-modal-note">Заполните только те параметры, которые хотите сохранить.</div>
+            <label class="field-label">Дата</label>
+            <input type="date" id="newMeasurementDate" value="${today}">
+            ${fields.map(f => `
+                <label class="field-label">${escapeHtml(f.label)}</label>
+                <input type="number" step="any" id="newMeas_${escapeHtml(f.key)}" placeholder="Введите значение">
+            `).join('')}
+            <button onclick="prepareNewMeasurementSave()">💾 Сохранить</button>
+            <button class="gray" onclick="closeNewMeasurementModal()">Отмена</button>
+        </div>`;
+    modal.classList.remove('hidden');
+}
+
+function closeNewMeasurementModal() {
+    document.getElementById('newMeasurementModal')?.classList.add('hidden');
+}
+
+function prepareNewMeasurementSave() {
+    const fields = getMeasurementFields();
+    const date = document.getElementById('newMeasurementDate')?.value;
+    if (!date) { showToast('Выберите дату'); return; }
+
+    const measurement = { date: new Date(date + 'T12:00:00').toISOString() };
+    fields.forEach(field => {
+        const input = document.getElementById(`newMeas_${field.key}`);
+        const value = input ? parseFloat(input.value) : NaN;
+        measurement[field.key] = Number.isFinite(value) ? value : null;
+    });
+
+    if (fields.every(field => measurement[field.key] === null)) {
+        showToast('Введите хотя бы одно значение');
+        return;
+    }
+
+    pendingMeasurementSave = measurement;
+    pendingMeasurementEditIndex = null;
+
+    const filled = fields
+        .filter(f => measurement[f.key] != null)
+        .map(f => `${f.label}: ${measurement[f.key]}`)
+        .join(' · ');
+
+    document.getElementById('measurementSaveConfirmText').textContent = filled;
+    closeNewMeasurementModal();
+    document.getElementById('measurementSaveConfirmModal').classList.remove('hidden');
+}
+
+function openLastMeasurementEdit() {
+    const fields = getMeasurementFields();
+    const index = data.measurements.length - 1;
+    if (index < 0) return openNewMeasurementModal();
+
+    const last = data.measurements[index];
+    let modal = document.getElementById('editMeasurementModal');
+
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'editMeasurementModal';
+        modal.className = 'catalog-modal hidden';
+        modal.onclick = function(e){ if(e.target === modal) closeLastMeasurementEdit(); };
+        document.body.appendChild(modal);
+    }
+
+    const dateValue = new Date(last.date).toISOString().slice(0,10);
+
+    modal.innerHTML = `
+        <div class="catalog-modal-content measurement-manager-modal-content">
+            <span class="close-btn" onclick="closeLastMeasurementEdit()">&times;</span>
+            <div style="font-size:21px;font-weight:800;margin-bottom:4px;">✏️ Изменить последний замер</div>
+            <div class="measurement-modal-note">Изменения исправят существующий последний замер, новый замер не создаётся.</div>
+            <label class="field-label">Дата</label>
+            <input type="date" id="editMeasurementDate" value="${dateValue}">
+            ${fields.map(f => `
+                <label class="field-label">${escapeHtml(f.label)}</label>
+                <input type="number" step="any" id="editMeas_${escapeHtml(f.key)}"
+                       value="${last[f.key] != null ? escapeHtml(last[f.key]) : ''}"
+                       placeholder="Введите значение">
+            `).join('')}
+            <button onclick="prepareLastMeasurementEdit()">💾 Сохранить изменения</button>
+            <button class="gray" onclick="closeLastMeasurementEdit()">Отмена</button>
+        </div>`;
+
+    modal.classList.remove('hidden');
+}
+
+function closeLastMeasurementEdit() {
+    document.getElementById('editMeasurementModal')?.classList.add('hidden');
+}
+
+function prepareLastMeasurementEdit() {
+    const fields = getMeasurementFields();
+    const index = data.measurements.length - 1;
+    if (index < 0) return;
+
+    const date = document.getElementById('editMeasurementDate')?.value;
+    if (!date) { showToast('Выберите дату'); return; }
+
+    const measurement = { ...data.measurements[index] };
+    measurement.date = new Date(date + 'T12:00:00').toISOString();
+
+    fields.forEach(field => {
+        const input = document.getElementById(`editMeas_${field.key}`);
+        const value = input ? parseFloat(input.value) : NaN;
+        measurement[field.key] = Number.isFinite(value) ? value : null;
+    });
+
+    if (fields.every(field => measurement[field.key] === null)) {
+        showToast('Введите хотя бы одно значение');
+        return;
+    }
+
+    pendingMeasurementSave = measurement;
+    pendingMeasurementEditIndex = index;
+
+    const filled = fields
+        .filter(f => measurement[f.key] != null)
+        .map(f => `${f.label}: ${measurement[f.key]}`)
+        .join(' · ');
+
+    document.getElementById('measurementSaveConfirmText').textContent = filled;
+    closeLastMeasurementEdit();
+    document.getElementById('measurementSaveConfirmModal').classList.remove('hidden');
 }
 
 function openMeasurementManager() {
@@ -1067,25 +1275,47 @@ function saveMeasurements() {
         const value = input ? parseFloat(input.value) : NaN;
         measurement[field.key] = Number.isFinite(value) ? value : null;
     });
-    if (fields.every(field => measurement[field.key] === null)) { showToast('Введите хотя бы одно значение'); return; }
+    if (fields.every(field => measurement[field.key] === null)) {
+        showToast('Введите хотя бы одно значение');
+        return;
+    }
+
     pendingMeasurementSave = measurement;
-    const filled = fields.filter(f=>measurement[f.key]!=null).map(f=>`${f.label}: ${measurement[f.key]}`).join(' · ');
+    pendingMeasurementEditIndex = data.measurements.length ? data.measurements.length - 1 : null;
+
+    const filled = fields.filter(f=>measurement[f.key]!=null)
+        .map(f=>`${f.label}: ${measurement[f.key]}`).join(' · ');
     document.getElementById('measurementSaveConfirmText').textContent = filled;
     document.getElementById('measurementSaveConfirmModal').classList.remove('hidden');
 }
+
 function closeMeasurementSaveConfirm() {
     document.getElementById('measurementSaveConfirmModal').classList.add('hidden');
     pendingMeasurementSave = null;
+    pendingMeasurementEditIndex = null;
 }
+
 function confirmSaveMeasurements() {
     if (!pendingMeasurementSave) return;
-    data.measurements.push(pendingMeasurementSave);
+
+    if (pendingMeasurementEditIndex !== null &&
+        pendingMeasurementEditIndex === data.measurements.length - 1 &&
+        data.measurements[pendingMeasurementEditIndex]) {
+        data.measurements[pendingMeasurementEditIndex] = pendingMeasurementSave;
+        showToast('Последний замер изменён');
+    } else {
+        data.measurements.push(pendingMeasurementSave);
+        data.measurements.sort((a,b) => new Date(a.date) - new Date(b.date));
+        showToast('Новый замер сохранён');
+    }
+
     saveData();
     pendingMeasurementSave = null;
+    pendingMeasurementEditIndex = null;
     document.getElementById('measurementSaveConfirmModal').classList.add('hidden');
     renderMeasurementScreen();
-    showToast('Замер сохранён');
 }
+
 function openBodyGraph() {
     const select=document.getElementById('bodyGraphField');
     const fields=getMeasurementFields();
