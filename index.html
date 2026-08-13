@@ -64,6 +64,9 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .comparison .positive { color: var(--positive); } .comparison .negative { color: var(--negative); }
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
+/* Delete confirmation must always appear above every other modal (including parameter manager). */
+#deleteConfirmModal { z-index: 1000 !important; }
+#deleteConfirmModal .confirm-modal-content { position: relative; z-index: 1001; }
 .theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
 .theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
 .theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; }
@@ -218,6 +221,8 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .summary-improvement{font-size:13px;color:var(--subtext);margin-top:3px}
 @media(max-width:420px){.smart-summary-grid{grid-template-columns:repeat(2,1fr)}}
 
+#measurementManagerModal { z-index: 200 !important; }
+#measurementFieldModal { z-index: 300 !important; }
 </style>
 </head>
 <body>
