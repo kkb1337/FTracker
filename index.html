@@ -65,6 +65,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
 .theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.confirm-modal { z-index: 500; }
 .theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
 .theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; }
 .close-btn, .modal-close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--subtext); cursor: pointer; background: none; border: none; }
@@ -1148,8 +1149,9 @@ function deleteHistoryEntry(index) { pendingDeleteType='history'; pendingDeleteI
 function showDeleteConfirm(text) {
     const content = document.getElementById('deleteConfirmContent');
     content.innerHTML = `<span class="close-btn" onclick="closeDeleteConfirm()">&times;</span>
-        <div style="font-size:20px;font-weight:600;margin-bottom:16px;">${text}</div>
-        <button onclick="confirmDeleteEntry()">🗑️ Удалить</button>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;">${text}</div>
+        <div style="color:var(--subtext);font-size:13px;line-height:1.45;margin-bottom:16px;">Это действие нельзя отменить.</div>
+        <button onclick="confirmDeleteEntry()" style="background:var(--negative);">🗑️ Удалить</button>
         <button class="gray" onclick="closeDeleteConfirm()">Отмена</button>`;
     document.getElementById('deleteConfirmModal').classList.remove('hidden');
 }
