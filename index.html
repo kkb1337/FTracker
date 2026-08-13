@@ -48,6 +48,18 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .measurement-input { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
 .measurement-input label { width: 80px; color: var(--subtext); font-size: 15px; }
 .measurement-input input { flex: 1; text-align: left; font-size: 16px; }
+.measurement-manager { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.measurement-manager-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.measurement-field-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); }
+.measurement-field-row input { margin:0; flex:1; min-width:0; }
+.measurement-field-row .small-btn { flex:0 0 auto; }
+.measurement-change { display:flex; align-items:center; gap:6px; margin-top:6px; font-size:14px; }
+.measurement-change.up { color:var(--positive); }
+.measurement-change.down { color:var(--negative); }
+.measurement-change.same { color:var(--subtext); }
+.measurement-arrow { display:inline-flex; width:22px; height:22px; align-items:center; justify-content:center; font-weight:900; font-size:16px; }
+.measurement-summary { background:var(--input-bg); border-radius:12px; padding:12px; margin-top:12px; }
+
 .comparison { margin-top: 12px; font-size: 15px; }
 .comparison .positive { color: var(--positive); } .comparison .negative { color: var(--negative); }
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
@@ -92,8 +104,18 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .period-selector button { flex: 1; min-width: 70px; font-size: 14px; padding: 8px; }
 .period-selector button.active { background: var(--accent-gradient); color: #fff; }
 .data-type-selector { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
-.data-type-selector button { flex: 1; min-width: 70px; font-size: 14px; padding: 8px; }
-.data-type-selector button.active { background: var(--accent-gradient); color: #fff; }
+.data-type-selector button { flex: 1; min-width: 70px; font-size: 14px; padding: 8px; background: var(--input-bg); color: var(--subtext); border: 2px solid transparent; }
+.data-type-selector button[data-type="calories"] { border-color: #34c759; color: #34c759; }
+.data-type-selector button[data-type="protein"] { border-color: #007AFF; color: #007AFF; }
+.data-type-selector button[data-type="fat"] { border-color: #FF9500; color: #FF9500; }
+.data-type-selector button[data-type="carbs"] { border-color: #AF52DE; color: #AF52DE; }
+.data-type-selector button[data-type="all"] { border-color: var(--border); }
+.data-type-selector button.active { color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.18) inset; }
+.data-type-selector button[data-type="calories"].active { background: #34c759; }
+.data-type-selector button[data-type="protein"].active { background: #007AFF; }
+.data-type-selector button[data-type="fat"].active { background: #FF9500; }
+.data-type-selector button[data-type="carbs"].active { background: #AF52DE; }
+.data-type-selector button[data-type="all"].active { background: var(--accent-gradient); }
 .chart-container { position: relative; height: 260px; margin: 16px 0; }
 .chart-container canvas { width: 100%; height: 100%; display: block; }
 .custom-date-range { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
@@ -104,22 +126,75 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .nav-icon { width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 6px; }
 .nav-buttons button { display: flex; align-items: center; justify-content: center; gap: 4px; }
-.data-type-selector { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
-.data-type-selector button { flex:1 1 auto; min-width:90px; padding:9px 10px; border-radius:10px; font-weight:600; border:1px solid var(--border); background:var(--input-bg); color:var(--subtext); cursor:pointer; transition:none; }
-.data-type-selector button[data-type="calories"].active { background:#34c759; border-color:#34c759; color:#fff; }
-.data-type-selector button[data-type="protein"].active { background:#007AFF; border-color:#007AFF; color:#fff; }
-.data-type-selector button[data-type="fat"].active { background:#FF9500; border-color:#FF9500; color:#fff; }
-.data-type-selector button[data-type="carbs"].active { background:#AF52DE; border-color:#AF52DE; color:#fff; }
-.data-type-selector button[data-type="all"].active { background:linear-gradient(90deg,#34c759 0%,#007AFF 33%,#FF9500 66%,#AF52DE 100%); border-color:transparent; color:#fff; }
-.data-type-selector button[data-type="calories"]:not(.active) { color:#34c759; border-color:rgba(52,199,89,.45); }
-.data-type-selector button[data-type="protein"]:not(.active) { color:#007AFF; border-color:rgba(0,122,255,.45); }
-.data-type-selector button[data-type="fat"]:not(.active) { color:#FF9500; border-color:rgba(255,149,0,.45); }
-.data-type-selector button[data-type="carbs"]:not(.active) { color:#AF52DE; border-color:rgba(175,82,222,.45); }
-.data-type-selector button[data-type="all"]:not(.active) { color:var(--subtext); }
 .stats-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
 .stats-tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; background: var(--input-bg); color: var(--subtext); cursor: pointer; font-weight: 600; font-size: 15px; }
 .stats-tab.active { background: var(--accent-gradient); color: #fff; }
 .field-label { display: block; font-size: 12px; color: var(--subtext); margin: 6px 0 2px; }
+
+/* --- Refined charts / body parameters UI --- */
+.chart-modal-content { width: min(94%, 560px); max-width: 560px; max-height: 88vh; padding: 20px; border-radius: 24px; }
+.chart-modal-header { display:flex; align-items:center; gap:12px; padding-right:28px; margin-bottom:18px; }
+.chart-modal-icon { width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); font-size:22px; }
+.chart-modal-title { font-size:21px; font-weight:800; }
+.chart-modal-subtitle { color:var(--subtext); font-size:13px; margin-top:2px; }
+.chart-section-label { font-size:12px; font-weight:700; color:var(--subtext); text-transform:uppercase; letter-spacing:.06em; margin:16px 0 8px; }
+.period-selector { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:0; padding:4px; background:var(--input-bg); border-radius:14px; }
+.period-selector button { min-width:0; margin:0; padding:10px 7px; border-radius:10px; background:transparent; color:var(--subtext); border:0; font-size:13px; font-weight:700; }
+.period-selector button.active { background:var(--card-bg); color:var(--text); box-shadow:0 2px 8px rgba(0,0,0,.18); }
+.custom-date-range { display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:end; margin:10px 0 0; padding:12px; background:var(--input-bg); border-radius:14px; }
+.custom-date-range .date-field { min-width:0; }
+.custom-date-range .date-field label { display:block; color:var(--subtext); font-size:11px; font-weight:700; margin:0 0 3px 2px; }
+.custom-date-range input { margin:0; padding:10px; font-size:14px; }
+.custom-date-range .apply-period-btn { grid-column:1/-1; margin:0; padding:10px; font-size:14px; }
+.data-type-selector { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:0; }
+.data-type-selector button { min-width:0; margin:0; padding:11px 10px; border-radius:13px; background:var(--input-bg); color:var(--subtext); border:1px solid transparent; font-size:14px; font-weight:700; text-align:left; position:relative; }
+.data-type-selector button::before { content:''; width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:7px; background:currentColor; opacity:.85; }
+.data-type-selector button[data-type="all"]::before { background:linear-gradient(135deg,#34c759,#007AFF,#FF9500,#AF52DE); }
+.data-type-selector button.active { color:var(--text); box-shadow:inset 0 0 0 1px currentColor, 0 3px 10px rgba(0,0,0,.14); }
+.data-type-selector button[data-type="calories"].active { color:#34c759; background:rgba(52,199,89,.13); }
+.data-type-selector button[data-type="protein"].active { color:#007AFF; background:rgba(0,122,255,.13); }
+.data-type-selector button[data-type="fat"].active { color:#FF9500; background:rgba(255,149,0,.13); }
+.data-type-selector button[data-type="carbs"].active { color:#AF52DE; background:rgba(175,82,222,.13); }
+.data-type-selector button[data-type="all"].active { color:var(--text); background:var(--input-bg); }
+.chart-container { margin:14px 0 8px; height:260px; background:var(--input-bg); border-radius:18px; padding:8px; overflow:hidden; }
+.chart-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; }
+.chart-footer .gray { margin:0; padding:10px 14px; width:auto; }
+.chart-range-caption { color:var(--subtext); font-size:12px; }
+
+.body-hero-card { background:var(--card-bg); border-radius:22px; padding:18px; margin-bottom:12px; box-shadow:0 8px 20px rgba(0,0,0,.16); }
+.body-card-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+.body-card-title { font-size:19px; font-weight:800; }
+.body-card-subtitle { color:var(--subtext); font-size:12px; margin-top:3px; }
+.body-settings-btn { width:auto; margin:0; padding:9px 12px; background:var(--input-bg); color:var(--text); font-size:13px; }
+.measurement-input { display:grid; grid-template-columns:minmax(90px,1fr) minmax(110px,1.3fr); align-items:center; gap:10px; margin:7px 0; }
+.measurement-input label { width:auto; font-size:14px; font-weight:600; color:var(--text); }
+.measurement-input input { margin:0; padding:11px 12px; }
+.body-save-btn { margin-top:12px; }
+.body-comparison-card { background:var(--card-bg); border-radius:18px; padding:16px; margin-bottom:12px; }
+.body-comparison-title { font-size:15px; font-weight:800; margin-bottom:8px; }
+.body-comparison-list { display:grid; gap:6px; }
+.body-comparison-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+.body-comparison-row:last-child { border-bottom:0; }
+.body-comparison-name { font-weight:600; font-size:14px; }
+.body-comparison-value { color:var(--subtext); font-size:13px; white-space:nowrap; }
+.measurement-change { margin-top:3px; font-size:12px; }
+.body-history-card { background:var(--card-bg); border-radius:18px; padding:16px; }
+.body-history-title { font-size:17px; font-weight:800; margin-bottom:8px; }
+.body-history-item { background:var(--input-bg); border-radius:14px; padding:12px; margin-top:8px; }
+.body-history-item-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.body-history-date { font-weight:800; font-size:14px; }
+.body-history-delete { width:auto; margin:0; padding:7px 9px; font-size:13px; }
+.body-history-values { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.body-history-value { background:var(--card-bg); border-radius:9px; padding:5px 8px; font-size:12px; color:var(--text); }
+.body-history-comparison { margin-top:9px; padding-top:9px; border-top:1px solid var(--border); }
+.measurement-manager-modal-content { width:min(92%,480px); max-height:82vh; }
+.measurement-manager-list { display:grid; gap:7px; margin:12px 0; }
+.measurement-manager-row { display:flex; align-items:center; gap:8px; background:var(--input-bg); border-radius:13px; padding:8px; }
+.measurement-manager-row-name { flex:1; min-width:0; font-weight:600; font-size:14px; }
+.measurement-manager-row button { width:auto; margin:0; padding:8px 10px; font-size:13px; background:var(--card-bg); color:var(--text); }
+.measurement-modal-note { color:var(--subtext); font-size:12px; line-height:1.4; margin-top:6px; }
+@media (max-width:420px){ .period-selector{grid-template-columns:repeat(2,1fr)} .data-type-selector{grid-template-columns:1fr 1fr} .measurement-input{grid-template-columns:1fr 1.15fr} }
+
 </style>
 </head>
 <body>
@@ -162,7 +237,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     </div>
     <div id="bodyScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📏 Параметры тела</div></div>
-        <div id="measurementForm" class="card"></div>
+        <div id="measurementForm"></div>
     </div>
     <div id="confirmScreen" class="hidden">
         <div class="card centered-card">
@@ -422,34 +497,55 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     </div>
 </div>
 <div id="chartModal" class="catalog-modal hidden" onclick="if(event.target === this) closeChartModal()">
-    <div class="catalog-modal-content">
+    <div class="catalog-modal-content chart-modal-content">
         <span class="close-btn" onclick="closeChartModal()">&times;</span>
-        <div style="font-size:20px; font-weight:600; margin-bottom:16px;">График питания</div>
+        <div class="chart-modal-header">
+            <div class="chart-modal-icon">📊</div>
+            <div><div class="chart-modal-title">График питания</div><div class="chart-modal-subtitle">Выберите период и показатель</div></div>
+        </div>
+        <div class="chart-section-label">Период</div>
         <div class="period-selector">
-            <button data-period="week" class="active" onclick="setChartPeriod('week')">Неделя</button>
-            <button data-period="month" onclick="setChartPeriod('month')">Месяц</button>
+            <button data-period="week" class="active" onclick="setChartPeriod('week')">7 дней</button>
+            <button data-period="month" onclick="setChartPeriod('month')">30 дней</button>
             <button data-period="year" onclick="setChartPeriod('year')">Год</button>
-            <button data-period="custom" onclick="setChartPeriod('custom')">Период</button>
+            <button data-period="custom" onclick="setChartPeriod('custom')">Свой</button>
         </div>
         <div id="chartCustomDateRange" class="custom-date-range hidden">
-            <label class="field-label">С</label>
-            <input type="date" id="chartStartDate">
-            <label class="field-label">По</label>
-            <input type="date" id="chartEndDate">
-            <button class="small-btn" onclick="applyChartCustom()">Применить</button>
+            <div class="date-field"><label>НАЧАЛО</label><input type="date" id="chartStartDate"></div>
+            <div class="date-field"><label>КОНЕЦ</label><input type="date" id="chartEndDate"></div>
+            <button class="apply-period-btn" onclick="applyChartCustom()">Применить период</button>
         </div>
+        <div class="chart-section-label">Показатель</div>
         <div class="data-type-selector">
             <button data-type="calories" class="active" onclick="setChartDataType('calories')">Калории</button>
             <button data-type="protein" onclick="setChartDataType('protein')">Белки</button>
             <button data-type="fat" onclick="setChartDataType('fat')">Жиры</button>
             <button data-type="carbs" onclick="setChartDataType('carbs')">Углеводы</button>
-            <button data-type="all" onclick="setChartDataType('all')">Все вместе</button>
+            <button data-type="all" onclick="setChartDataType('all')">Все показатели</button>
         </div>
-        <div class="chart-container">
-            <canvas id="chartCanvas"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="chartCanvas"></canvas></div>
         <div id="chartLegend" class="legend"></div>
-        <button class="gray" onclick="closeChartModal()">Закрыть</button>
+        <div class="chart-footer"><div id="chartRangeCaption" class="chart-range-caption"></div><button class="gray" onclick="closeChartModal()">Закрыть</button></div>
+    </div>
+</div>
+<div id="measurementManagerModal" class="catalog-modal hidden" onclick="if(event.target === this) closeMeasurementManager()">
+    <div class="catalog-modal-content measurement-manager-modal-content">
+        <span class="close-btn" onclick="closeMeasurementManager()">&times;</span>
+        <div style="font-size:21px;font-weight:800;margin-bottom:4px;">⚙️ Параметры</div>
+        <div class="measurement-modal-note">Здесь можно менять список параметров. История уже сохранённых замеров останется на месте.</div>
+        <div id="measurementManagerList" class="measurement-manager-list"></div>
+        <button onclick="openMeasurementFieldEditor()">➕ Добавить параметр</button>
+        <button class="gray" onclick="closeMeasurementManager()">Готово</button>
+    </div>
+</div>
+<div id="measurementFieldModal" class="catalog-modal hidden" onclick="if(event.target === this) closeMeasurementFieldEditor()">
+    <div class="catalog-modal-content measurement-manager-modal-content">
+        <span class="close-btn" onclick="closeMeasurementFieldEditor()">&times;</span>
+        <div id="measurementFieldModalTitle" style="font-size:21px;font-weight:800;margin-bottom:12px;">Новый параметр</div>
+        <label class="field-label">Название параметра</label>
+        <input type="text" id="measurementFieldNameInput" maxlength="40" placeholder="Например, Икры">
+        <button onclick="saveMeasurementFieldEditor()">💾 Сохранить</button>
+        <button class="gray" onclick="closeMeasurementFieldEditor()">Отмена</button>
     </div>
 </div>
 
@@ -457,7 +553,23 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 const STORAGE_KEY = 'ftracker_v23';
 const DRAFT_KEY = 'ftracker_draft';
 const LAST_EXPORT_KEY = 'ftracker_last_export';
-const MEASURE_FIELDS = { weight: 'Вес', chest: 'Грудь', waist: 'Талия', hips: 'Бёдра', biceps: 'Бицепс', thigh: 'Бедро' };
+const DEFAULT_MEASURE_FIELDS = [
+    { key: 'weight', label: 'Вес' },
+    { key: 'chest', label: 'Грудь' },
+    { key: 'waist', label: 'Талия' },
+    { key: 'hips', label: 'Бёдра' },
+    { key: 'biceps', label: 'Бицепс' },
+    { key: 'thigh', label: 'Бедро' }
+];
+function getMeasurementFields() {
+    if (!Array.isArray(data.measurementFields) || !data.measurementFields.length) {
+        data.measurementFields = DEFAULT_MEASURE_FIELDS.map(f => ({...f}));
+    }
+    return data.measurementFields;
+}
+function getMeasurementFieldMap() {
+    return Object.fromEntries(getMeasurementFields().map(f => [f.key, f.label]));
+}
 
 let data = {
     programs: [
@@ -467,6 +579,7 @@ let data = {
     ],
     history: [],
     measurements: [],
+    measurementFields: DEFAULT_MEASURE_FIELDS.map(f => ({...f})),
     foodDiary: { limits: {}, entries: [] },
     productCatalog: []
 };
@@ -482,9 +595,8 @@ let currentFoodMode = 'portion';
 let statsTextPeriod = '7';
 let chartPeriod = 'week';
 let chartDataType = 'calories';
-let chartCustomStart = '';
-let chartCustomEnd = '';
 let editingFoodEntryIndex = null;
+let editingMeasurementFieldIndex = null;
 
 function localDateString(d) {
     const y = d.getFullYear();
@@ -524,6 +636,11 @@ function loadData() {
                     return p;
                 });
                 if (!parsed.measurements) parsed.measurements = [];
+                if (!Array.isArray(parsed.measurementFields) || !parsed.measurementFields.length) {
+                    parsed.measurementFields = DEFAULT_MEASURE_FIELDS.map(f => ({...f}));
+                } else {
+                    parsed.measurementFields = parsed.measurementFields.filter(f => f && f.key && f.label);
+                }
                 if (!parsed.foodDiary) parsed.foodDiary = { limits: {}, entries: [] };
                 if (!parsed.productCatalog) parsed.productCatalog = [];
                 parsed.productCatalog = parsed.productCatalog.map(p => ({ ...p, type: p.type || 'per100' }));
@@ -581,44 +698,194 @@ function showProgress() {
 }
 
 function showBodyMeasurements() { showScreen('bodyScreen'); renderMeasurementScreen(); }
-function renderMeasurementScreen() {
-    const form = document.getElementById('measurementForm'); const last = data.measurements.slice(-1)[0];
-    form.innerHTML = `<div style="font-weight:600;margin-bottom:12px;font-size:18px;">Новый замер</div>
-        ${Object.entries(MEASURE_FIELDS).map(([key,label]) => `<div class="measurement-input"><label>${label}</label><input type="number" id="meas_${key}" placeholder="${label}" value="${last?last[key]||'':''}"></div>`).join('')}
-        <button onclick="saveMeasurements()">💾 Сохранить</button>
-        <div id="comparisonBlock" class="comparison"></div>
-        <div style="margin-top:20px;font-weight:600;font-size:18px;">История замеров</div><div id="measurementHistory"></div>`;
-    renderMeasurementHistory(); if (data.measurements.length>1) showComparison(data.measurements.slice(-1)[0],data.measurements.slice(-2)[0]);
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
+
+function renderMeasurementScreen() {
+    const form = document.getElementById('measurementForm');
+    const fields = getMeasurementFields();
+    const last = data.measurements.slice(-1)[0] || {};
+
+    form.innerHTML = `
+        <div class="body-hero-card">
+            <div class="body-card-head">
+                <div><div class="body-card-title">Текущий замер</div><div class="body-card-subtitle">Последнее сохранённое значение подставляется автоматически</div></div>
+                <button class="body-settings-btn" onclick="openMeasurementManager()">⚙️ Параметры</button>
+            </div>
+            ${fields.map(f => `
+                <div class="measurement-input">
+                    <label>${escapeHtml(f.label)}</label>
+                    <input type="number" step="any" id="meas_${escapeHtml(f.key)}" placeholder="Введите значение" value="${last[f.key] != null ? escapeHtml(last[f.key]) : ''}">
+                </div>
+            `).join('')}
+            <button class="body-save-btn" onclick="saveMeasurements()">💾 Сохранить замер</button>
+        </div>
+        <div id="comparisonBlock"></div>
+        <div class="body-history-card">
+            <div class="body-history-title">История замеров</div>
+            <div style="color:var(--subtext);font-size:12px;margin-bottom:4px;">Каждый новый замер сравнивается с предыдущим значением каждого параметра.</div>
+            <div id="measurementHistory"></div>
+        </div>
+    `;
+
+    renderMeasurementHistory();
+    if (data.measurements.length) showLatestMeasurementComparison();
+}
+
+function openMeasurementManager() {
+    renderMeasurementFieldManager();
+    document.getElementById('measurementManagerModal').classList.remove('hidden');
+}
+function closeMeasurementManager() {
+    document.getElementById('measurementManagerModal').classList.add('hidden');
+}
+
+function renderMeasurementFieldManager() {
+    const container = document.getElementById('measurementManagerList');
+    if (!container) return;
+    const fields = getMeasurementFields();
+    container.innerHTML = fields.map((f, idx) => `
+        <div class="measurement-manager-row">
+            <div class="measurement-manager-row-name">${escapeHtml(f.label)}</div>
+            <button onclick="openMeasurementFieldEditor(${idx})">✏️</button>
+            <button onclick="deleteMeasurementField(${idx})">🗑️</button>
+        </div>
+    `).join('');
+}
+
+function openMeasurementFieldEditor(index = null) {
+    editingMeasurementFieldIndex = index;
+    const input = document.getElementById('measurementFieldNameInput');
+    const title = document.getElementById('measurementFieldModalTitle');
+    const fields = getMeasurementFields();
+    if (index !== null && fields[index]) {
+        title.textContent = 'Изменить параметр';
+        input.value = fields[index].label;
+    } else {
+        title.textContent = 'Новый параметр';
+        input.value = '';
+    }
+    document.getElementById('measurementFieldModal').classList.remove('hidden');
+    setTimeout(() => input.focus(), 80);
+}
+
+function closeMeasurementFieldEditor() {
+    document.getElementById('measurementFieldModal').classList.add('hidden');
+    editingMeasurementFieldIndex = null;
+}
+
+function saveMeasurementFieldEditor() {
+    const input = document.getElementById('measurementFieldNameInput');
+    const cleanLabel = (input.value || '').trim();
+    if (!cleanLabel) { showToast('Введите название параметра'); return; }
+
+    const fields = getMeasurementFields();
+    if (fields.some((f, i) => i !== editingMeasurementFieldIndex && f.label.toLowerCase() === cleanLabel.toLowerCase())) {
+        showToast('Такой параметр уже существует');
+        return;
+    }
+
+    if (editingMeasurementFieldIndex !== null && fields[editingMeasurementFieldIndex]) {
+        fields[editingMeasurementFieldIndex].label = cleanLabel;
+        saveData();
+        closeMeasurementFieldEditor();
+        renderMeasurementFieldManager();
+        renderMeasurementScreen();
+        showToast('Параметр изменён');
+        return;
+    }
+
+    const key = 'custom_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+    fields.push({ key, label: cleanLabel });
+    data.measurements.forEach(m => { if (!(key in m)) m[key] = null; });
+    saveData();
+    closeMeasurementFieldEditor();
+    renderMeasurementFieldManager();
+    renderMeasurementScreen();
+    showToast('Параметр добавлен');
+}
+
+function deleteMeasurementField(index) {
+    const fields = getMeasurementFields();
+    const field = fields[index];
+    if (!field) return;
+    if (fields.length <= 1) { showToast('Должен остаться хотя бы один параметр'); return; }
+    pendingDeleteType = 'measurementField';
+    pendingDeleteIndex = index;
+    showDeleteConfirm(`Удалить параметр «${escapeHtml(field.label)}»?`);
+}
+
+function findPreviousMeasurement(index, key) {
+    for (let i = index - 1; i >= 0; i--) {
+        const value = data.measurements[i]?.[key];
+        if (value !== null && value !== undefined && value !== '') return { measurement: data.measurements[i], index: i };
+    }
+    return null;
+}
+
+function formatMeasurementDiff(current, previous) {
+    const diff = Number(current) - Number(previous);
+    if (!Number.isFinite(diff) || Math.abs(diff) < 0.000001) {
+        return `<div class="measurement-change same"><span class="measurement-arrow">●</span><span>Без изменений</span></div>`;
+    }
+    const value = Number.isInteger(diff) ? String(Math.abs(diff)) : Math.abs(diff).toFixed(1).replace(/\.0$/, '');
+    if (diff > 0) return `<div class="measurement-change up"><span class="measurement-arrow">▲</span><span>+${value}</span></div>`;
+    return `<div class="measurement-change down"><span class="measurement-arrow">▼</span><span>−${value}</span></div>`;
+}
+
+function buildMeasurementComparison(measurementIndex) {
+    const current = data.measurements[measurementIndex];
+    if (!current) return '';
+    const fields = getMeasurementFields();
+    const items = [];
+    fields.forEach(field => {
+        const cur = current[field.key];
+        if (cur === null || cur === undefined || cur === '') return;
+        const previous = findPreviousMeasurement(measurementIndex, field.key);
+        const changeHtml = previous ? formatMeasurementDiff(cur, previous.measurement[field.key]) : `<div class="measurement-change same"><span class="measurement-arrow">●</span><span>Первое значение</span></div>`;
+        items.push(`<div class="body-comparison-row"><div><div class="body-comparison-name">${escapeHtml(field.label)}</div>${changeHtml}</div><div class="body-comparison-value">${escapeHtml(cur)}</div></div>`);
+    });
+    return items.length ? `<div class="body-comparison-list">${items.join('')}</div>` : '<div style="color:var(--subtext);font-size:13px;">Нет заполненных параметров.</div>';
+}
+
+function showLatestMeasurementComparison() {
+    const block = document.getElementById('comparisonBlock');
+    if (!block) return;
+    if (!data.measurements.length) { block.innerHTML = ''; return; }
+    block.innerHTML = `<div class="body-comparison-card"><div class="body-comparison-title">Сравнение с предыдущим замером</div>${buildMeasurementComparison(data.measurements.length - 1)}</div>`;
+}
+
 function renderMeasurementHistory() {
-    const container = document.getElementById('measurementHistory'); if (!container) return;
-    if (!data.measurements.length) { container.innerHTML='<div style="color:var(--subtext);text-align:center;margin-top:8px;">Нет записей</div>'; return; }
-    container.innerHTML = data.measurements.slice().reverse().map((m,idx) => {
-        const date = new Date(m.date).toLocaleDateString(); const prev = data.measurements.slice().reverse()[idx+1]; let comparison='';
-        if (prev) { const changes=[]; Object.keys(MEASURE_FIELDS).forEach(field => { const curVal=m[field], prevVal=prev[field]; if (curVal!=null && prevVal!=null && curVal!==prevVal) { const diff=(curVal-prevVal).toFixed(1); const better=(field==='weight'||field==='waist')?(diff<0):(diff>0); const sign=diff>0?'+':''; changes.push(`<span class="${better?'positive':'negative'}">${MEASURE_FIELDS[field]}: ${sign}${diff}</span>`); } }); if (changes.length) comparison=changes.join(', '); else comparison='без изменений'; } else comparison='первый замер';
-        const realIdx = data.measurements.length - 1 - (data.measurements.slice().reverse().length - 1 - idx);
-        return `<div style="background:var(--card-bg);border-radius:12px;padding:12px;margin-top:8px;position:relative;">
-            <div style="font-weight:600;">${date}</div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">${Object.entries(m).filter(([k])=>k!=='date').map(([k,v])=>v?`<span>${MEASURE_FIELDS[k]}: ${v}</span>`:'').join('')}</div>
-            <div style="font-size:12px;color:var(--subtext);margin-top:4px;">${comparison}</div>
-            <button class="small-btn gray" style="position:absolute; top:8px; right:8px;" onclick="deleteMeasurement(${realIdx})">🗑️</button>
-        </div>`;
+    const container = document.getElementById('measurementHistory');
+    if (!container) return;
+    if (!data.measurements.length) { container.innerHTML = '<div style="color:var(--subtext);text-align:center;padding:12px 0;">Пока нет сохранённых замеров</div>'; return; }
+    const fields = getMeasurementFields();
+    container.innerHTML = data.measurements.slice().reverse().map((m, reverseIdx) => {
+        const realIdx = data.measurements.length - 1 - reverseIdx;
+        const date = new Date(m.date).toLocaleDateString('ru-RU');
+        const values = fields.filter(f => m[f.key] !== null && m[f.key] !== undefined && m[f.key] !== '').map(f => `<span class="body-history-value">${escapeHtml(f.label)}: ${escapeHtml(m[f.key])}</span>`).join('');
+        const comparison = realIdx > 0 ? `<div class="body-history-comparison">${buildMeasurementComparison(realIdx)}</div>` : '';
+        return `<div class="body-history-item"><div class="body-history-item-head"><div class="body-history-date">${date}</div><button class="body-history-delete gray" onclick="deleteMeasurement(${realIdx})">🗑️</button></div><div class="body-history-values">${values || '<span style="color:var(--subtext);font-size:12px;">Нет значений</span>'}</div>${comparison}</div>`;
     }).join('');
 }
-function deleteMeasurement(index) { pendingDeleteType='measurement'; pendingDeleteIndex=index; showDeleteConfirm('Удалить этот замер?'); }
-function showComparison(current, prev) {
-    const block = document.getElementById('comparisonBlock'); if (!block) return;
-    if (!prev) { block.innerHTML='<div style="color:var(--subtext);">Это ваш первый замер.</div>'; return; }
-    const fields = Object.entries(MEASURE_FIELDS).map(([key,label]) => ({key, label, lowerIsBetter: key==='weight'||key==='waist'}));
-    let html='<div style="font-weight:600;margin-top:16px;">Изменения с прошлого раза:</div>'; let hasChanges=false;
-    fields.forEach(f => { const cur=current[f.key], prv=prev[f.key]; if (cur!=null && prv!=null && cur!==prv) { const diff=(cur-prv).toFixed(1); const better=f.lowerIsBetter?(diff<0):(diff>0); const cls=better?'positive':'negative'; const sign=diff>0?'+':''; html+=`<div class="${cls}">${f.label}: ${sign}${diff}</div>`; hasChanges=true; } });
-    if (!hasChanges) html+='<div style="color:var(--subtext);">Без изменений</div>'; block.innerHTML=html;
-}
+
+function deleteMeasurement(index) { pendingDeleteType = 'measurement'; pendingDeleteIndex = index; showDeleteConfirm('Удалить этот замер?'); }
+
 function saveMeasurements() {
+    const fields = getMeasurementFields();
     const measurement = { date: new Date().toISOString() };
-    Object.keys(MEASURE_FIELDS).forEach(key => { measurement[key] = parseFloat(document.getElementById(`meas_${key}`).value) || null; });
-    if (Object.values(measurement).every(v => v === null)) { showToast('Введите хотя бы одно значение'); return; }
-    data.measurements.push(measurement); saveData(); showToast('Параметры сохранены'); renderMeasurementScreen();
+    fields.forEach(field => {
+        const input = document.getElementById(`meas_${field.key}`);
+        const value = input ? parseFloat(input.value) : NaN;
+        measurement[field.key] = Number.isFinite(value) ? value : null;
+    });
+    if (fields.every(field => measurement[field.key] === null)) { showToast('Введите хотя бы одно значение'); return; }
+    data.measurements.push(measurement);
+    saveData();
+    renderMeasurementScreen();
+    showToast('Параметры сохранены');
 }
 
 function confirmStart(index) { pendingProgramIndex=index; document.getElementById('confirmTitle').textContent=data.programs[index].name; showScreen('confirmScreen'); }
@@ -890,6 +1157,7 @@ function closeDeleteConfirm() { document.getElementById('deleteConfirmModal').cl
 function confirmDeleteEntry() {
     if (pendingDeleteType === 'history' && pendingDeleteIndex !== null) { data.history.splice(pendingDeleteIndex,1); saveData(); renderHistory(); showToast('Запись удалена'); }
     else if (pendingDeleteType === 'measurement' && pendingDeleteIndex !== null) { data.measurements.splice(pendingDeleteIndex,1); saveData(); renderMeasurementScreen(); showToast('Замер удалён'); }
+    else if (pendingDeleteType === 'measurementField' && pendingDeleteIndex !== null) { const fields=getMeasurementFields(); const field=fields[pendingDeleteIndex]; if (field) { fields.splice(pendingDeleteIndex,1); data.measurements.forEach(m=>{ delete m[field.key]; }); saveData(); closeMeasurementManager(); renderMeasurementScreen(); showToast('Параметр удалён'); } }
     else if (pendingDeleteType === 'program' && pendingDeleteIndex !== null) { data.programs.splice(pendingDeleteIndex, 1); saveData(); renderSettings(); renderHome(); showToast('Сплит удалён'); }
     else if (pendingDeleteType === 'foodEntry' && pendingDeleteIndex !== null) { data.foodDiary.entries.splice(pendingDeleteIndex,1); saveData(); renderFoodDiary(); showToast('Запись удалена'); }
     else if (pendingDeleteType === 'foodDay' && pendingDeleteDate) {
@@ -1132,30 +1400,55 @@ function renderTextStats() {
     `;
 }
 
+const CHART_COLORS = {
+    calories: '#34c759',
+    protein: '#007AFF',
+    fat: '#FF9500',
+    carbs: '#AF52DE'
+};
+const CHART_LABELS = {
+    calories: 'Калории, ккал',
+    protein: 'Белки, г',
+    fat: 'Жиры, г',
+    carbs: 'Углеводы, г'
+};
+let chartCustomStart = '';
+let chartCustomEnd = '';
+
 function openChartModal() {
     document.getElementById('chartModal').classList.remove('hidden');
-
-    // При новом открытии начинаем с недели и очищаем старый пользовательский период.
-    chartCustomStart = '';
-    chartCustomEnd = '';
-    document.getElementById('chartStartDate').value = '';
-    document.getElementById('chartEndDate').value = '';
-
-    setChartPeriod('week');
-    setChartDataType('calories');
+    if (chartPeriod === 'custom' && chartCustomStart && chartCustomEnd) {
+        setChartPeriod('custom');
+    } else {
+        setChartPeriod('week');
+    }
+    setChartDataType(chartDataType || 'calories');
 }
-function closeChartModal() { document.getElementById('chartModal').classList.add('hidden'); }
+
+function closeChartModal() {
+    document.getElementById('chartModal').classList.add('hidden');
+}
+
 function setChartPeriod(period) {
     chartPeriod = period;
-    document.querySelectorAll('#chartModal .period-selector button').forEach(b => b.classList.remove('active'));
-    document.querySelector(`#chartModal .period-selector button[data-period="${period}"]`).classList.add('active');
+
+    document.querySelectorAll('#chartModal .period-selector button').forEach(b => {
+        b.classList.toggle('active', b.dataset.period === period);
+    });
+
     const customRange = document.getElementById('chartCustomDateRange');
 
     if (period === 'custom') {
         customRange.classList.remove('hidden');
 
-        // Если пользователь уже выбирал даты в этом открытии окна,
-        // оставляем их и сразу строим график по ним.
+        const entriesDates = data.foodDiary.entries.map(e => e.date).sort();
+        if (!document.getElementById('chartStartDate').value && entriesDates.length) {
+            document.getElementById('chartStartDate').value = entriesDates[0];
+        }
+        if (!document.getElementById('chartEndDate').value && entriesDates.length) {
+            document.getElementById('chartEndDate').value = entriesDates[entriesDates.length - 1];
+        }
+
         if (chartCustomStart && chartCustomEnd) {
             document.getElementById('chartStartDate').value = chartCustomStart;
             document.getElementById('chartEndDate').value = chartCustomEnd;
@@ -1166,66 +1459,90 @@ function setChartPeriod(period) {
         renderChart();
     }
 }
+
 function setChartDataType(type) {
     chartDataType = type;
-    document.querySelectorAll('#chartModal .data-type-selector button').forEach(b => b.classList.remove('active'));
-    const selectedButton = document.querySelector(`#chartModal .data-type-selector button[data-type="${type}"]`);
-    if (selectedButton) selectedButton.classList.add('active');
+
+    document.querySelectorAll('#chartModal .data-type-selector button').forEach(b => {
+        b.classList.toggle('active', b.dataset.type === type);
+    });
+
     renderChart();
 }
+
 function applyChartCustom() {
-    const start = document.getElementById('chartStartDate').value;
-    const end = document.getElementById('chartEndDate').value;
+    let start = document.getElementById('chartStartDate').value;
+    let end = document.getElementById('chartEndDate').value;
 
     if (!start || !end) {
-        showToast('Выберите обе даты');
+        showToast('Выберите дату начала и окончания');
         return;
     }
 
     if (start > end) {
-        showToast('Дата начала не может быть позже даты окончания');
-        return;
+        [start, end] = [end, start];
+        document.getElementById('chartStartDate').value = start;
+        document.getElementById('chartEndDate').value = end;
     }
 
-    // ВАЖНО: сохраняем выбранный период в состоянии приложения.
-    // Благодаря этому переключение «Калории / Белки / Жиры / Углеводы»
-    // больше не сбрасывает выбранные даты.
-    chartPeriod = 'custom';
     chartCustomStart = start;
     chartCustomEnd = end;
+    chartPeriod = 'custom';
 
+    document.querySelectorAll('#chartModal .period-selector button').forEach(b => {
+        b.classList.toggle('active', b.dataset.period === 'custom');
+    });
+
+    document.getElementById('chartCustomDateRange').classList.remove('hidden');
     renderChart();
+    showToast(`Период: ${formatShortDate(start)} — ${formatShortDate(end)}`);
 }
+
+function formatShortDate(dateStr) {
+    const parts = dateStr.split('-');
+    return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : dateStr;
+}
+
+function getChartDateRange() {
+    if (chartPeriod === 'custom') {
+        if (!chartCustomStart || !chartCustomEnd) return null;
+        return { startStr: chartCustomStart, endStr: chartCustomEnd };
+    }
+
+    const end = new Date();
+    const start = new Date(end);
+
+    if (chartPeriod === 'week') {
+        start.setDate(end.getDate() - 6);
+    } else if (chartPeriod === 'month') {
+        start.setDate(end.getDate() - 29);
+    } else if (chartPeriod === 'year') {
+        start.setDate(end.getDate() - 364);
+    } else {
+        return null;
+    }
+
+    return {
+        startStr: localDateString(start),
+        endStr: localDateString(end)
+    };
+}
+
 function renderChart() {
     const canvas = document.getElementById('chartCanvas');
     if (!canvas) return;
+
+    const range = getChartDateRange();
+    if (!range) return;
+
     const ctx = canvas.getContext('2d');
     const container = canvas.parentElement;
-    canvas.width = container.clientWidth;
+    canvas.width = Math.max(300, container.clientWidth);
     canvas.height = 260;
 
-    let start, end;
-    if (chartPeriod === 'week') {
-        end = new Date();
-        start = new Date();
-        start.setDate(end.getDate() - 6);
-    } else if (chartPeriod === 'month') {
-        end = new Date();
-        start = new Date();
-        start.setMonth(end.getMonth() - 1);
-    } else if (chartPeriod === 'year') {
-        end = new Date();
-        start = new Date();
-        start.setFullYear(end.getFullYear() - 1);
-    } else if (chartPeriod === 'custom' && chartCustomStart && chartCustomEnd) {
-        start = new Date(chartCustomStart + 'T00:00:00');
-        end = new Date(chartCustomEnd + 'T00:00:00');
-    } else {
-        return;
-    }
-
-    const startStr = localDateString(start);
-    const endStr = localDateString(end);
+    const { startStr, endStr } = range;
+    const caption = document.getElementById('chartRangeCaption');
+    if (caption) caption.textContent = `${formatShortDate(startStr)} — ${formatShortDate(endStr)}`;
 
     const dailyData = {
         calories: {},
@@ -1233,6 +1550,7 @@ function renderChart() {
         fat: {},
         carbs: {}
     };
+
     data.foodDiary.entries.forEach(e => {
         if (e.date >= startStr && e.date <= endStr) {
             dailyData.calories[e.date] = (dailyData.calories[e.date] || 0) + (parseFloat(e.calories) || 0);
@@ -1242,20 +1560,26 @@ function renderChart() {
         }
     });
 
-    let typesToShow = chartDataType === 'all'
+    const typesToShow = chartDataType === 'all'
         ? ['calories', 'protein', 'fat', 'carbs']
         : [chartDataType];
 
+    // Для выбранного периода показываем каждый день, даже если в какой-то день было 0.
+    // Это особенно важно для пользовательского диапазона Пн–Ср.
     const allDates = [];
-    const currentDate = new Date(start);
-    while (currentDate <= end) {
-        const dateStr = localDateString(currentDate);
-        const hasValue = typesToShow.some(type => (dailyData[type][dateStr] || 0) > 0);
-        if (hasValue) allDates.push(dateStr);
-        currentDate.setDate(currentDate.getDate() + 1);
+    let cursor = new Date(startStr + 'T12:00:00');
+    const endDate = new Date(endStr + 'T12:00:00');
+
+    while (cursor <= endDate) {
+        allDates.push(localDateString(cursor));
+        cursor.setDate(cursor.getDate() + 1);
     }
 
-    if (allDates.length === 0) {
+    const hasAnyValue = allDates.some(date =>
+        typesToShow.some(type => (dailyData[type][date] || 0) > 0)
+    );
+
+    if (!hasAnyValue) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
         ctx.font = '14px sans-serif';
@@ -1268,34 +1592,23 @@ function renderChart() {
     let maxVal = 0;
     typesToShow.forEach(type => {
         allDates.forEach(date => {
-            const val = dailyData[type][date] || 0;
-            if (val > maxVal) maxVal = val;
+            maxVal = Math.max(maxVal, dailyData[type][date] || 0);
         });
     });
+
     maxVal = maxVal || 1;
     const minVal = 0;
 
-    const colors = {
-        calories: '#34c759',
-        protein: '#007AFF',
-        fat: '#FF9500',
-        carbs: '#AF52DE'
-    };
-    const labels = {
-        calories: 'Калории, ккал',
-        protein: 'Белки, г',
-        fat: 'Жиры, г',
-        carbs: 'Углеводы, г'
-    };
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    const chartWidth = canvas.width - margin.left - margin.right;
+
+    const margin = { top: 20, right: 20, bottom: 42, left: 50 };
+    const chartWidth = Math.max(1, canvas.width - margin.left - margin.right);
     const chartHeight = canvas.height - margin.top - margin.bottom;
     const baseY = margin.top + chartHeight;
-    const stepX = chartWidth / (allDates.length - 1 || 1);
+    const stepX = chartWidth / Math.max(1, allDates.length - 1);
 
     ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(margin.left, margin.top);
     ctx.lineTo(margin.left, baseY);
@@ -1305,11 +1618,14 @@ function renderChart() {
     ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'right';
+
     const ySteps = 4;
     for (let i = 0; i <= ySteps; i++) {
         const value = minVal + (maxVal - minVal) * (i / ySteps);
         const y = baseY - (chartHeight * i / ySteps);
+
         ctx.fillText(Math.round(value), margin.left - 5, y + 3);
+
         ctx.beginPath();
         ctx.moveTo(margin.left, y);
         ctx.lineTo(margin.left + chartWidth, y);
@@ -1321,51 +1637,45 @@ function renderChart() {
     ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'center';
+
     const totalDates = allDates.length;
-    let labelStep;
-    if (totalDates <= 7) labelStep = 1;
-    else if (totalDates <= 31) labelStep = Math.ceil(totalDates / 7);
-    else labelStep = Math.ceil(totalDates / 10);
+    const labelStep = totalDates <= 7 ? 1 : (totalDates <= 31 ? Math.ceil(totalDates / 7) : Math.ceil(totalDates / 10));
 
     allDates.forEach((date, i) => {
         if (i % labelStep === 0 || i === allDates.length - 1) {
-            const d = new Date(date + 'T00:00:00');
-            let label;
-            if (totalDates <= 7) {
-                const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-                label = days[d.getDay()];
-            } else {
-                const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-                label = `${d.getDate()}.${d.getMonth()+1} ${days[d.getDay()]}`;
-            }
+            const d = new Date(date + 'T12:00:00');
+            const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+            const label = totalDates <= 7
+                ? days[d.getDay()]
+                : `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${days[d.getDay()]}`;
+
             const x = margin.left + i * stepX;
-            ctx.fillText(label, x, baseY + 15);
+            ctx.fillText(label, x, baseY + 22);
         }
     });
 
     typesToShow.forEach(type => {
-        ctx.strokeStyle = colors[type];
+        ctx.strokeStyle = CHART_COLORS[type];
         ctx.lineWidth = 2;
         ctx.beginPath();
-        let firstPoint = true;
+
         allDates.forEach((date, i) => {
             const value = dailyData[type][date] || 0;
             const x = margin.left + i * stepX;
             const y = baseY - ((value - minVal) / (maxVal - minVal)) * chartHeight;
-            if (firstPoint) {
-                ctx.moveTo(x, y);
-                firstPoint = false;
-            } else {
-                ctx.lineTo(x, y);
-            }
+
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         });
+
         ctx.stroke();
 
-        ctx.fillStyle = colors[type];
+        ctx.fillStyle = CHART_COLORS[type];
         allDates.forEach((date, i) => {
             const value = dailyData[type][date] || 0;
             const x = margin.left + i * stepX;
             const y = baseY - ((value - minVal) / (maxVal - minVal)) * chartHeight;
+
             ctx.beginPath();
             ctx.arc(x, y, 4, 0, Math.PI * 2);
             ctx.fill();
@@ -1373,12 +1683,21 @@ function renderChart() {
     });
 
     const legendContainer = document.getElementById('chartLegend');
-    legendContainer.innerHTML = typesToShow.map(type => `
-        <button type="button" class="legend-item" data-chart-type="${type}" onclick="setChartDataType('${type}')">
-            <span class="legend-dot" style="background:${colors[type]}"></span>
-            <span>${labels[type]}</span>
-        </button>
-    `).join('');
+    if (typesToShow.length > 1) {
+        legendContainer.innerHTML = typesToShow.map(type => `
+            <div class="legend-item">
+                <span class="legend-dot" style="background:${CHART_COLORS[type]}"></span>
+                ${CHART_LABELS[type]}
+            </div>
+        `).join('');
+    } else {
+        legendContainer.innerHTML = `
+            <div class="legend-item">
+                <span class="legend-dot" style="background:${CHART_COLORS[typesToShow[0]]}"></span>
+                ${CHART_LABELS[typesToShow[0]]}
+            </div>
+        `;
+    }
 }
 
 function renderCatalogList() {
