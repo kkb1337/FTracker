@@ -65,7 +65,6 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
 .theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
-.confirm-modal { z-index: 500; }
 .theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
 .theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; }
 .close-btn, .modal-close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--subtext); cursor: pointer; background: none; border: none; }
@@ -196,6 +195,29 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .measurement-modal-note { color:var(--subtext); font-size:12px; line-height:1.4; margin-top:6px; }
 @media (max-width:420px){ .period-selector{grid-template-columns:repeat(2,1fr)} .data-type-selector{grid-template-columns:1fr 1fr} .measurement-input{grid-template-columns:1fr 1.15fr} }
 
+
+/* --- Progress intelligence / analytics --- */
+.smart-summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+.smart-stat{background:var(--input-bg);border-radius:14px;padding:12px;text-align:center}
+.smart-stat-value{font-size:22px;font-weight:800}
+.smart-stat-label{font-size:11px;color:var(--subtext);margin-top:3px}
+.record-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--input-bg);border-radius:12px;padding:10px;margin-top:7px}
+.record-name{font-weight:700;font-size:14px}
+.record-value{font-weight:800;color:var(--positive);white-space:nowrap}
+.analysis-card{background:var(--input-bg);border-radius:15px;padding:14px;margin-top:10px}
+.analysis-title{font-weight:800;font-size:15px;margin-bottom:6px}
+.analysis-line{padding:5px 0;color:var(--subtext);font-size:14px}
+.progress-filter{display:flex;gap:8px;overflow-x:auto;margin-bottom:10px}
+.progress-filter button{flex:0 0 auto;width:auto;margin:0;padding:9px 12px;font-size:13px;background:var(--input-bg);color:var(--subtext)}
+.progress-filter button.active{background:var(--accent-gradient);color:#fff}
+.body-graph-btn{width:auto;margin:0;padding:8px 10px;font-size:13px}
+.body-graph-modal-content{width:min(94%,560px);max-height:88vh}
+.body-graph-chart{height:270px;background:var(--input-bg);border-radius:18px;padding:8px;margin-top:12px}
+.body-graph-chart canvas{width:100%;height:100%}
+.summary-record{background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.25);border-radius:13px;padding:10px;margin-top:7px}
+.summary-improvement{font-size:13px;color:var(--subtext);margin-top:3px}
+@media(max-width:420px){.smart-summary-grid{grid-template-columns:repeat(2,1fr)}}
+
 </style>
 </head>
 <body>
@@ -234,7 +256,14 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     </div>
     <div id="progressScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📊 Прогресс</div></div>
-        <div id="progressContent" class="card"></div>
+        <div class="card">
+    <div class="progress-filter" id="progressPeriodFilter">
+        <button class="active" data-period="30" onclick="setProgressPeriod(30)">30 дней</button>
+        <button data-period="90" onclick="setProgressPeriod(90)">90 дней</button>
+        <button data-period="all" onclick="setProgressPeriod('all')">Всё время</button>
+    </div>
+    <div id="progressContent"></div>
+</div>
     </div>
     <div id="bodyScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📏 Параметры тела</div></div>
@@ -497,6 +526,37 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
         <button class="gray" onclick="closeCatalogEdit()">Отмена</button>
     </div>
 </div>
+
+<div id="workoutSummaryModal" class="achievements-modal hidden" onclick="if(event.target===this) closeWorkoutSummary()">
+    <div class="achievements-content">
+        <span class="close-btn" onclick="closeWorkoutSummary()">&times;</span>
+        <div id="workoutSummaryTitle" style="font-size:22px;font-weight:800;margin-bottom:4px;">🏁 Итог тренировки</div>
+        <div id="workoutSummaryContent"></div>
+        <button onclick="closeWorkoutSummary()">Готово</button>
+    </div>
+</div>
+<div id="bodyGraphModal" class="catalog-modal hidden" onclick="if(event.target===this) closeBodyGraph()">
+    <div class="catalog-modal-content body-graph-modal-content">
+        <span class="close-btn" onclick="closeBodyGraph()">&times;</span>
+        <div style="font-size:21px;font-weight:800;">📈 Динамика параметра</div>
+        <div style="color:var(--subtext);font-size:13px;margin-top:3px;">История изменения выбранного параметра</div>
+        <label class="field-label" style="margin-top:14px;">Параметр</label>
+        <select id="bodyGraphField" onchange="renderBodyGraph()"></select>
+        <div id="bodyGraphSummary" style="margin-top:10px;"></div>
+        <div class="body-graph-chart"><canvas id="bodyGraphCanvas"></canvas></div>
+        <button class="gray" onclick="closeBodyGraph()">Закрыть</button>
+    </div>
+</div>
+<div id="measurementSaveConfirmModal" class="confirm-modal hidden" onclick="if(event.target===this) closeMeasurementSaveConfirm()">
+    <div class="confirm-modal-content">
+        <span class="close-btn" onclick="closeMeasurementSaveConfirm()">&times;</span>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;">Сохранить замер?</div>
+        <div id="measurementSaveConfirmText" style="color:var(--subtext);margin-bottom:16px;"></div>
+        <button onclick="confirmSaveMeasurements()">💾 Сохранить</button>
+        <button class="gray" onclick="closeMeasurementSaveConfirm()">Отмена</button>
+    </div>
+</div>
+
 <div id="chartModal" class="catalog-modal hidden" onclick="if(event.target === this) closeChartModal()">
     <div class="catalog-modal-content chart-modal-content">
         <span class="close-btn" onclick="closeChartModal()">&times;</span>
@@ -591,6 +651,9 @@ let pendingProgramIndex = null, openedExerciseName = null, editingHistoryIndex =
 let pendingDeleteType = null, pendingDeleteIndex = null, pendingDeleteDate = null;
 let pendingImportData = null;
 let currentAchievements = {};
+let progressPeriod = 30;
+let pendingMeasurementSave = null;
+let currentBodyGraphKey = null;
 let editingCatalogProduct = null;
 let currentFoodMode = 'portion';
 let statsTextPeriod = '7';
@@ -691,11 +754,125 @@ function renderHome() {
     }).join('');
 }
 
+function setProgressPeriod(period) {
+    progressPeriod = period;
+    document.querySelectorAll('#progressPeriodFilter button').forEach(b => b.classList.toggle('active', String(b.dataset.period) === String(period)));
+    renderProgressDashboard();
+}
 function showProgress() {
-    showScreen('progressScreen'); const container = document.getElementById('progressContent'); const stats = {};
-    data.history.forEach(entry => { entry.exercises.forEach(ex => { if (!stats[ex.name]) stats[ex.name] = { maxWeight:0, maxReps:0, totalSets:0, lastDate:'' }; ex.sets.forEach(s => { const w=parseFloat(s.weight)||0, r=parseInt(s.reps)||0; if (w>stats[ex.name].maxWeight) stats[ex.name].maxWeight=w; if (r>stats[ex.name].maxReps) stats[ex.name].maxReps=r; stats[ex.name].totalSets++; }); if (entry.date>stats[ex.name].lastDate) stats[ex.name].lastDate=entry.date; }); });
-    if (!Object.keys(stats).length) { container.innerHTML='<div style="color:var(--subtext);text-align:center;">Нет данных</div>'; return; }
-    container.innerHTML = Object.entries(stats).map(([name,s]) => `<div class="progress-item"><div><div style="font-weight:600;">${name}</div><div style="font-size:12px;color:var(--subtext);">Макс: ${s.maxWeight}кг × ${s.maxReps}, подходов: ${s.totalSets}</div></div><div style="color:var(--subtext);font-size:12px;">${new Date(s.lastDate).toLocaleDateString()}</div></div>`).join('');
+    showScreen('progressScreen');
+    renderProgressDashboard();
+}
+function getHistoryInPeriod(days) {
+    if (days === 'all') return data.history.slice();
+    const cutoff = Date.now() - Number(days) * 24 * 60 * 60 * 1000;
+    return data.history.filter(e => new Date(e.date).getTime() >= cutoff);
+}
+function calculateWorkoutVolume(entry) {
+    let volume = 0;
+    (entry.exercises || []).forEach(ex => (ex.sets || []).forEach(s => {
+        const w = parseFloat(s.weight), r = parseInt(s.reps);
+        if (Number.isFinite(w) && Number.isFinite(r)) volume += w * r;
+    }));
+    return volume;
+}
+function getExerciseRecords() {
+    const records = {};
+    data.history.forEach(entry => (entry.exercises || []).forEach(ex => {
+        if (!records[ex.name]) records[ex.name] = { maxWeight:0, maxReps:0, bestWeightReps:'' };
+        (ex.sets || []).forEach(s => {
+            const w = parseFloat(s.weight) || 0, r = parseInt(s.reps) || 0;
+            if (w > records[ex.name].maxWeight) records[ex.name].maxWeight = w;
+            if (r > records[ex.name].maxReps) records[ex.name].maxReps = r;
+            if (w > 0 && r > 0) {
+                const score = w * r;
+                if (!records[ex.name].bestScore || score > records[ex.name].bestScore) {
+                    records[ex.name].bestScore = score;
+                    records[ex.name].bestWeightReps = `${w} кг × ${r}`;
+                }
+            }
+        });
+    }));
+    return records;
+}
+function getPreviousWorkoutForProgram(currentEntry) {
+    const same = data.history
+        .filter(e => e.program === currentEntry.program && e !== currentEntry)
+        .sort((a,b) => new Date(b.date)-new Date(a.date));
+    return same[0] || null;
+}
+function compareWorkoutEntries(currentEntry, previousEntry) {
+    if (!previousEntry) return [];
+    const result = [];
+    (currentEntry.exercises || []).forEach(ex => {
+        const prev = (previousEntry.exercises || []).find(x => x.name === ex.name);
+        if (!prev) return;
+        const curSets = ex.sets || [], prevSets = prev.sets || [];
+        const curVol = calculateWorkoutVolume({exercises:[ex]});
+        const prevVol = calculateWorkoutVolume({exercises:[prev]});
+        if (curVol !== prevVol) result.push({name:ex.name, diff:curVol-prevVol, type:'volume'});
+        const curMax = Math.max(0,...curSets.map(s=>parseFloat(s.weight)||0));
+        const prevMax = Math.max(0,...prevSets.map(s=>parseFloat(s.weight)||0));
+        if (curMax > 0 && prevMax > 0 && curMax !== prevMax) result.push({name:ex.name, diff:curMax-prevMax, type:'weight'});
+    });
+    return result;
+}
+function renderProgressDashboard() {
+    const container = document.getElementById('progressContent');
+    if (!container) return;
+    const history = getHistoryInPeriod(progressPeriod);
+    if (!history.length) {
+        container.innerHTML='<div style="color:var(--subtext);text-align:center;padding:16px 0;">Нет тренировок за выбранный период</div>';
+        return;
+    }
+    const totalVolume = history.reduce((sum,e)=>sum+calculateWorkoutVolume(e),0);
+    const avgDuration = history.filter(e=>e.durationSeconds).length
+        ? Math.round(history.reduce((sum,e)=>sum+(e.durationSeconds||0),0)/history.filter(e=>e.durationSeconds).length/60) : 0;
+    const records = getExerciseRecords();
+    const recordEntries = Object.entries(records).sort((a,b)=>(b[1].maxWeight||0)-(a[1].maxWeight||0)).slice(0,8);
+    const recent = history.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+    let comparisonHtml = '';
+    if (recent.length >= 2) {
+        const latest = recent[0], previous = recent[1];
+        const diffVol = calculateWorkoutVolume(latest)-calculateWorkoutVolume(previous);
+        comparisonHtml = `<div class="analysis-card"><div class="analysis-title">⚡ Последняя тренировка</div>
+            <div class="analysis-line">${latest.program}</div>
+            <div class="analysis-line">${diffVol===0?'Объём не изменился':`Объём ${diffVol>0?'увеличился':'уменьшился'} на ${Math.abs(Math.round(diffVol))} кг`}</div>
+        </div>`;
+    }
+    const bodyLatest = data.measurements.length ? data.measurements[data.measurements.length-1] : null;
+    const bodyPrev = data.measurements.length>1 ? data.measurements[data.measurements.length-2] : null;
+    let analysis = [];
+    if (history.length >= 2) {
+        const first = history.slice().sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+        const last = recent[0];
+        const firstVol = calculateWorkoutVolume(first), lastVol = calculateWorkoutVolume(last);
+        if (firstVol && lastVol) analysis.push(`Тренировочный объём: ${lastVol>firstVol?'рост':'снижение'} на ${Math.abs(Math.round(lastVol-firstVol))} кг`);
+    }
+    if (bodyLatest && bodyPrev) {
+        const fields = getMeasurementFields();
+        fields.forEach(f=>{
+            const a=bodyPrev[f.key], b=bodyLatest[f.key];
+            if (a!=null && b!=null && Number(a)!==Number(b)) analysis.push(`${f.label}: ${Number(b)>Number(a)?'↑':'↓'} ${Math.abs(Number(b)-Number(a)).toFixed(1).replace(/\.0$/,'')}`);
+        });
+    }
+    container.innerHTML = `
+        <div style="font-size:20px;font-weight:800;">Анализ прогресса</div>
+        <div style="color:var(--subtext);font-size:12px;margin-top:3px;">${progressPeriod==='all'?'Всё время':`Последние ${progressPeriod} дней`}</div>
+        <div class="smart-summary-grid">
+            <div class="smart-stat"><div class="smart-stat-value">${history.length}</div><div class="smart-stat-label">ТРЕНИРОВОК</div></div>
+            <div class="smart-stat"><div class="smart-stat-value">${Math.round(totalVolume).toLocaleString('ru-RU')}</div><div class="smart-stat-label">ОБЪЁМ, КГ</div></div>
+            <div class="smart-stat"><div class="smart-stat-value">${avgDuration||'—'}</div><div class="smart-stat-label">СРЕДНЯЯ, МИН</div></div>
+            <div class="smart-stat"><div class="smart-stat-value">${recordEntries.length}</div><div class="smart-stat-label">РЕКОРДОВ</div></div>
+        </div>
+        ${comparisonHtml}
+        <div class="analysis-card"><div class="analysis-title">🏆 Личные рекорды</div>
+            ${recordEntries.length ? recordEntries.map(([name,r])=>`<div class="record-row"><div class="record-name">${escapeHtml(name)}</div><div class="record-value">${r.maxWeight ? `${r.maxWeight} кг` : `${r.maxReps} повт.`}</div></div>`).join('') : '<div class="analysis-line">Пока нет рекордов</div>'}
+        </div>
+        <div class="analysis-card"><div class="analysis-title">🧠 Короткий анализ</div>
+            ${analysis.length ? analysis.slice(0,8).map(x=>`<div class="analysis-line">${escapeHtml(x)}</div>`).join('') : '<div class="analysis-line">Нужно ещё несколько записей, чтобы увидеть динамику.</div>'}
+        </div>
+    `;
 }
 
 function showBodyMeasurements() { showScreen('bodyScreen'); renderMeasurementScreen(); }
@@ -725,7 +902,10 @@ function renderMeasurementScreen() {
         </div>
         <div id="comparisonBlock"></div>
         <div class="body-history-card">
-            <div class="body-history-title">История замеров</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+    <div class="body-history-title" style="margin:0;">История замеров</div>
+    <button class="body-graph-btn gray" onclick="openBodyGraph()">📈 График</button>
+</div>
             <div style="color:var(--subtext);font-size:12px;margin-bottom:4px;">Каждый новый замер сравнивается с предыдущим значением каждого параметра.</div>
             <div id="measurementHistory"></div>
         </div>
@@ -883,10 +1063,60 @@ function saveMeasurements() {
         measurement[field.key] = Number.isFinite(value) ? value : null;
     });
     if (fields.every(field => measurement[field.key] === null)) { showToast('Введите хотя бы одно значение'); return; }
-    data.measurements.push(measurement);
+    pendingMeasurementSave = measurement;
+    const filled = fields.filter(f=>measurement[f.key]!=null).map(f=>`${f.label}: ${measurement[f.key]}`).join(' · ');
+    document.getElementById('measurementSaveConfirmText').textContent = filled;
+    document.getElementById('measurementSaveConfirmModal').classList.remove('hidden');
+}
+function closeMeasurementSaveConfirm() {
+    document.getElementById('measurementSaveConfirmModal').classList.add('hidden');
+    pendingMeasurementSave = null;
+}
+function confirmSaveMeasurements() {
+    if (!pendingMeasurementSave) return;
+    data.measurements.push(pendingMeasurementSave);
     saveData();
+    pendingMeasurementSave = null;
+    document.getElementById('measurementSaveConfirmModal').classList.add('hidden');
     renderMeasurementScreen();
-    showToast('Параметры сохранены');
+    showToast('Замер сохранён');
+}
+function openBodyGraph() {
+    const select=document.getElementById('bodyGraphField');
+    const fields=getMeasurementFields();
+    select.innerHTML=fields.map(f=>`<option value="${escapeHtml(f.key)}">${escapeHtml(f.label)}</option>`).join('');
+    if(currentBodyGraphKey && fields.some(f=>f.key===currentBodyGraphKey)) select.value=currentBodyGraphKey;
+    currentBodyGraphKey=select.value;
+    document.getElementById('bodyGraphModal').classList.remove('hidden');
+    renderBodyGraph();
+}
+function closeBodyGraph(){ document.getElementById('bodyGraphModal').classList.add('hidden'); }
+function renderBodyGraph(){
+    const key=document.getElementById('bodyGraphField').value;
+    currentBodyGraphKey=key;
+    const field=getMeasurementFields().find(f=>f.key===key);
+    const points=data.measurements.map((m,i)=>({date:m.date,value:Number(m[key]),i})).filter(p=>Number.isFinite(p.value));
+    const summary=document.getElementById('bodyGraphSummary');
+    if(!field) return;
+    if(!points.length){ summary.innerHTML='<div style="color:var(--subtext);">Нет данных для графика.</div>'; return; }
+    const first=points[0], last=points[points.length-1], diff=last.value-first.value;
+    summary.innerHTML=`<div style="font-weight:700;">${escapeHtml(field.label)}: ${last.value}</div>
+        <div style="color:var(--subtext);font-size:13px;">С первого значения: ${diff>0?'+':''}${diff.toFixed(1).replace(/\.0$/,'')}</div>`;
+    const canvas=document.getElementById('bodyGraphCanvas'), container=canvas.parentElement;
+    canvas.width=Math.max(300,container.clientWidth); canvas.height=270;
+    const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+    const vals=points.map(p=>p.value), min=Math.min(...vals), max=Math.max(...vals), range=(max-min)||1;
+    const margin={top:20,right:18,bottom:42,left:42}, w=canvas.width-margin.left-margin.right, h=canvas.height-margin.top-margin.bottom, baseY=margin.top+h;
+    ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--border'); ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(margin.left,margin.top);ctx.lineTo(margin.left,baseY);ctx.lineTo(margin.left+w,baseY);ctx.stroke();
+    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--subtext');ctx.font='10px sans-serif';ctx.textAlign='right';
+    for(let i=0;i<=4;i++){const v=min+range*i/4,y=baseY-h*i/4;ctx.fillText(Number(v.toFixed(1)),margin.left-5,y+3);ctx.strokeStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.moveTo(margin.left,y);ctx.lineTo(margin.left+w,y);ctx.stroke();}
+    ctx.strokeStyle='#34c759';ctx.lineWidth=3;ctx.beginPath();
+    points.forEach((p,i)=>{const x=margin.left+(points.length===1?w/2:i*w/(points.length-1)),y=baseY-(p.value-min)/range*h;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    ctx.fillStyle='#34c759';points.forEach((p,i)=>{const x=margin.left+(points.length===1?w/2:i*w/(points.length-1)),y=baseY-(p.value-min)/range*h;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();});
+    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--subtext');ctx.font='10px sans-serif';ctx.textAlign='center';
+    const step=Math.max(1,Math.ceil(points.length/6));
+    points.forEach((p,i)=>{if(i%step===0||i===points.length-1){const x=margin.left+(points.length===1?w/2:i*w/(points.length-1));ctx.fillText(new Date(p.date).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}),x,baseY+22);}});
 }
 
 function confirmStart(index) { pendingProgramIndex=index; document.getElementById('confirmTitle').textContent=data.programs[index].name; showScreen('confirmScreen'); }
@@ -1056,6 +1286,7 @@ function closeConfirmExit() { document.getElementById('confirmExitModal').classL
 function exitWorkoutWithoutSaving() { closeConfirmExit(); stopRestTimer(); stopTotalTimer(); clearDraft(); currentProgram = null; goHome(); }
 
 function finishWorkout() {
+    const sessionDurationSeconds = workoutStartTime ? Math.max(0, Math.floor((Date.now() - workoutStartTime) / 1000)) : 0;
     closeConfirmExit(); stopRestTimer(); stopTotalTimer();
     if (currentProgram === null) return;
     const hasAnySets = Object.values(workoutSets).some(sets => sets.length > 0);
@@ -1063,19 +1294,49 @@ function finishWorkout() {
     const program = data.programs[currentProgram];
     program.exercises.forEach((ex, i) => { const sets = workoutSets[i]; if (sets && sets.length) { const last = sets[sets.length - 1]; lastResults[ex] = { ...last, done: undefined }; } });
     localStorage.setItem('strong_last_results', JSON.stringify(lastResults));
-    data.history.push({
-        date: new Date().toISOString(), program: program.name,
+    const durationSeconds = sessionDurationSeconds;
+    const newHistoryEntry = {
+        date: new Date().toISOString(), program: program.name, durationSeconds,
         exercises: program.exercises.filter((_, i) => program.active[i]).map((ex, i) => {
             const realIdx = program.exercises.indexOf(ex);
             return { name: ex, sets: (workoutSets[realIdx] || []).map(s => { const { done, ...clean } = s; return clean; }) };
         })
-    });
+    };
+    data.history.push(newHistoryEntry);
     saveData(); clearDraft(); currentProgram = null;
-    if (Object.keys(currentAchievements).length > 0) {
-        const list = document.getElementById('achievementsList');
-        list.innerHTML = Object.entries(currentAchievements).map(([ex, txt]) => `<div style="margin-bottom:8px;">✨ ${ex}: ${txt}</div>`).join('');
-        document.getElementById('achievementsModal').classList.remove('hidden');
-    } else { showToast('Тренировка сохранена'); goHome(); }
+    showWorkoutSummary(newHistoryEntry);
+}
+function showWorkoutSummary(entry) {
+    const duration = entry.durationSeconds || 0;
+    const sets = (entry.exercises||[]).reduce((n,e)=>n+(e.sets||[]).length,0);
+    const volume = Math.round(calculateWorkoutVolume(entry));
+    const prev = getPreviousWorkoutForProgram(entry);
+    const comparisons = compareWorkoutEntries(entry, prev);
+    const improved = comparisons.filter(x=>x.diff>0);
+    const records = Object.entries(currentAchievements);
+    const title = document.getElementById('workoutSummaryTitle');
+    const content = document.getElementById('workoutSummaryContent');
+    title.textContent = '🏁 Тренировка завершена';
+    content.innerHTML = `
+        <div style="font-weight:700;font-size:16px;">${escapeHtml(entry.program)}</div>
+        <div class="smart-summary-grid">
+            <div class="smart-stat"><div class="smart-stat-value">${formatTime(duration)}</div><div class="smart-stat-label">ВРЕМЯ</div></div>
+            <div class="smart-stat"><div class="smart-stat-value">${entry.exercises.length}</div><div class="smart-stat-label">УПРАЖНЕНИЙ</div></div>
+            <div class="smart-stat"><div class="smart-stat-value">${sets}</div><div class="smart-stat-label">ПОДХОДОВ</div></div>
+            <div class="smart-stat"><div class="smart-stat-value">${volume.toLocaleString('ru-RU')}</div><div class="smart-stat-label">ОБЪЁМ, КГ</div></div>
+        </div>
+        ${prev ? `<div class="analysis-card"><div class="analysis-title">📈 Сравнение с прошлой тренировкой</div>
+            ${comparisons.length ? comparisons.slice(0,6).map(x=>`<div class="summary-improvement">${escapeHtml(x.name)} — ${x.type==='weight'?'максимальный вес':'объём'}: <b>${x.diff>0?'↑ +':'↓ '}${Math.abs(Math.round(x.diff))}${x.type==='weight'?' кг':' кг'}</b></div>`).join('') : '<div class="analysis-line">Существенных изменений нет.</div>'}
+        </div>` : '<div class="analysis-card"><div class="analysis-title">📈 Сравнение</div><div class="analysis-line">Это первая сохранённая тренировка этого сплита.</div></div>'}
+        ${records.length ? `<div class="analysis-card"><div class="analysis-title">🏆 Личные рекорды</div>${records.map(([ex,txt])=>`<div class="summary-record">✨ ${escapeHtml(ex)}: ${escapeHtml(txt)}</div>`).join('')}</div>` : ''}
+        ${improved.length ? `<div class="analysis-card"><div class="analysis-title">💪 Что улучшилось</div><div class="analysis-line">${improved.length} показател${improved.length===1?'ь':'я'} стали лучше прошлой тренировки.</div></div>` : ''}
+    `;
+    document.getElementById('workoutSummaryModal').classList.remove('hidden');
+}
+function closeWorkoutSummary() {
+    document.getElementById('workoutSummaryModal').classList.add('hidden');
+    currentAchievements = {};
+    goHome();
 }
 function closeAchievements() { document.getElementById('achievementsModal').classList.add('hidden'); currentAchievements = {}; goHome(); }
 
@@ -1141,7 +1402,7 @@ function renderHistory() {
                     <button class="small-btn gray" onclick="event.stopPropagation();deleteHistoryEntry(${realIdx})" style="color:var(--negative);">🗑️</button>
                 </div>
             </div>
-            <div style="margin-top:6px;font-size:15px;color:var(--subtext);">${entry.exercises.length} упражнений</div>
+            <div style="margin-top:6px;font-size:15px;color:var(--subtext);">${entry.exercises.length} упражнений${entry.durationSeconds ? ` · ${formatTime(entry.durationSeconds)}` : ''}</div>
         </div>`;
     }).join('');
 }
@@ -1149,9 +1410,8 @@ function deleteHistoryEntry(index) { pendingDeleteType='history'; pendingDeleteI
 function showDeleteConfirm(text) {
     const content = document.getElementById('deleteConfirmContent');
     content.innerHTML = `<span class="close-btn" onclick="closeDeleteConfirm()">&times;</span>
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px;">${text}</div>
-        <div style="color:var(--subtext);font-size:13px;line-height:1.45;margin-bottom:16px;">Это действие нельзя отменить.</div>
-        <button onclick="confirmDeleteEntry()" style="background:var(--negative);">🗑️ Удалить</button>
+        <div style="font-size:20px;font-weight:600;margin-bottom:16px;">${text}</div>
+        <button onclick="confirmDeleteEntry()">🗑️ Удалить</button>
         <button class="gray" onclick="closeDeleteConfirm()">Отмена</button>`;
     document.getElementById('deleteConfirmModal').classList.remove('hidden');
 }
@@ -1159,8 +1419,12 @@ function closeDeleteConfirm() { document.getElementById('deleteConfirmModal').cl
 function confirmDeleteEntry() {
     if (pendingDeleteType === 'history' && pendingDeleteIndex !== null) { data.history.splice(pendingDeleteIndex,1); saveData(); renderHistory(); showToast('Запись удалена'); }
     else if (pendingDeleteType === 'measurement' && pendingDeleteIndex !== null) { data.measurements.splice(pendingDeleteIndex,1); saveData(); renderMeasurementScreen(); showToast('Замер удалён'); }
-    else if (pendingDeleteType === 'measurementField' && pendingDeleteIndex !== null) { const fields=getMeasurementFields(); const field=fields[pendingDeleteIndex]; if (field) { fields.splice(pendingDeleteIndex,1); data.measurements.forEach(m=>{ delete m[field.key]; }); saveData(); closeMeasurementManager(); renderMeasurementScreen(); showToast('Параметр удалён'); } }
+    else if (pendingDeleteType === 'measurementField' && pendingDeleteIndex !== null) { const fields=getMeasurementFields(); const field=fields[pendingDeleteIndex]; if (field) { fields.splice(pendingDeleteIndex,1); data.measurements.forEach(m=>{ delete m[field.key]; }); saveData(); renderMeasurementFieldManager(); renderMeasurementScreen(); showToast('Параметр удалён'); } }
     else if (pendingDeleteType === 'program' && pendingDeleteIndex !== null) { data.programs.splice(pendingDeleteIndex, 1); saveData(); renderSettings(); renderHome(); showToast('Сплит удалён'); }
+    else if (pendingDeleteType === 'catalogProduct' && pendingDeleteIndex !== null) {
+        if (data.productCatalog[pendingDeleteIndex]) data.productCatalog.splice(pendingDeleteIndex,1);
+        saveData(); renderCatalogList(); showToast('Продукт удалён');
+    }
     else if (pendingDeleteType === 'foodEntry' && pendingDeleteIndex !== null) { data.foodDiary.entries.splice(pendingDeleteIndex,1); saveData(); renderFoodDiary(); showToast('Запись удалена'); }
     else if (pendingDeleteType === 'foodDay' && pendingDeleteDate) {
         data.foodDiary.entries = data.foodDiary.entries.filter(e => e.date !== pendingDeleteDate);
@@ -1801,12 +2065,9 @@ function saveCatalogProduct() {
 }
 
 function deleteCatalogProduct(index) {
-    if (confirm('Удалить продукт из каталога?')) {
-        data.productCatalog.splice(index, 1);
-        saveData();
-        renderCatalogList();
-        showToast('Удалено');
-    }
+    if (!data.productCatalog[index]) return;
+    pendingDeleteType='catalogProduct'; pendingDeleteIndex=index;
+    showDeleteConfirm(`Удалить «${escapeHtml(data.productCatalog[index].name)}» из каталога?`);
 }
 
 function openAddFoodModal() {
