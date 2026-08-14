@@ -225,7 +225,8 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 #measurementFieldModal { z-index: 300 !important; }
 #deleteConfirmModal { z-index: 1000 !important; }
 #measurementSaveConfirmModal { z-index: 1000 !important; }
-#newMeasurementModal, #editMeasurementModal { z-index: 400 !important; }
+#newMeasurementModal, #editMeasurementModal, #historicalMeasurementEditModal { z-index: 400 !important; }
+#foodCopyConfirmModal { z-index: 1000 !important; }
 </style>
 
 <style id="measurement-v27-style">
@@ -561,6 +562,15 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
         <div id="bodyGraphSummary" style="margin-top:10px;"></div>
         <div class="body-graph-chart"><canvas id="bodyGraphCanvas"></canvas></div>
         <button class="gray" onclick="closeBodyGraph()">Закрыть</button>
+    </div>
+</div>
+<div id="foodCopyConfirmModal" class="confirm-modal hidden" onclick="if(event.target===this) closeFoodCopyConfirm()">
+    <div class="confirm-modal-content">
+        <span class="close-btn" onclick="closeFoodCopyConfirm()">&times;</span>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;">Скопировать данные дня?</div>
+        <div id="foodCopyConfirmText" style="color:var(--subtext);margin-bottom:16px;"></div>
+        <button onclick="confirmFoodCopy()">📋 Скопировать</button>
+        <button class="gray" onclick="closeFoodCopyConfirm()">Отмена</button>
     </div>
 </div>
 <div id="measurementSaveConfirmModal" class="confirm-modal hidden" onclick="if(event.target===this) closeMeasurementSaveConfirm()">
@@ -1261,8 +1271,54 @@ function renderMeasurementHistory() {
         const date = new Date(m.date).toLocaleDateString('ru-RU');
         const values = fields.filter(f => m[f.key] !== null && m[f.key] !== undefined && m[f.key] !== '').map(f => `<span class="body-history-value">${escapeHtml(f.label)}: ${escapeHtml(m[f.key])}</span>`).join('');
         const comparison = realIdx > 0 ? `<div class="body-history-comparison">${buildMeasurementComparison(realIdx)}</div>` : '';
-        return `<div class="body-history-item"><div class="body-history-item-head"><div class="body-history-date">${date}</div><button class="body-history-delete gray" onclick="deleteMeasurement(${realIdx})">🗑️</button></div><div class="body-history-values">${values || '<span style="color:var(--subtext);font-size:12px;">Нет значений</span>'}</div>${comparison}</div>`;
+        return `<div class="body-history-item"><div class="body-history-item-head"><div class="body-history-date">${date}</div><div style="display:flex;gap:6px;"><button class="gray" onclick="openHistoricalMeasurementEdit(${realIdx})">✏️</button><button class="body-history-delete gray" onclick="deleteMeasurement(${realIdx})">🗑️</button></div></div><div class="body-history-values">${values || '<span style="color:var(--subtext);font-size:12px;">Нет значений</span>'}</div>${comparison}</div>`;
     }).join('');
+}
+
+function openHistoricalMeasurementEdit(index) {
+    const measurement = data.measurements[index];
+    if (!measurement) return;
+    const fields = getMeasurementFields();
+    let modal = document.getElementById('historicalMeasurementEditModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'historicalMeasurementEditModal';
+        modal.className = 'catalog-modal hidden';
+        modal.onclick = function(e){ if(e.target===modal) closeHistoricalMeasurementEdit(); };
+        document.body.appendChild(modal);
+    }
+    const dateValue = new Date(measurement.date).toISOString().slice(0,10);
+    modal.innerHTML = `<div class="catalog-modal-content measurement-manager-modal-content">
+        <span class="close-btn" onclick="closeHistoricalMeasurementEdit()">&times;</span>
+        <div style="font-size:21px;font-weight:800;margin-bottom:4px;">✏️ Изменить замер</div>
+        <div class="measurement-modal-note">Изменяется именно сохранённый замер за выбранную дату.</div>
+        <label class="field-label">Дата</label>
+        <input type="date" id="historicalMeasurementDate" value="${dateValue}">
+        ${fields.map(f => `<label class="field-label">${escapeHtml(f.label)}</label>
+        <input type="number" step="any" id="historicalMeas_${escapeHtml(f.key)}" value="${measurement[f.key] ?? ''}" placeholder="Введите значение">`).join('')}
+        <button onclick="prepareHistoricalMeasurementSave(${index})">💾 Сохранить изменения</button>
+        <button class="gray" onclick="closeHistoricalMeasurementEdit()">Отмена</button>
+    </div>`;
+    modal.classList.remove('hidden');
+}
+function closeHistoricalMeasurementEdit(){ document.getElementById('historicalMeasurementEditModal')?.classList.add('hidden'); }
+function prepareHistoricalMeasurementSave(index){
+    const measurement=data.measurements[index];
+    if(!measurement) return;
+    const date=document.getElementById('historicalMeasurementDate')?.value;
+    if(!date){ showToast('Выберите дату'); return; }
+    const fields=getMeasurementFields();
+    const updated={...measurement,date:new Date(date+'T12:00:00').toISOString()};
+    fields.forEach(f=>{
+        const v=parseFloat(document.getElementById('historicalMeas_'+f.key)?.value);
+        updated[f.key]=Number.isFinite(v)?v:null;
+    });
+    if(fields.every(f=>updated[f.key]===null)){ showToast('Введите хотя бы одно значение'); return; }
+    pendingMeasurementSave=updated;
+    pendingMeasurementEditIndex=index;
+    document.getElementById('measurementSaveConfirmText').textContent=fields.filter(f=>updated[f.key]!=null).map(f=>`${f.label}: ${updated[f.key]}`).join(' · ');
+    closeHistoricalMeasurementEdit();
+    document.getElementById('measurementSaveConfirmModal').classList.remove('hidden');
 }
 
 function deleteMeasurement(index) { pendingDeleteType = 'measurement'; pendingDeleteIndex = index; showDeleteConfirm('Удалить этот замер?'); }
@@ -1281,7 +1337,7 @@ function saveMeasurements() {
     }
 
     pendingMeasurementSave = measurement;
-    pendingMeasurementEditIndex = data.measurements.length ? data.measurements.length - 1 : null;
+    pendingMeasurementEditIndex = null;
 
     const filled = fields.filter(f=>measurement[f.key]!=null)
         .map(f=>`${f.label}: ${measurement[f.key]}`).join(' · ');
@@ -1298,11 +1354,10 @@ function closeMeasurementSaveConfirm() {
 function confirmSaveMeasurements() {
     if (!pendingMeasurementSave) return;
 
-    if (pendingMeasurementEditIndex !== null &&
-        pendingMeasurementEditIndex === data.measurements.length - 1 &&
-        data.measurements[pendingMeasurementEditIndex]) {
+    if (pendingMeasurementEditIndex !== null && data.measurements[pendingMeasurementEditIndex]) {
         data.measurements[pendingMeasurementEditIndex] = pendingMeasurementSave;
-        showToast('Последний замер изменён');
+        data.measurements.sort((a,b) => new Date(a.date) - new Date(b.date));
+        showToast('Замер изменён');
     } else {
         data.measurements.push(pendingMeasurementSave);
         data.measurements.sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -2584,11 +2639,12 @@ function clearFoodLimit() {
     renderFoodDiary();
 }
 
+let pendingFoodCopy = null;
 function copyYesterday() {
     const today = document.getElementById('foodDate').value;
     const yesterday = new Date(today + 'T00:00:00');
     yesterday.setDate(yesterday.getDate() - 1);
-    copyEntriesFromDate(localDateString(yesterday), today);
+    prepareFoodCopy(localDateString(yesterday), today);
 }
 function openCopyDatePicker() {
     document.getElementById('copyDateInput').value = '';
@@ -2602,16 +2658,39 @@ function closeCopyDatePicker() { document.getElementById('copyDatePickerModal').
 function copyFromDate() {
     const from = document.getElementById('copyDateInput').value;
     if (!from) return showToast('Выберите дату');
-    copyEntriesFromDate(from, document.getElementById('foodDate').value);
+    const to = document.getElementById('foodDate').value;
     closeCopyDatePicker();
+    prepareFoodCopy(from, to);
+}
+function prepareFoodCopy(fromDate, toDate) {
+    const fromEntries = data.foodDiary.entries.filter(e => e.date === fromDate);
+    const sourceLimit = data.foodDiary.limits[fromDate] || null;
+    if (!fromEntries.length && !sourceLimit) return showToast('В выбранный день нет блюд и лимитов КБЖУ');
+    pendingFoodCopy = {fromDate, toDate};
+    const parts=[];
+    if(fromEntries.length) parts.push(`${fromEntries.length} ${fromEntries.length===1?'запись':'записей'}`);
+    if(sourceLimit) parts.push('лимиты КБЖУ');
+    document.getElementById('foodCopyConfirmText').textContent = `${getDateWithWeekday(fromDate)} → ${getDateWithWeekday(toDate)}. Будут скопированы: ${parts.join(' + ')}.`;
+    document.getElementById('foodCopyConfirmModal').classList.remove('hidden');
+}
+function closeFoodCopyConfirm(){ document.getElementById('foodCopyConfirmModal').classList.add('hidden'); pendingFoodCopy=null; }
+function confirmFoodCopy(){
+    if(!pendingFoodCopy) return;
+    const {fromDate,toDate}=pendingFoodCopy;
+    const fromEntries=data.foodDiary.entries.filter(e=>e.date===fromDate);
+    const sourceLimit=data.foodDiary.limits[fromDate];
+    fromEntries.forEach(e=>data.foodDiary.entries.push({...e,date:toDate}));
+    if(sourceLimit) data.foodDiary.limits[toDate]={...sourceLimit};
+    saveData();
+    closeFoodCopyConfirm();
+    renderFoodDiary();
+    const copied=[];
+    if(fromEntries.length) copied.push(`${fromEntries.length} ${fromEntries.length===1?'запись':'записей'}`);
+    if(sourceLimit) copied.push('лимиты КБЖУ');
+    showToast(`Скопировано: ${copied.join(' + ')}`);
 }
 function copyEntriesFromDate(fromDate, toDate) {
-    const fromEntries = data.foodDiary.entries.filter(e => e.date === fromDate);
-    if (!fromEntries.length) return showToast('В выбранный день нет записей');
-    fromEntries.forEach(e => data.foodDiary.entries.push({ ...e, date: toDate }));
-    saveData();
-    renderFoodDiary();
-    showToast(`Скопировано ${fromEntries.length} зап.`);
+    prepareFoodCopy(fromDate,toDate);
 }
 
 function showToast(msg) { const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = msg; document.body.appendChild(toast); setTimeout(() => toast.remove(), 2000); }
