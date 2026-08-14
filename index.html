@@ -236,6 +236,31 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     width: 100%;
     height: 100%;
 }
+
+/* === Progress analytics v2 === */
+.progress-dashboard{display:grid;gap:12px}
+.progress-section{background:var(--input-bg);border-radius:16px;padding:14px}
+.progress-section-title{font-size:16px;font-weight:800;margin-bottom:8px}
+.progress-section-subtitle{font-size:12px;color:var(--subtext);margin-top:-3px;margin-bottom:10px}
+.progress-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.progress-stat{background:var(--card-bg);border-radius:14px;padding:12px;text-align:center}
+.progress-stat-value{font-size:22px;font-weight:800}
+.progress-stat-label{font-size:10px;color:var(--subtext);margin-top:3px;text-transform:uppercase}
+.progress-chart{height:210px;position:relative;margin-top:8px}
+.progress-chart canvas{width:100%;height:100%;display:block}
+.progress-empty{color:var(--subtext);text-align:center;padding:16px 4px}
+.progress-exercise-select{margin:0 0 10px}
+.progress-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.progress-metric{background:var(--card-bg);border-radius:13px;padding:10px}
+.progress-metric-label{font-size:11px;color:var(--subtext)}
+.progress-metric-value{font-size:18px;font-weight:800;margin-top:3px}
+.progress-history-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.progress-history-row:last-child{border-bottom:0}
+.progress-record{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.progress-record:last-child{border-bottom:0}
+.progress-record-name{font-weight:700;min-width:0}
+.progress-record-value{font-weight:800;color:var(--positive);white-space:nowrap}
+@media(max-width:420px){.progress-stats,.progress-metrics{grid-template-columns:repeat(2,1fr)}}
 </style>
 
 <style id="measurement-v27-style">
@@ -245,6 +270,268 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 #newMeasurementModal, #editMeasurementModal{z-index:400!important}
 </style>
 
+
+<style id="workout-ui-v2">
+/* Workout UX refresh — preserves existing application logic */
+#workoutScreen{padding:calc(4px + env(safe-area-inset-top,0px)) 0 calc(24px + env(safe-area-inset-bottom,0px));}
+#workoutScreen .workout-topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:6px 0 12px;margin-bottom:8px;}
+.workout-head{display:grid;grid-template-columns:44px 1fr 70px;align-items:center;gap:10px;}
+.workout-close{width:42px!important;height:42px!important;margin:0!important;padding:0!important;border-radius:14px!important;background:var(--input-bg)!important;color:var(--text)!important;box-shadow:none!important;font-size:18px!important;}
+.workout-title-wrap{min-width:0;text-align:center;}
+.workout-title-wrap .title{font-size:18px!important;line-height:1.2;margin:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.workout-subline{color:var(--subtext);font-size:12px;margin-top:4px;}
+.workout-time{font-variant-numeric:tabular-nums;text-align:right;font-size:14px;font-weight:800;color:var(--text);}
+.workout-progress{height:5px;background:var(--input-bg);border-radius:99px;overflow:hidden;margin-top:10px;}
+.workout-progress>span{display:block;height:100%;background:var(--accent-gradient);border-radius:inherit;transition:width .25s ease;}
+.workout-progress-caption{display:flex;justify-content:space-between;gap:8px;color:var(--subtext);font-size:11px;margin-top:5px;}
+#exerciseStrip{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 2px 10px;margin:0 -2px 4px;scroll-snap-type:x proximity;}
+#exerciseStrip::-webkit-scrollbar{display:none;}
+#exerciseStrip .exercise-dot{position:relative;display:flex;align-items:center;gap:7px;min-height:42px;padding:9px 13px;border-radius:14px;background:var(--input-bg);color:var(--subtext);font-size:13px;font-weight:700;border:1px solid transparent;scroll-snap-align:center;}
+#exerciseStrip .exercise-dot.active{background:var(--card-bg);color:var(--text);border-color:var(--button-green);box-shadow:0 3px 12px rgba(0,0,0,.16);}
+#exerciseStrip .exercise-dot.done:not(.active){background:rgba(52,199,89,.13);color:var(--positive);}
+#exerciseStrip .exercise-dot::before{content:attr(data-step);width:21px;height:21px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:11px;flex:0 0 auto;}
+#exerciseStrip .exercise-dot.done::before{content:'✓';background:rgba(52,199,89,.18);color:var(--positive);}
+#exerciseStrip .exercise-dot.active::before{background:var(--button-green);color:#fff;}
+.workout-exercise-card{padding:17px!important;margin-bottom:12px!important;border-radius:22px!important;}
+.workout-exercise-kicker{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;color:var(--subtext);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;}
+.workout-exercise-title{display:flex;align-items:center;gap:8px;font-size:24px;font-weight:800;line-height:1.15;margin-bottom:10px;cursor:pointer;}
+.workout-exercise-title .arrow{color:var(--subtext);font-size:20px;margin-left:auto;}
+.workout-last-result{display:flex;align-items:center;gap:10px;background:var(--input-bg);border-radius:15px;padding:11px 12px;margin-bottom:14px;}
+.workout-last-icon{width:30px;height:30px;border-radius:10px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.workout-last-copy{min-width:0;flex:1;}
+.workout-last-label{font-size:11px;color:var(--subtext);font-weight:700;}
+.workout-last-value{font-size:14px;font-weight:800;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.workout-best-badge{font-size:11px;font-weight:800;color:var(--positive);white-space:nowrap;}
+.sets-header{display:grid;grid-template-columns:34px 1fr 34px 34px;gap:8px;align-items:center;color:var(--subtext);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:0 4px 5px;}
+.set-row.workout-set-row{display:grid;grid-template-columns:34px minmax(0,1fr) 40px 40px;gap:8px;align-items:center;margin-top:8px;padding:6px;background:var(--input-bg);border-radius:15px;}
+.workout-set-row:has(.set-done-btn.done){background:rgba(52,199,89,.10);}
+.workout-set-row .set-num{width:28px;height:28px;border-radius:9px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+.workout-set-row input{margin:0!important;min-width:0!important;width:100%!important;background:var(--card-bg)!important;border-radius:11px!important;padding:10px!important;font-size:17px!important;}
+.workout-set-row .set-done-btn,.workout-set-row .set-delete-btn{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.workout-set-row .set-done-btn{background:var(--button-gray);color:var(--text);font-weight:900;}
+.workout-set-row .set-done-btn.done{background:var(--button-green);color:#fff;}
+.workout-set-row .set-delete-btn{background:transparent;color:var(--subtext);font-size:16px;}
+.workout-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.workout-actions button{margin:0!important;min-height:50px;font-size:14px;}
+.workout-actions .primary-action{background:var(--accent-gradient);color:#fff;}
+.workout-actions .next-action{background:var(--input-bg);color:var(--text);}
+.workout-actions .finish-action{background:var(--input-bg);color:var(--text);}
+.workout-secondary-action{width:100%!important;margin:8px 0 0!important;background:transparent!important;color:var(--subtext)!important;border:1px solid var(--border)!important;padding:10px!important;font-size:13px!important;}
+.rest-panel{background:linear-gradient(180deg,rgba(52,199,89,.13),var(--input-bg));border:1px solid rgba(52,199,89,.22);border-radius:20px;padding:15px;margin-top:14px;text-align:center;}
+.rest-panel.warning{border-color:rgba(255,59,48,.4);background:rgba(255,59,48,.10);}
+.rest-label{font-size:11px;color:var(--subtext);font-weight:800;text-transform:uppercase;letter-spacing:.07em;}
+.rest-time{font-size:42px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;margin:7px 0 12px;}
+.rest-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.rest-presets button{margin:0!important;padding:9px 5px!important;background:var(--card-bg)!important;color:var(--text)!important;font-size:12px!important;}
+.rest-presets button.active{background:var(--button-green)!important;color:#fff!important;}
+.rest-actions{display:flex;gap:8px;margin-top:8px;}
+.rest-actions button{margin:0!important;flex:1;padding:9px!important;font-size:12px!important;}
+.workout-finish-wrap{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);}
+.workout-finish-wrap button{margin:0!important;background:transparent!important;color:var(--subtext)!important;font-size:12px!important;padding:10px!important;}
+@media(max-width:420px){
+  .workout-head{grid-template-columns:40px 1fr 62px;gap:8px}.workout-close{width:40px!important;height:40px!important}.workout-exercise-title{font-size:22px}.workout-exercise-card{padding:14px!important}.workout-set-row{grid-template-columns:30px minmax(0,1fr) 38px 38px!important;gap:6px!important}.workout-set-row .set-done-btn,.workout-set-row .set-delete-btn{width:38px;height:38px}.sets-header{grid-template-columns:30px 1fr 38px 38px}.rest-time{font-size:38px}
+}
+
+/* ===== Progress UX v2 ===== */
+.progress-v2{display:flex;flex-direction:column;gap:12px}
+.progress-v2-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.progress-v2-title{font-size:22px;font-weight:850;letter-spacing:-.3px}
+.progress-v2-sub{font-size:12px;color:var(--subtext);margin-top:3px}
+.progress-v2-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--input-bg);padding:5px;border-radius:14px;position:sticky;top:8px;z-index:5}
+.progress-v2-tab{border:0!important;background:transparent!important;color:var(--subtext)!important;margin:0!important;padding:10px 5px!important;border-radius:10px!important;font-size:12px!important;font-weight:750!important;min-height:40px}
+.progress-v2-tab.active{background:var(--card-bg)!important;color:var(--text)!important;box-shadow:0 1px 5px rgba(0,0,0,.14)}
+.progress-v2-section{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:14px}
+.progress-v2-section-title{font-size:16px;font-weight:800}
+.progress-v2-section-sub{font-size:12px;color:var(--subtext);margin-top:3px;line-height:1.4}
+.progress-v2-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:11px}
+.progress-v2-stat{background:var(--input-bg);border-radius:14px;padding:12px}
+.progress-v2-stat-value{font-size:21px;font-weight:850}
+.progress-v2-stat-label{font-size:11px;color:var(--subtext);margin-top:3px}
+.progress-v2-chart{height:205px;margin-top:10px;background:var(--input-bg);border-radius:15px;padding:5px}
+.progress-v2-chart canvas{width:100%;height:100%}
+.progress-v2-search{position:relative;margin-top:12px}
+.progress-v2-search input{margin:0!important;padding:13px 14px 13px 40px!important;border-radius:13px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;width:100%!important;box-sizing:border-box}
+.progress-v2-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--subtext);font-size:16px;pointer-events:none}
+.progress-v2-results{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:190px;overflow:auto}
+.progress-v2-result{width:100%!important;margin:0!important;text-align:left!important;background:var(--input-bg)!important;color:var(--text)!important;border:1px solid transparent!important;border-radius:12px!important;padding:11px 12px!important;font-size:14px!important;font-weight:650!important}
+.progress-v2-result.active{border-color:var(--button-green)!important;background:rgba(52,199,89,.10)!important}
+.progress-v2-result small{display:block;color:var(--subtext);font-size:11px;margin-top:2px;font-weight:500}
+.progress-v2-selected{margin-top:10px;border-radius:16px;padding:14px;background:linear-gradient(135deg,rgba(52,199,89,.13),rgba(52,199,89,.04));border:1px solid rgba(52,199,89,.22)}
+.progress-v2-selected-name{font-size:19px;font-weight:850}
+.progress-v2-selected-meta{font-size:12px;color:var(--subtext);margin-top:3px}
+.progress-v2-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:11px}
+.progress-v2-metric{background:var(--input-bg);border-radius:12px;padding:10px}
+.progress-v2-metric-label{font-size:10px;color:var(--subtext);text-transform:uppercase;letter-spacing:.3px}
+.progress-v2-metric-value{font-size:17px;font-weight:800;margin-top:3px}
+.progress-v2-change{display:grid;gap:5px;margin-top:10px}
+.progress-v2-change-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.progress-v2-change-row:last-child{border-bottom:0}
+.progress-v2-positive{color:var(--positive);font-weight:800}
+.progress-v2-negative{color:#ff453a;font-weight:800}
+.progress-v2-list{display:grid;gap:6px;margin-top:10px}
+.progress-v2-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--input-bg);border-radius:12px;padding:10px 11px;font-size:13px}
+.progress-v2-row-main{min-width:0}.progress-v2-row-main strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.progress-v2-row-main small{display:block;color:var(--subtext);margin-top:2px}
+.progress-v2-row-value{font-weight:800;white-space:nowrap}
+.progress-v2-empty{text-align:center;color:var(--subtext);padding:22px 10px;font-size:13px}
+.progress-v2-period{display:flex;gap:6px;overflow:auto;margin-top:11px;padding-bottom:1px}
+.progress-v2-period button{width:auto!important;flex:0 0 auto;margin:0!important;padding:8px 11px!important;font-size:12px!important;background:var(--input-bg)!important;color:var(--subtext)!important;border-radius:10px!important}
+.progress-v2-period button.active{background:var(--accent-gradient)!important;color:#fff!important}
+@media(max-width:420px){.progress-v2-tabs{gap:3px}.progress-v2-tab{font-size:11px!important;padding:9px 2px!important}.progress-v2-chart{height:185px}}
+</style>
+
+<style id="final-ux-fix">
+/* ===== FINAL EXERCISE PROGRESS / WORKOUT UX ===== */
+.workout-analytics-card{margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:16px;background:var(--input-bg);cursor:pointer;display:flex;align-items:center;gap:11px;text-align:left;transition:.18s;}
+.workout-analytics-card:active{transform:scale(.99)}
+.workout-analytics-icon{width:38px;height:38px;flex:0 0 38px;border-radius:12px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:19px}
+.workout-analytics-copy{min-width:0;flex:1}.workout-analytics-title{font-size:14px;font-weight:850}.workout-analytics-sub{font-size:11px;color:var(--subtext);margin-top:3px;line-height:1.35}.workout-analytics-arrow{font-size:22px;color:var(--subtext);font-weight:700}
+.workout-finish-wrap{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.workout-finish-wrap button{margin:0!important;background:var(--button-gray)!important;color:var(--text)!important;border:1px solid var(--border)!important;font-size:14px!important;font-weight:800!important;padding:12px!important}
+.progress-ex{display:flex;flex-direction:column;gap:12px}
+.progress-ex-head{padding:2px 2px 0}.progress-ex-title{font-size:24px;font-weight:900;letter-spacing:-.4px}.progress-ex-sub{font-size:12px;color:var(--subtext);line-height:1.4;margin-top:4px}
+.progress-ex-period{display:flex;gap:6px;padding:4px;background:var(--input-bg);border-radius:13px}.progress-ex-period button{margin:0!important;min-height:38px!important;padding:8px 10px!important;background:transparent!important;color:var(--subtext)!important;border:0!important;font-size:12px!important}.progress-ex-period button.active{background:var(--card-bg)!important;color:var(--text)!important;box-shadow:0 1px 5px rgba(0,0,0,.14)}
+.progress-ex-picker{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:13px}
+.progress-ex-picker-label{font-size:11px;color:var(--subtext);font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.progress-ex-search-wrap{position:relative}.progress-ex-search{width:100%!important;box-sizing:border-box;margin:0!important;padding:13px 38px 13px 40px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;border-radius:13px!important;font-size:16px!important}
+.progress-ex-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--subtext);pointer-events:none}.progress-ex-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0!important;background:transparent!important;color:var(--subtext)!important;margin:0!important;padding:0!important;font-size:18px!important}
+.progress-ex-results{display:grid;gap:5px;margin-top:8px;max-height:210px;overflow-y:auto}.progress-ex-result{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;margin:0!important;padding:11px 12px!important;border:1px solid transparent!important;border-radius:12px!important;background:var(--input-bg)!important;color:var(--text)!important;text-align:left!important;font-size:14px!important;font-weight:700!important}.progress-ex-result.active{border-color:var(--button-green)!important;background:rgba(52,199,89,.10)!important}.progress-ex-result-check{color:var(--button-green);font-size:16px}.progress-ex-no-results{padding:12px;text-align:center;color:var(--subtext);font-size:13px}
+.progress-ex-selected{display:flex;align-items:center;gap:10px;margin-top:9px;padding:11px 12px;border-radius:13px;background:rgba(52,199,89,.09);border:1px solid rgba(52,199,89,.22)}.progress-ex-selected-dot{width:8px;height:8px;border-radius:50%;background:var(--button-green);flex:0 0 8px}.progress-ex-selected-name{font-size:15px;font-weight:850;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.progress-ex-selected-meta{font-size:11px;color:var(--subtext);margin-left:auto;white-space:nowrap}
+.progress-ex-section{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:14px}.progress-ex-section-title{font-size:16px;font-weight:850}.progress-ex-section-sub{font-size:12px;color:var(--subtext);margin-top:3px;line-height:1.4}
+.progress-ex-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:11px}.progress-ex-metric{background:var(--input-bg);border-radius:13px;padding:11px;min-width:0}.progress-ex-metric-label{font-size:10px;color:var(--subtext);line-height:1.25}.progress-ex-metric-value{font-size:17px;font-weight:900;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-ex-change{margin-top:10px;border-top:1px solid var(--border)}.progress-ex-change-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}.progress-ex-change-row:last-child{border-bottom:0}.progress-ex-positive{color:var(--positive);font-weight:850}.progress-ex-negative{color:#ff453a;font-weight:850}.progress-ex-neutral{color:var(--subtext);font-weight:700}
+.progress-ex-chart{height:205px;margin-top:10px;border-radius:14px;background:var(--input-bg);padding:5px;box-sizing:border-box}.progress-ex-chart canvas{width:100%;height:100%}
+.progress-ex-history{display:grid;gap:6px;margin-top:10px}.progress-ex-history-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 11px;background:var(--input-bg);border-radius:12px;font-size:13px}.progress-ex-history-date{font-weight:750}.progress-ex-history-value{text-align:right;font-weight:800}.progress-ex-history-value small{display:block;color:var(--subtext);font-weight:500;margin-top:2px}
+.exercise-modal-content{width:min(92%,520px)!important;max-height:86vh!important;padding:18px!important}.exercise-modal-title{padding-right:28px!important;font-size:20px!important}.exercise-modal-content .tabs{gap:6px;margin:14px 0!important;padding:4px;background:var(--input-bg);border-radius:14px}.exercise-modal-content .tabs .tab{padding:10px 6px!important;border-radius:10px!important;font-size:12px!important}.exercise-modal-content .best-result{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;text-align:left!important}.exercise-modal-content .best-item{background:var(--input-bg);border-radius:13px;padding:11px}.exercise-modal-content .best-value{font-size:19px!important}.exercise-modal-content .best-label{font-size:11px!important;line-height:1.25}.exercise-modal-content .history-item{padding:11px 0!important}.exercise-modal-content .graph-container{height:220px!important;background:var(--input-bg);border-radius:14px;padding:5px;box-sizing:border-box}
+@media(max-width:420px){.progress-ex-title{font-size:22px}.progress-ex-metric-value{font-size:15px}.progress-ex-chart{height:190px}.progress-ex-selected-meta{display:none}.workout-analytics-title{font-size:13px}}
+</style>
+
+
+<style id="final-cleanup-v3">
+/* Clean workout set layout */
+.workout-exercise-card .sets-header{display:none!important;}
+.workout-analytics-card{width:100%!important;display:flex!important;align-items:center!important;gap:11px!important;text-align:left!important;margin:14px 0 0!important;padding:12px 13px!important;min-height:58px!important;background:var(--input-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:15px!important;box-shadow:none!important;}
+.workout-analytics-card:active{transform:scale(.99);}
+.workout-analytics-icon{width:34px;height:34px;border-radius:10px;background:rgba(52,199,89,.12);color:var(--positive);display:flex;align-items:center;justify-content:center;flex:0 0 34px;font-size:17px;font-weight:900;}
+.workout-analytics-copy{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important;flex:1!important;}
+.workout-analytics-title{font-size:14px!important;font-weight:850!important;line-height:1.15!important;display:block!important;}
+.workout-analytics-sub{font-size:11px!important;color:var(--subtext)!important;line-height:1.25!important;display:block!important;white-space:normal!important;}
+.workout-analytics-arrow{font-size:23px!important;color:var(--subtext)!important;line-height:1!important;flex:0 0 auto!important;}
+.workout-finish-wrap{margin-top:14px!important;padding-top:10px!important;}
+.workout-finish-wrap button{min-height:42px!important;border:1px solid var(--border)!important;border-radius:12px!important;}
+
+/* Progress: no duplicate selected chip, no full exercise catalog */
+.progress-ex-picker{padding:14px!important;}
+.progress-ex-search-clear{display:none!important;}
+.progress-ex-search-clear.visible{display:block!important;}
+.progress-ex-results{max-height:220px!important;margin-top:9px!important;}
+.progress-ex-current{margin-top:0!important;padding:13px 14px!important;border:1px solid rgba(52,199,89,.28)!important;background:rgba(52,199,89,.08)!important;border-radius:16px!important;}
+.progress-ex-current-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:5px;}
+.progress-ex-current-label{font-size:10px!important;text-transform:uppercase;letter-spacing:.06em;color:var(--subtext)!important;font-weight:800!important;}
+.progress-ex-current-type{font-size:10px!important;color:var(--positive)!important;font-weight:800!important;}
+.progress-ex-current-name{font-size:18px!important;font-weight:900!important;line-height:1.2!important;}
+.progress-ex-empty-state{padding:28px 18px!important;text-align:center!important;border:1px dashed var(--border)!important;border-radius:18px!important;background:var(--input-bg)!important;}
+.progress-ex-empty-icon{width:42px;height:42px;margin:0 auto 10px;border-radius:13px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;color:var(--subtext);font-size:22px;}
+.progress-ex-empty-title{font-size:16px;font-weight:850;}
+.progress-ex-empty-sub{margin-top:5px;font-size:12px;line-height:1.45;color:var(--subtext);}
+@media(max-width:420px){
+  .workout-analytics-card{min-height:56px!important;padding:11px!important;}
+  .progress-ex-current-name{font-size:17px!important;}
+}
+
+/* === Final UI polish v4 === */
+.progress-ex{gap:10px!important}
+.progress-ex-head{padding:2px 2px 4px!important}
+.progress-ex-title{font-size:24px!important;letter-spacing:-.5px!important}
+.progress-ex-sub{font-size:13px!important;max-width:520px!important}
+.progress-ex-period{margin:0!important;padding:4px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;border-radius:16px!important}
+.progress-ex-period button{min-height:42px!important;font-size:13px!important;font-weight:750!important}
+.progress-ex-period button.active{background:var(--card-bg)!important}
+.progress-ex-picker{padding:14px!important;border-radius:18px!important}
+.progress-ex-picker-label{margin-bottom:7px!important}
+.progress-ex-results{max-height:190px!important;overflow:auto!important}
+.progress-ex-result-arrow{color:var(--subtext);font-size:20px;line-height:1}
+.progress-ex-current-inline{display:flex;align-items:center;gap:9px;margin-top:9px;padding:10px 11px;border-radius:13px;background:rgba(52,199,89,.09);border:1px solid rgba(52,199,89,.22)}
+.progress-ex-current-dot{width:8px;height:8px;border-radius:50%;background:var(--button-green);flex:0 0 8px}.progress-ex-current-name{font-size:14px!important;font-weight:850!important;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.progress-ex-current-inline button{width:auto!important;margin:0!important;padding:6px 9px!important;background:transparent!important;color:var(--positive)!important;border:0!important;font-size:12px!important;font-weight:800!important}
+.progress-ex-section{padding:15px!important;border-radius:18px!important}
+.progress-ex-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.progress-section-chevron{color:var(--subtext);font-size:18px}
+.progress-ex-metrics{gap:8px!important}.progress-ex-metric{padding:12px!important}.progress-ex-metric-label{font-size:11px!important}.progress-ex-metric-value{font-size:18px!important}
+.progress-chart-metrics{display:flex;gap:6px;margin-top:11px;padding:4px;background:var(--input-bg);border-radius:12px}.progress-chart-metric{flex:1!important;width:auto!important;margin:0!important;min-height:36px!important;padding:7px 8px!important;background:transparent!important;color:var(--subtext)!important;border:0!important;font-size:12px!important;font-weight:750!important}.progress-chart-metric.active{background:var(--card-bg)!important;color:var(--text)!important;box-shadow:0 1px 4px rgba(0,0,0,.14)}
+.progress-single-chart{height:230px!important;margin-top:9px!important}
+.progress-history-section .progress-ex-history{margin-top:11px!important}
+/* Consistent screen language for Nutrition / Measurements / Programs */
+#foodScreen,#bodyScreen,#settingsScreen{padding-bottom:20px}
+#foodScreen .screen-header,#bodyScreen .screen-header,#settingsScreen .screen-header{margin-bottom:14px}
+#foodScreen .screen-header .title,#bodyScreen .screen-header .title,#settingsScreen .screen-header .title{font-size:24px;font-weight:900;letter-spacing:-.4px}
+#foodScreen>.tabs{display:flex;gap:5px;padding:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow-x:auto}
+#foodScreen>.tabs .tab{flex:1;min-width:0;padding:10px 9px;border-radius:12px;text-align:center;font-weight:750;font-size:13px;color:var(--subtext);background:transparent;white-space:nowrap}
+#foodScreen>.tabs .tab.active{background:var(--card-bg);color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,.12)}
+#foodScreen .tab-content>.card,#foodScreen .tab-content .card{border-radius:18px;border:1px solid var(--border);box-shadow:none}
+#foodScreen .food-item{border-radius:14px!important;background:var(--input-bg)!important;padding:12px!important;margin-bottom:7px!important}
+#bodyScreen .body-hero-card,#bodyScreen .body-history-card{border-radius:18px!important;border:1px solid var(--border)!important;box-shadow:none!important}
+#bodyScreen .body-card-title{font-size:21px!important;font-weight:900!important;letter-spacing:-.3px}
+#bodyScreen .body-card-subtitle{font-size:13px!important;line-height:1.4}
+#bodyScreen .body-settings-btn,#bodyScreen .body-save-btn{border-radius:12px!important}
+#settingsScreen #programsEditor .card{border-radius:18px;border:1px solid var(--border);box-shadow:none;padding:15px}
+#settingsScreen .checkbox-label{background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:9px!important;margin-top:7px!important}
+#settingsScreen .checkbox-label input[type=text]{background:transparent!important;border:0!important}
+#settingsScreen .inline-select{border-radius:10px!important}
+#settingsScreen #programsEditor + button,#settingsScreen>button:last-child{border-radius:14px}
+@media(max-width:420px){.progress-ex-title{font-size:22px!important}.progress-ex-period button{font-size:12px!important;padding-left:7px!important;padding-right:7px!important}.progress-single-chart{height:210px!important}.progress-chart-metric{font-size:11px!important;padding:7px 4px!important}#foodScreen>.tabs .tab{font-size:12px;padding-left:6px;padding-right:6px}}
+
+/* === Body measurements redesign === */
+#bodyScreen .body-current-card,
+#bodyScreen .body-tools-card,
+#bodyScreen .body-change-card,
+#bodyScreen .body-empty-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;box-shadow:none;margin-bottom:10px;padding:16px}
+#bodyScreen .body-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+#bodyScreen .body-section-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--subtext);font-weight:850}
+#bodyScreen .body-section-date{font-size:18px;font-weight:850;margin-top:3px}
+#bodyScreen .body-icon-action{width:40px!important;height:40px!important;margin:0!important;padding:0!important;border-radius:12px!important;background:var(--input-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;font-size:17px}
+#bodyScreen .body-values-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+#bodyScreen .body-value-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--input-bg);border-radius:13px;padding:11px 12px;min-width:0}
+#bodyScreen .body-value-item span{font-size:13px;color:var(--subtext);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bodyScreen .body-value-item strong{font-size:16px;font-weight:850;white-space:nowrap}
+#bodyScreen .body-no-values{grid-column:1/-1;color:var(--subtext);padding:12px;text-align:center}
+#bodyScreen .body-main-actions{display:grid;grid-template-columns:1.15fr .85fr;gap:8px;margin-top:10px}
+#bodyScreen .body-primary-action,#bodyScreen .body-secondary-action{min-height:44px!important;margin:0!important;border-radius:13px!important;font-weight:800!important}
+#bodyScreen .body-primary-action{background:var(--accent-gradient)!important;color:#fff!important}
+#bodyScreen .body-secondary-action{background:var(--input-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important}
+#bodyScreen .body-tools-card{padding:8px}
+#bodyScreen .body-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#bodyScreen .body-tool{display:grid!important;grid-template-columns:34px 1fr 14px;align-items:center;gap:8px;text-align:left!important;background:var(--input-bg)!important;border:0!important;color:var(--text)!important;margin:0!important;padding:11px!important;min-height:66px!important;border-radius:14px!important}
+#bodyScreen .body-tool-icon{width:32px;height:32px;border-radius:10px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:18px}
+#bodyScreen .body-tool strong{display:block;font-size:14px}
+#bodyScreen .body-tool small{display:block;color:var(--subtext);font-size:10px;margin-top:2px;white-space:nowrap}
+#bodyScreen .body-tool-arrow{color:var(--subtext);font-size:20px}
+#bodyScreen .body-change-card{padding:14px}
+#bodyScreen .body-change-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:7px}
+#bodyScreen .body-change-head span{font-size:16px;font-weight:850}
+#bodyScreen .body-change-head small{color:var(--subtext);font-size:10px;text-align:right}
+#bodyScreen .body-change-list{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+#bodyScreen .body-change-row{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:8px 0;border-top:1px solid var(--border);font-size:12px}
+#bodyScreen .body-change-row span{color:var(--subtext);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bodyScreen .body-change-row strong{font-size:12px;white-space:nowrap}
+#bodyScreen .body-change-row strong.up{color:var(--positive)}
+#bodyScreen .body-change-row strong.down{color:var(--negative)}
+#bodyScreen .body-change-row strong.same{color:var(--subtext)}
+#bodyScreen .body-empty-card{text-align:center;padding:28px 18px}
+#bodyScreen .body-empty-icon{width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:25px}
+#bodyScreen .body-empty-title{font-size:19px;font-weight:850}
+#bodyScreen .body-empty-sub{font-size:12px;color:var(--subtext);margin:5px auto 14px;max-width:300px;line-height:1.4}
+#measurementHistoryModal{z-index:450!important}
+#measurementHistoryModal .body-history-modal-content{width:min(94%,560px);max-height:88vh;padding:20px;border-radius:22px}
+#measurementHistoryModal .body-history-modal-title{font-size:21px;font-weight:900}
+#measurementHistoryModal .body-history-modal-sub{color:var(--subtext);font-size:12px;margin-top:3px}
+#measurementHistoryModal .body-history-modal-head{padding-right:26px;margin-bottom:12px}
+#measurementHistoryModal .body-history-item{margin-top:8px;padding:12px;border:1px solid var(--border)}
+#measurementHistoryModal .body-history-values{margin-top:9px}
+#measurementHistoryModal .body-history-value{background:var(--card-bg);border:1px solid var(--border)}
+#measurementHistoryModal .body-history-value b{margin-left:4px}
+#measurementHistoryModal .body-history-empty{color:var(--subtext);text-align:center;padding:18px 8px}
+#measurementHistoryModal>div>button:last-child{margin-top:10px}
+@media(max-width:420px){#bodyScreen .body-values-grid{grid-template-columns:1fr 1fr}#bodyScreen .body-change-list{grid-template-columns:1fr}#bodyScreen .body-tool small{font-size:9px}#bodyScreen .body-main-actions{grid-template-columns:1fr 1fr}}
+</style>
+
 </head>
 <body>
 <div class="container" id="app">
@@ -252,7 +539,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     <div id="homeScreen">
         <div class="theme-toggle-btn" onclick="openThemeModal()" title="Выбор темы">⚙️</div>
         <div class="title">FTracker</div>
-        <div class="subtitle">Твой путь к идеальной форме</div>
+        
         <div id="draftBanner" class="card hidden" style="background: var(--accent-gradient); color:#fff; text-align:center; cursor:pointer;" onclick="resumeDraft()">У вас есть незавершённая тренировка.<br>Нажмите, чтобы продолжить.</div>
         <div id="exportReminder" class="card hidden" style="background: var(--accent-gradient); color:#fff; text-align:center;">
             Прошло больше недели с последнего экспорта.<br><button onclick="exportData(); closeExportReminder();" style="background:#fff; color:#000; margin-top:8px;">📥 Экспортировать сейчас</button>
@@ -283,17 +570,10 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     </div>
     <div id="progressScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📊 Прогресс</div></div>
-        <div class="card">
-            <div class="progress-filter" id="progressPeriodFilter">
-                <button class="active" data-period="30" onclick="setProgressPeriod(30)">30 дней</button>
-                <button data-period="90" onclick="setProgressPeriod(90)">90 дней</button>
-                <button data-period="all" onclick="setProgressPeriod('all')">Всё время</button>
-            </div>
-            <div id="progressContent"></div>
-        </div>
+        <div id="progressContent"></div>
     </div>
     <div id="bodyScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📏 Параметры тела</div></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📏 Замеры</div></div>
         <div id="measurementForm"></div>
     </div>
     <div id="confirmScreen" class="hidden">
@@ -304,9 +584,18 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
         </div>
     </div>
     <div id="workoutScreen" class="hidden">
-        <div class="close-workout-btn" onclick="confirmExitWorkout()" title="Завершить тренировку">✕</div>
-        <div class="title" id="workoutTitle"></div>
-        <div class="total-timer" id="totalTimer">00:00</div>
+        <div class="workout-topbar">
+            <div class="workout-head">
+                <button class="workout-close" onclick="confirmExitWorkout()" title="Завершить тренировку">✕</button>
+                <div class="workout-title-wrap">
+                    <div class="title" id="workoutTitle"></div>
+                    <div class="workout-subline" id="workoutProgressText">Подготовка</div>
+                </div>
+                <div class="workout-time" id="totalTimer">00:00</div>
+            </div>
+            <div class="workout-progress"><span id="workoutProgressBar" style="width:0%"></span></div>
+            <div class="workout-progress-caption"><span id="workoutProgressLeft">0 из 0 упражнений</span><span id="workoutProgressRight">0 подходов</span></div>
+        </div>
         <div class="exercise-strip" id="exerciseStrip"></div>
         <div id="exerciseContainer"></div>
     </div>
@@ -797,7 +1086,6 @@ function renderHome() {
 
 function setProgressPeriod(period) {
     progressPeriod = period;
-    document.querySelectorAll('#progressPeriodFilter button').forEach(b => b.classList.toggle('active', String(b.dataset.period) === String(period)));
     renderProgressDashboard();
 }
 function showProgress() {
@@ -858,163 +1146,201 @@ function compareWorkoutEntries(currentEntry, previousEntry) {
     });
     return result;
 }
-function renderProgressDashboard() {
-    const container = document.getElementById('progressContent');
-    if (!container) return;
-    const history = getHistoryInPeriod(progressPeriod);
-    if (!history.length) {
-        container.innerHTML='<div style="color:var(--subtext);text-align:center;padding:16px 0;">Нет тренировок за выбранный период</div>';
-        return;
+function progressEsc(value){ return escapeHtml(value); }
+function formatKg(v){ return Number.isFinite(Number(v)) ? `${Number(v).toLocaleString('ru-RU',{maximumFractionDigits:1})} кг` : '—'; }
+function formatNum(v){ return Number.isFinite(Number(v)) ? Number(v).toLocaleString('ru-RU',{maximumFractionDigits:1}) : '—'; }
+function getAllExerciseNames(){
+    const names = new Set();
+    (data.programs||[]).forEach(p => (p.exercises||[]).forEach((name,i)=>{ if(p.active?.[i] !== false) names.add(name); }));
+    (data.history||[]).forEach(e => (e.exercises||[]).forEach(x=>{ if(x.name) names.add(x.name); }));
+    return [...names].sort((a,b)=>a.localeCompare(b,'ru'));
+}
+function getExerciseTypeByName(name){
+    for(const p of (data.programs||[])){
+        const i=(p.exercises||[]).indexOf(name);
+        if(i>=0) return p.types?.[i] || 'strength';
     }
-    const totalVolume = history.reduce((sum,e)=>sum+calculateWorkoutVolume(e),0);
-    const avgDuration = history.filter(e=>e.durationSeconds).length
-        ? Math.round(history.reduce((sum,e)=>sum+(e.durationSeconds||0),0)/history.filter(e=>e.durationSeconds).length/60) : 0;
-    const records = getExerciseRecords();
-    const recordEntries = Object.entries(records).sort((a,b)=>(b[1].maxWeight||0)-(a[1].maxWeight||0)).slice(0,8);
-    const recent = history.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
-    let comparisonHtml = '';
-    if (recent.length >= 2) {
-        const latest = recent[0], previous = recent[1];
-        const diffVol = calculateWorkoutVolume(latest)-calculateWorkoutVolume(previous);
-        comparisonHtml = `<div class="analysis-card"><div class="analysis-title">⚡ Последняя тренировка</div>
-            <div class="analysis-line">${latest.program}</div>
-            <div class="analysis-line">${diffVol===0?'Объём не изменился':`Объём ${diffVol>0?'увеличился':'уменьшился'} на ${Math.abs(Math.round(diffVol))} кг`}</div>
-        </div>`;
-    }
-    const bodyLatest = data.measurements.length ? data.measurements[data.measurements.length-1] : null;
-    const bodyPrev = data.measurements.length>1 ? data.measurements[data.measurements.length-2] : null;
-    let analysis = [];
-    if (history.length >= 2) {
-        const first = history.slice().sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
-        const last = recent[0];
-        const firstVol = calculateWorkoutVolume(first), lastVol = calculateWorkoutVolume(last);
-        if (firstVol && lastVol) analysis.push(`Тренировочный объём: ${lastVol>firstVol?'рост':'снижение'} на ${Math.abs(Math.round(lastVol-firstVol))} кг`);
-    }
-    if (bodyLatest && bodyPrev) {
-        const fields = getMeasurementFields();
-        fields.forEach(f=>{
-            const a=bodyPrev[f.key], b=bodyLatest[f.key];
-            if (a!=null && b!=null && Number(a)!==Number(b)) analysis.push(`${f.label}: ${Number(b)>Number(a)?'↑':'↓'} ${Math.abs(Number(b)-Number(a)).toFixed(1).replace(/\.0$/,'')}`);
+    return 'strength';
+}
+function getExerciseSeries(name, history){
+    const type=getExerciseTypeByName(name), rows=[];
+    (history||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(entry=>{
+        const ex=(entry.exercises||[]).find(x=>x.name===name); if(!ex) return;
+        const sets=ex.sets||[]; if(!sets.length) return;
+        let maxWeight=0,maxReps=0,volume=0,maxTime=0,maxIntensity=0;
+        sets.forEach(set=>{
+            const w=parseFloat(set.weight)||0, r=parseInt(set.reps)||0, t=parseFloat(set.time)||0, intensity=parseFloat(set.intensity)||0;
+            maxWeight=Math.max(maxWeight,w); maxReps=Math.max(maxReps,r); volume+=w*r;
+            maxTime=Math.max(maxTime,t); maxIntensity=Math.max(maxIntensity,intensity);
         });
+        rows.push({date:new Date(entry.date),weight:maxWeight,reps:maxReps,volume,maxTime,maxIntensity,type});
+    });
+    return rows;
+}
+function getExerciseRecordData(name){
+    const type=getExerciseTypeByName(name), rows=getExerciseSeries(name,data.history||[]);
+    if(type==='strength'){
+        return {type, metrics:[
+            ['Рекорд веса', rows.length?formatKg(Math.max(...rows.map(r=>r.weight))):'—'],
+            ['Рекорд повторов', rows.length?`${formatNum(Math.max(...rows.map(r=>r.reps)))} повт.`:'—'],
+            ['Лучший объём', rows.length?formatKg(Math.max(...rows.map(r=>r.volume))):'—'],
+            ['Тренировок', rows.length?String(rows.length):'—']
+        ]};
     }
-    container.innerHTML = `
-        <div style="font-size:20px;font-weight:800;">Анализ прогресса</div>
-        <div style="color:var(--subtext);font-size:12px;margin-top:3px;">${progressPeriod==='all'?'Всё время':`Последние ${progressPeriod} дней`}</div>
-        <div class="smart-summary-grid">
-            <div class="smart-stat"><div class="smart-stat-value">${history.length}</div><div class="smart-stat-label">ТРЕНИРОВОК</div></div>
-            <div class="smart-stat"><div class="smart-stat-value">${Math.round(totalVolume).toLocaleString('ru-RU')}</div><div class="smart-stat-label">ОБЪЁМ, КГ</div></div>
-            <div class="smart-stat"><div class="smart-stat-value">${avgDuration||'—'}</div><div class="smart-stat-label">СРЕДНЯЯ, МИН</div></div>
-            <div class="smart-stat"><div class="smart-stat-value">${recordEntries.length}</div><div class="smart-stat-label">РЕКОРДОВ</div></div>
-        </div>
-        <div class="analysis-card">
-            <div class="analysis-title">📈 Объём тренировок по датам</div>
-            <div class="progress-chart-container">
-                <canvas id="progressVolumeChart"></canvas>
-            </div>
-        </div>
-        ${comparisonHtml}
-        <div class="analysis-card"><div class="analysis-title">🏆 Личные рекорды</div>
-            ${recordEntries.length ? recordEntries.map(([name,r])=>`<div class="record-row"><div class="record-name">${escapeHtml(name)}</div><div class="record-value">${r.maxWeight ? `${r.maxWeight} кг` : `${r.maxReps} повт.`}</div></div>`).join('') : '<div class="analysis-line">Пока нет рекордов</div>'}
-        </div>
-        <div class="analysis-card"><div class="analysis-title">🧠 Короткий анализ</div>
-            ${analysis.length ? analysis.slice(0,8).map(x=>`<div class="analysis-line">${escapeHtml(x)}</div>`).join('') : '<div class="analysis-line">Нужно ещё несколько записей, чтобы увидеть динамику.</div>'}
-        </div>
-    `;
-    // Отрисовка графика объёма
-    renderProgressVolumeChart(history);
+    if(type==='cardio'){
+        return {type, metrics:[
+            ['Макс. время', rows.length?`${formatNum(Math.max(...rows.map(r=>r.maxTime)))} мин`:'—'],
+            ['Макс. интенсивность', rows.length?formatNum(Math.max(...rows.map(r=>r.maxIntensity))):'—'],
+            ['Тренировок', rows.length?String(rows.length):'—'],
+            ['Последний результат', rows.length?`${formatNum(rows[rows.length-1].maxTime)} мин · ${formatNum(rows[rows.length-1].maxIntensity)}`:'—']
+        ]};
+    }
+    return {type:'bodyweight', metrics:[
+        ['Рекорд повторов', rows.length?`${formatNum(Math.max(...rows.map(r=>r.reps)))} повт.`:'—'],
+        ['Всего тренировок', rows.length?String(rows.length):'—'],
+        ['Лучший подход', rows.length?`${formatNum(Math.max(...rows.map(r=>r.reps)))} повторов`:'—'],
+        ['Последний результат', rows.length?`${formatNum(rows[rows.length-1].reps)} повторов`:'—']
+    ]};
+}
+function getExerciseMetricConfig(type){
+    if(type==='strength') return [
+        {key:'weight',label:'Вес',unit:'кг'},
+        {key:'volume',label:'Объём',unit:'кг'},
+        {key:'reps',label:'Повторы',unit:'повт.'}
+    ];
+    if(type==='cardio') return [
+        {key:'maxTime',label:'Время',unit:'мин'},
+        {key:'maxIntensity',label:'Интенсивность',unit:''}
+    ];
+    return [{key:'reps',label:'Повторы',unit:'повт.'}];
 }
 
-function renderProgressVolumeChart(history) {
-    const canvas = document.getElementById('progressVolumeChart');
-    if (!canvas) return;
-
-    const container = canvas.parentElement;
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    if (history.length < 2) {
-        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
-        ctx.font = '14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Недостаточно данных для графика', canvas.width / 2, canvas.height / 2);
-        return;
+function getWorkoutStats(history){
+    const sorted=(history||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const volume=sorted.map(e=>({date:new Date(e.date),value:calculateWorkoutVolume(e)}));
+    const duration=sorted.filter(e=>Number(e.durationSeconds)>0).map(e=>({date:new Date(e.date),value:Number(e.durationSeconds)/60}));
+    return {sorted,volume,duration};
+}
+function drawLineChart(canvas, points, options={}){
+    if(!canvas) return;
+    const box=canvas.parentElement; const dpr=Math.max(1,window.devicePixelRatio||1);
+    const w=Math.max(280,box.clientWidth||300), h=Math.max(180,box.clientHeight||200);
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr); canvas.style.width=w+'px'; canvas.style.height=h+'px';
+    const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    const sub=getComputedStyle(document.body).getPropertyValue('--subtext');
+    const border=getComputedStyle(document.body).getPropertyValue('--border');
+    const accent=getComputedStyle(document.body).getPropertyValue('--button-green');
+    if(!points || !points.length){ctx.fillStyle=sub;ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('Нет данных',w/2,h/2);return;}
+    const vals=points.map(p=>Number(p.value)||0), min=Math.min(...vals), max=Math.max(...vals), range=(max-min)||1;
+    const m={top:18,right:14,bottom:34,left:48}, cw=w-m.left-m.right,ch=h-m.top-m.bottom, base=m.top+ch;
+    ctx.strokeStyle=border;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.left,m.top);ctx.lineTo(m.left,base);ctx.lineTo(m.left+cw,base);ctx.stroke();
+    ctx.font='10px sans-serif';ctx.fillStyle=sub;ctx.textAlign='right';
+    for(let i=0;i<=4;i++){const v=min+range*i/4,y=base-ch*i/4;ctx.fillText(formatNum(v),m.left-5,y+3);ctx.strokeStyle=border;ctx.beginPath();ctx.moveTo(m.left,y);ctx.lineTo(m.left+cw,y);ctx.stroke();}
+    const xAt=i=>m.left+(points.length===1?cw/2:i*cw/(points.length-1));
+    const yAt=v=>base-((v-min)/range)*ch;
+    ctx.strokeStyle=accent;ctx.lineWidth=2.5;ctx.beginPath();points.forEach((p,i)=>{const x=xAt(i),y=yAt(Number(p.value)||0);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+    ctx.fillStyle=accent;points.forEach((p,i)=>{const x=xAt(i),y=yAt(Number(p.value)||0);ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);ctx.fill();});
+    ctx.fillStyle=sub;ctx.textAlign='center';const step=Math.max(1,Math.ceil(points.length/6));
+    points.forEach((p,i)=>{if(i%step===0||i===points.length-1)ctx.fillText(new Date(p.date).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}),xAt(i),base+20);});
+}
+function renderProgressDashboard(){
+    const container=document.getElementById('progressContent'); if(!container)return;
+    const history=getHistoryInPeriod(progressPeriod).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const totalVolume=history.reduce((s,e)=>s+calculateWorkoutVolume(e),0);
+    const durations=history.filter(e=>Number(e.durationSeconds)>0).map(e=>Number(e.durationSeconds));
+    const avgDuration=durations.length?Math.round(durations.reduce((a,b)=>a+b,0)/durations.length/60):0;
+    const exerciseNames=getAllExerciseNames();
+    const current=window.progressSelectedExercise && exerciseNames.includes(window.progressSelectedExercise)?window.progressSelectedExercise:(exerciseNames[0]||'');
+    window.progressSelectedExercise=current;
+    const stats=getWorkoutStats(history);
+    const records=getExerciseRecords();
+    const recordEntries=Object.entries(records).sort((a,b)=>(b[1].maxWeight||0)-(a[1].maxWeight||0));
+    let bodyHtml='';
+    const measurements=(data.measurements||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    if(measurements.length){
+        const fields=getMeasurementFields();
+        const bodyRows=fields.map(f=>{const vals=measurements.filter(m=>m[f.key]!=null).map(m=>Number(m[f.key]));if(!vals.length)return '';const first=vals[0],last=vals[vals.length-1],diff=last-first;return `<div class="progress-record"><span class="progress-record-name">${progressEsc(f.label)}</span><span class="progress-record-value">${formatNum(last)} ${diff?`(${diff>0?'+':''}${formatNum(diff)})`:''}</span></div>`;}).join('');
+        bodyHtml=`<div class="progress-section"><div class="progress-section-title">📏 Параметры тела</div><div class="progress-section-subtitle">Последние значения и изменение относительно первого замера</div>${bodyRows||'<div class="progress-empty">Нет числовых замеров</div>'}<div class="progress-chart"><canvas id="progressBodyChart"></canvas></div></div>`;
     }
+    const exerciseHtml=current?`<div class="progress-section"><div class="progress-section-title">🏋️ Прогресс упражнения</div><div class="progress-section-subtitle">История, рекорды и динамика выбранного упражнения</div><select class="progress-exercise-select" onchange="selectProgressExercise(this.value)">${exerciseNames.map(n=>`<option value="${progressEsc(n)}" ${n===current?'selected':''}>${progressEsc(n)}</option>`).join('')}</select><div id="selectedExerciseProgress"></div></div>`:'';
+    container.innerHTML=`<div class="progress-dashboard">
+        <div><div style="font-size:20px;font-weight:800">Аналитика прогресса</div><div style="color:var(--subtext);font-size:12px;margin-top:3px">${progressPeriod==='all'?'Всё время':`Последние ${progressPeriod} дней`}</div></div>
+        <div class="progress-section"><div class="progress-stats">
+            <div class="progress-stat"><div class="progress-stat-value">${history.length}</div><div class="progress-stat-label">Тренировок</div></div>
+            <div class="progress-stat"><div class="progress-stat-value">${Math.round(totalVolume).toLocaleString('ru-RU')}</div><div class="progress-stat-label">Объём, кг</div></div>
+            <div class="progress-stat"><div class="progress-stat-value">${avgDuration||'—'}</div><div class="progress-stat-label">Средняя, мин</div></div>
+            <div class="progress-stat"><div class="progress-stat-value">${recordEntries.length}</div><div class="progress-stat-label">Упражнений с рекордами</div></div>
+        </div></div>
+        <div class="progress-section"><div class="progress-section-title">📈 Динамика тренировочного объёма</div><div class="progress-chart"><canvas id="progressVolumeChart"></canvas></div></div>
+        <div class="progress-section"><div class="progress-section-title">⏱️ Длительность тренировок</div><div class="progress-chart"><canvas id="progressDurationChart"></canvas></div></div>
+        <div class="progress-section"><div class="progress-section-title">🏆 Личные рекорды</div>${recordEntries.length?recordEntries.map(([n,r])=>`<div class="progress-record"><span class="progress-record-name">${progressEsc(n)}</span><span class="progress-record-value">${r.bestWeightReps||formatKg(r.maxWeight)||formatNum(r.maxReps)+' повт.'}</span></div>`).join(''):'<div class="progress-empty">Пока нет записанных рекордов</div>'}</div>
+        ${exerciseHtml}${bodyHtml}
+        <div class="progress-section"><div class="progress-section-title">🗓️ История тренировок</div>${history.length?history.slice().reverse().map(e=>`<div class="progress-history-row"><span>${new Date(e.date).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}<br><span style="color:var(--subtext)">${progressEsc(e.program||'Тренировка')}</span></span><strong>${Math.round(calculateWorkoutVolume(e)).toLocaleString('ru-RU')} кг</strong></div>`).join(''):'<div class="progress-empty">За выбранный период тренировок нет</div>'}</div>
+    </div>`;
+    drawLineChart(document.getElementById('progressVolumeChart'),stats.volume);
+    drawLineChart(document.getElementById('progressDurationChart'),stats.duration);
+    if(measurements.length){const weightPoints=measurements.filter(m=>m.weight!=null).map(m=>({date:new Date(m.date),value:Number(m.weight)}));drawLineChart(document.getElementById('progressBodyChart'),weightPoints);}
+    renderSelectedExerciseProgress(current,history);
+}
+function selectProgressExercise(name){window.progressSelectedExercise=name;renderProgressDashboard();}
+function renderSelectedExerciseProgress(name,history){
+    const box=document.getElementById('selectedExerciseProgress');if(!box)return;
+    const rows=getExerciseSeries(name,history), allRows=getExerciseSeries(name,data.history||[]), type=getExerciseTypeByName(name);
+    if(!rows.length){box.innerHTML='<div class="progress-empty">За выбранный период данных по этому упражнению нет</div>';return;}
+    const bestWeight=Math.max(0,...allRows.map(r=>r.weight)),bestReps=Math.max(0,...allRows.map(r=>r.reps)),bestVolume=Math.max(0,...allRows.map(r=>r.volume));
+    const first=rows[0],last=rows[rows.length-1];
+    const pct=(a,b)=>a&&b?((b-a)/a*100):null;
+    const volumeDiff=last.volume-first.volume,weightDiff=last.weight-first.weight,repsDiff=last.reps-first.reps;
+    box.innerHTML=`<div class="progress-metrics">
+        <div class="progress-metric"><div class="progress-metric-label">Рекорд веса</div><div class="progress-metric-value">${bestWeight?formatKg(bestWeight):'—'}</div></div>
+        <div class="progress-metric"><div class="progress-metric-label">Рекорд повторов</div><div class="progress-metric-value">${bestReps?formatNum(bestReps)+' повт.':'—'}</div></div>
+        <div class="progress-metric"><div class="progress-metric-label">Лучший объём</div><div class="progress-metric-value">${bestVolume?formatKg(bestVolume):'—'}</div></div>
+        <div class="progress-metric"><div class="progress-metric-label">Тренировок</div><div class="progress-metric-value">${rows.length}</div></div>
+    </div>
+    <div class="analysis-card" style="margin-top:10px"><div class="analysis-title">📊 Изменение за период</div><div class="analysis-line">Вес: ${weightDiff>0?'+':''}${formatNum(weightDiff)} кг${pct(first.weight,last.weight)!=null?` (${pct(first.weight,last.weight)>0?'+':''}${pct(first.weight,last.weight).toFixed(1)}%)`:''}</div><div class="analysis-line">Повторы: ${repsDiff>0?'+':''}${formatNum(repsDiff)}</div><div class="analysis-line">Объём: ${volumeDiff>0?'+':''}${formatNum(volumeDiff)} кг</div></div>
+    ${type==='strength'?'<div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Вес</div><div class="progress-chart"><canvas id="exerciseWeightChart"></canvas></div></div>':''}
+    <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Объём</div><div class="progress-chart"><canvas id="exerciseVolumeChart"></canvas></div></div>
+    <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Повторы</div><div class="progress-chart"><canvas id="exerciseRepsChart"></canvas></div></div>
+    <div style="margin-top:10px"><div class="progress-section-title">История упражнения</div>${rows.slice().reverse().map(r=>`<div class="progress-history-row"><span>${r.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}</span><span>${r.weight?formatKg(r.weight)+' × ':''}${r.reps?r.reps+' повт. ':''}${r.volume?`· ${Math.round(r.volume)} кг`:r.duration?`· ${r.duration} мин`:''}</span></div>`).join('')}</div>`;
+    if(type==='strength')drawLineChart(document.getElementById('exerciseWeightChart'),rows.map(r=>({date:r.date,value:r.weight})));
+    drawLineChart(document.getElementById('exerciseVolumeChart'),rows.map(r=>({date:r.date,value:r.volume})));
+    drawLineChart(document.getElementById('exerciseRepsChart'),rows.map(r=>({date:r.date,value:r.reps||r.duration})));
+}
 
-    const sorted = history.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
-    const points = sorted.map(entry => ({
-        date: new Date(entry.date),
-        volume: Math.round(calculateWorkoutVolume(entry))
-    }));
-
-    const minVolume = Math.min(...points.map(p => p.volume));
-    const maxVolume = Math.max(...points.map(p => p.volume));
-    const range = (maxVolume - minVolume) || 1;
-
-    const margin = { top: 20, right: 20, bottom: 40, left: 50 };
-    const chartWidth = canvas.width - margin.left - margin.right;
-    const chartHeight = canvas.height - margin.top - margin.bottom;
-    const baseY = margin.top + chartHeight;
-
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.left, margin.top);
-    ctx.lineTo(margin.left, baseY);
-    ctx.lineTo(margin.left + chartWidth, baseY);
-    ctx.stroke();
-
-    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'right';
-    for (let i = 0; i <= 4; i++) {
-        const value = minVolume + (range * i / 4);
-        const y = baseY - (chartHeight * i / 4);
-        ctx.fillText(Math.round(value), margin.left - 5, y + 3);
-        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-        ctx.beginPath();
-        ctx.moveTo(margin.left, y);
-        ctx.lineTo(margin.left + chartWidth, y);
-        ctx.stroke();
-        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
+function openExerciseModal(realIdx){
+    if(currentProgram===null || !data.programs[currentProgram]) return;
+    const program=data.programs[currentProgram]; const name=program.exercises[realIdx]; if(!name)return;
+    openedExerciseName=name;
+    document.getElementById('exerciseModalTitle').textContent=name;
+    document.getElementById('exerciseModal').classList.remove('hidden');
+    switchExerciseModalTab('history');
+}
+function closeExerciseModal(){document.getElementById('exerciseModal').classList.add('hidden');openedExerciseName=null;}
+function switchExerciseModalTab(tab){
+    const modal=document.getElementById('exerciseModal');if(!modal)return;
+    modal.querySelectorAll('.tabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+    ['history','records','graph'].forEach(x=>{const el=document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1));if(el)el.classList.toggle('active',x===tab);});
+    const name=openedExerciseName;if(!name)return;
+    const all=getExerciseSeries(name,data.history||[]), type=getExerciseTypeByName(name);
+    const cfg=getExerciseMetricConfig(type);
+    if(tab==='history'){
+        const html=all.length?all.slice().reverse().map(r=>{
+            let main='';
+            if(type==='strength') main=`${formatKg(r.weight)} × ${formatNum(r.reps)} повт.`;
+            else if(type==='cardio') main=`${formatNum(r.maxTime)} мин · интенсивность ${formatNum(r.maxIntensity)}`;
+            else main=`${formatNum(r.reps)} повторов`;
+            return `<div class="history-item"><strong>${r.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}</strong><div style="color:var(--subtext);margin-top:4px">${main}</div></div>`;
+        }).join(''):'<div class="progress-empty">Истории пока нет</div>';
+        document.getElementById('tabHistory').innerHTML=html;
+    } else if(tab==='records'){
+        const record=getExerciseRecordData(name);
+        document.getElementById('tabRecords').innerHTML=`<div class="best-result">${record.metrics.map(m=>`<div class="best-item"><div class="best-value">${escapeHtml(m[1])}</div><div class="best-label">${escapeHtml(m[0])}</div></div>`).join('')}</div>`;
+    } else {
+        const canvas=document.getElementById('progressGraph');
+        const metric=cfg[0];
+        const pts=all.map(r=>({date:r.date,value:Number(r[metric.key])||0}));
+        setTimeout(()=>drawLineChart(canvas,pts),0);
     }
-
-    const stepX = chartWidth / Math.max(1, points.length - 1);
-    ctx.strokeStyle = '#34c759';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    points.forEach((p, i) => {
-        const x = margin.left + i * stepX;
-        const y = baseY - ((p.volume - minVolume) / range) * chartHeight;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-
-    ctx.fillStyle = '#34c759';
-    points.forEach((p, i) => {
-        const x = margin.left + i * stepX;
-        const y = baseY - ((p.volume - minVolume) / range) * chartHeight;
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-    const labelStep = Math.max(1, Math.ceil(points.length / 6));
-    points.forEach((p, i) => {
-        if (i % labelStep === 0 || i === points.length - 1) {
-            const x = margin.left + i * stepX;
-            ctx.fillText(
-                p.date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }),
-                x,
-                baseY + 20
-            );
-        }
-    });
 }
 
 function showBodyMeasurements() { showScreen('bodyScreen'); renderMeasurementScreen(); }
@@ -1024,98 +1350,144 @@ function escapeHtml(value) {
 }
 
 function renderMeasurementScreen() {
+    closeBodyHistory();
     const form = document.getElementById('measurementForm');
     const fields = getMeasurementFields();
     const lastIndex = data.measurements.length - 1;
     const last = lastIndex >= 0 ? data.measurements[lastIndex] : null;
-    const prev = lastIndex > 0 ? data.measurements[lastIndex - 1] : null;
+
+    ensureMeasurementHistoryModal();
 
     if (!last) {
         form.innerHTML = `
-            <div class="body-hero-card">
-                <div class="body-card-head">
-                    <div>
-                        <div class="body-card-title">📏 Параметры тела</div>
-                        <div class="body-card-subtitle">Здесь будут отображаться последние сохранённые значения.</div>
-                    </div>
-                    <button class="body-settings-btn" onclick="openMeasurementManager()">⚙️ Параметры</button>
-                </div>
-                <div style="padding:18px 4px;color:var(--subtext);text-align:center;">
-                    Пока нет сохранённых замеров
-                </div>
-                <button class="body-save-btn" onclick="openNewMeasurementModal()">＋ Новый замер</button>
-            </div>
-            <div id="comparisonBlock"></div>
-            <div class="body-history-card">
-                <div class="body-history-title">История замеров</div>
-                <div id="measurementHistory"></div>
+            <div class="body-empty-card">
+                <div class="body-empty-icon">📏</div>
+                <div class="body-empty-title">Замеров пока нет</div>
+                <div class="body-empty-sub">Добавь первый замер, чтобы отслеживать изменения.</div>
+                <button class="body-primary-action" onclick="openNewMeasurementModal()">＋ Новый замер</button>
+                <button class="body-secondary-action" onclick="openMeasurementManager()">⚙️ Параметры</button>
             </div>
         `;
-        document.getElementById('comparisonBlock').innerHTML = '';
-        renderMeasurementHistory();
         return;
     }
 
-    const dateText = new Date(last.date).toLocaleDateString('ru-RU', {
-        day:'2-digit', month:'long', year:'numeric'
-    });
-
+    const dateText = new Date(last.date).toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
     const rows = fields.map(f => {
         const cur = last[f.key];
         if (cur === null || cur === undefined || cur === '') return '';
-        const old = prev ? prev[f.key] : null;
-        let change = '';
-        if (old !== null && old !== undefined && old !== '' && Number.isFinite(Number(cur)) && Number.isFinite(Number(old))) {
-            change = formatMeasurementDiff(cur, old);
-        } else {
-            change = `<div class="measurement-change same"><span class="measurement-arrow">●</span><span>${prev ? 'Нет прошлого значения' : 'Первое значение'}</span></div>`;
-        }
-        return `
-            <div class="measurement-item">
-                <div>
-                    <div style="font-weight:700;">${escapeHtml(f.label)}</div>
-                    ${change}
-                </div>
-                <div style="font-size:18px;font-weight:800;">${escapeHtml(cur)}</div>
-            </div>`;
+        return `<div class="body-value-item"><span>${escapeHtml(f.label)}</span><strong>${escapeHtml(cur)}</strong></div>`;
     }).join('');
 
     form.innerHTML = `
-        <div class="body-hero-card">
-            <div class="body-card-head">
+        <div class="body-current-card">
+            <div class="body-section-head">
                 <div>
-                    <div class="body-card-title">📏 Параметры тела</div>
-                    <div class="body-card-subtitle">Последний замер · ${dateText}</div>
+                    <div class="body-section-kicker">Последний замер</div>
+                    <div class="body-section-date">${dateText}</div>
                 </div>
-                <button class="body-settings-btn" onclick="openMeasurementManager()">⚙️ Параметры</button>
+                <button class="body-icon-action" onclick="openMeasurementManager()" title="Параметры">⚙️</button>
             </div>
-
-            <div class="measurement-summary" style="margin-top:14px;">
-                ${rows || '<div style="color:var(--subtext);">Нет заполненных параметров.</div>'}
+            <div class="body-values-grid">${rows || '<div class="body-no-values">Нет заполненных параметров</div>'}</div>
+            <div class="body-main-actions">
+                <button class="body-primary-action" onclick="openNewMeasurementModal()">＋ Новый замер</button>
+                <button class="body-secondary-action" onclick="openLastMeasurementEdit()">✏️ Изменить</button>
             </div>
+        </div>
 
-            <div class="body-action-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
-                <button class="body-save-btn" style="margin-top:0;" onclick="openLastMeasurementEdit()">✏️ Изменить последний</button>
-                <button class="body-save-btn gray" style="margin-top:0;" onclick="openNewMeasurementModal()">＋ Новый замер</button>
+        <div class="body-tools-card">
+            <div class="body-tools-grid">
+                <button class="body-tool" onclick="openBodyHistory()">
+                    <span class="body-tool-icon">↺</span>
+                    <span><strong>История</strong><small>${data.measurements.length} ${data.measurements.length===1?'замер':'замеров'}</small></span>
+                    <span class="body-tool-arrow">›</span>
+                </button>
+                <button class="body-tool" onclick="openBodyGraph()">
+                    <span class="body-tool-icon">↗</span>
+                    <span><strong>Динамика</strong><small>График параметра</small></span>
+                    <span class="body-tool-arrow">›</span>
+                </button>
             </div>
         </div>
 
         <div id="comparisonBlock"></div>
-
-        <div class="body-history-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                <div class="body-history-title" style="margin:0;">История замеров</div>
-                <button class="body-graph-btn gray" onclick="openBodyGraph()">📈 Динамика</button>
-            </div>
-            <div style="color:var(--subtext);font-size:12px;margin-bottom:4px;">
-                Предыдущие замеры сохраняются отдельно.
-            </div>
-            <div id="measurementHistory"></div>
-        </div>
     `;
 
-    renderMeasurementHistory();
     showLatestMeasurementComparison();
+}
+
+function showLatestMeasurementComparison() {
+    const block = document.getElementById('comparisonBlock');
+    if (!block || !data.measurements.length) return;
+    const index = data.measurements.length - 1;
+    const current = data.measurements[index];
+    const fields = getMeasurementFields();
+    const items = [];
+    fields.forEach(field => {
+        const cur = current[field.key];
+        if (cur === null || cur === undefined || cur === '') return;
+        const previous = findPreviousMeasurement(index, field.key);
+        if (!previous) return;
+        const diff = Number(cur) - Number(previous.measurement[field.key]);
+        if (!Number.isFinite(diff)) return;
+        const value = Number.isInteger(diff) ? String(Math.abs(diff)) : Math.abs(diff).toFixed(1).replace(/\.0$/, '');
+        const state = Math.abs(diff) < 0.000001 ? 'same' : diff > 0 ? 'up' : 'down';
+        const icon = state === 'same' ? '•' : state === 'up' ? '↑' : '↓';
+        const text = state === 'same' ? 'Без изменений' : `${diff > 0 ? '+' : '−'}${value}`;
+        items.push(`<div class="body-change-row"><span>${escapeHtml(field.label)}</span><strong class="${state}">${icon} ${text}</strong></div>`);
+    });
+    if (!items.length) return;
+    block.innerHTML = `
+        <div class="body-change-card">
+            <div class="body-change-head"><span>Изменения</span><small>относительно предыдущего замера</small></div>
+            <div class="body-change-list">${items.join('')}</div>
+        </div>`;
+}
+
+function ensureMeasurementHistoryModal() {
+    let modal = document.getElementById('measurementHistoryModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'measurementHistoryModal';
+    modal.className = 'catalog-modal hidden';
+    modal.onclick = function(e){ if(e.target === modal) closeBodyHistory(); };
+    modal.innerHTML = `
+        <div class="catalog-modal-content body-history-modal-content">
+            <span class="close-btn" onclick="closeBodyHistory()">&times;</span>
+            <div class="body-history-modal-head">
+                <div><div class="body-history-modal-title">История замеров</div><div class="body-history-modal-sub">Все сохранённые измерения</div></div>
+            </div>
+            <div id="measurementHistory"></div>
+            <button class="gray" onclick="closeBodyHistory()">Закрыть</button>
+        </div>`;
+    document.body.appendChild(modal);
+    return modal;
+}
+
+function openBodyHistory() {
+    const modal = ensureMeasurementHistoryModal();
+    renderMeasurementHistory();
+    modal.classList.remove('hidden');
+}
+function closeBodyHistory() { document.getElementById('measurementHistoryModal')?.classList.add('hidden'); }
+
+function renderMeasurementHistory() {
+    const container = document.getElementById('measurementHistory');
+    if (!container) return;
+    if (!data.measurements.length) {
+        container.innerHTML = '<div class="body-history-empty">Пока нет сохранённых замеров</div>';
+        return;
+    }
+    const fields = getMeasurementFields();
+    container.innerHTML = data.measurements.slice().reverse().map((m, reverseIdx) => {
+        const realIdx = data.measurements.length - 1 - reverseIdx;
+        const date = new Date(m.date).toLocaleDateString('ru-RU', {day:'2-digit',month:'long',year:'numeric'});
+        const values = fields.filter(f => m[f.key] !== null && m[f.key] !== undefined && m[f.key] !== '')
+            .map(f => `<span class="body-history-value">${escapeHtml(f.label)} <b>${escapeHtml(m[f.key])}</b></span>`).join('');
+        return `<div class="body-history-item">
+            <div class="body-history-item-head"><div class="body-history-date">${date}</div><div style="display:flex;gap:6px;"><button class="gray" onclick="openHistoricalMeasurementEdit(${realIdx})">✏️</button><button class="body-history-delete gray" onclick="deleteMeasurement(${realIdx})">🗑️</button></div></div>
+            <div class="body-history-values">${values || '<span class="body-history-empty">Нет значений</span>'}</div>
+        </div>`;
+    }).join('');
 }
 
 function openNewMeasurementModal() {
@@ -1396,6 +1768,7 @@ function renderMeasurementHistory() {
 }
 
 function openHistoricalMeasurementEdit(index) {
+    closeBodyHistory();
     const measurement = data.measurements[index];
     if (!measurement) return;
     const fields = getMeasurementFields();
@@ -1550,58 +1923,86 @@ function startTotalTimer() { clearInterval(totalTimerInterval); updateTotalTimer
 function updateTotalTimer() { if (!workoutStartTime) return; const elapsed=Math.floor((Date.now()-workoutStartTime)/1000); document.getElementById('totalTimer').textContent=`${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`; }
 function stopTotalTimer() { clearInterval(totalTimerInterval); workoutStartTime=null; }
 function getActiveExercises() { const prog=data.programs[currentProgram]; return prog.exercises.filter((_,i)=>prog.active[i]); }
-function renderExerciseStrip() { const activeEx=getActiveExercises(); const strip=document.getElementById('exerciseStrip'); strip.innerHTML=activeEx.map((ex,idx)=>{ const realIdx=data.programs[currentProgram].exercises.indexOf(ex); const sets=workoutSets[realIdx]||[]; const hasDone=sets.some(s=>s.done); const active=idx===currentExerciseIndex?'active':''; const doneClass=hasDone?'done':''; return `<div class="exercise-dot ${active} ${doneClass}" onclick="switchExercise(${idx})">${ex}</div>`; }).join('');
-    // Автопрокрутка к активному элементу
-    setTimeout(() => {
-        const activeEl = document.querySelector('.exercise-dot.active');
-        if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }, 50);
+function renderExerciseStrip() {
+    const activeEx=getActiveExercises();
+    const strip=document.getElementById('exerciseStrip');
+    if (!strip) return;
+    strip.innerHTML=activeEx.map((ex,idx)=>{
+        const realIdx=data.programs[currentProgram].exercises.indexOf(ex);
+        const sets=workoutSets[realIdx]||[];
+        const hasDone=sets.some(s=>s.done);
+        const active=idx===currentExerciseIndex?'active':'';
+        const doneClass=hasDone?'done':'';
+        return `<div class="exercise-dot ${active} ${doneClass}" data-step="${idx+1}" onclick="switchExercise(${idx})">${escapeHtml(ex)}</div>`;
+    }).join('');
+    setTimeout(()=>{
+        const activeEl=strip.querySelector('.exercise-dot.active');
+        if(activeEl) activeEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    },50);
+    updateWorkoutProgressUI();
 }
-function switchExercise(idx) { stopRestTimer(); currentExerciseIndex = idx; renderExerciseStrip(); renderExercise(); saveDraft(); }
+function updateWorkoutProgressUI(){
+    const activeEx=getActiveExercises();
+    const total=activeEx.length;
+    const completed=activeEx.reduce((n,ex)=>{
+        const idx=data.programs[currentProgram].exercises.indexOf(ex);
+        return n + ((workoutSets[idx]||[]).some(s=>s.done)?1:0);
+    },0);
+    const totalSets=Object.values(workoutSets).reduce((n,sets)=>n+sets.filter(s=>s.done).length,0);
+    const pct=total?Math.round((completed/total)*100):0;
+    const bar=document.getElementById('workoutProgressBar');
+    if(bar) bar.style.width=pct+'%';
+    const left=document.getElementById('workoutProgressLeft');
+    if(left) left.textContent=`${Math.min(currentExerciseIndex+1,total)} из ${total} упражнений`;
+    const right=document.getElementById('workoutProgressRight');
+    if(right) right.textContent=`${totalSets} ${totalSets===1?'подход':totalSets<5?'подхода':'подходов'} выполнено`;
+    const text=document.getElementById('workoutProgressText');
+    if(text) text.textContent=`Упражнение ${Math.min(currentExerciseIndex+1,total)} из ${total}`;
+}
+function switchExercise(idx) { stopRestTimer(); currentExerciseIndex=idx; renderExerciseStrip(); renderExercise(); saveDraft(); }
 function getRealExerciseIndex() { const activeEx = getActiveExercises(); const exName = activeEx[currentExerciseIndex]; return data.programs[currentProgram].exercises.indexOf(exName); }
 function renderExercise() {
-    const program = data.programs[currentProgram]; const activeEx = getActiveExercises();
-    if (currentExerciseIndex >= activeEx.length) { finishWorkout(); return; }
-    const exerciseName = activeEx[currentExerciseIndex]; const realIdx = program.exercises.indexOf(exerciseName);
-    const type = program.types[realIdx]; const sets = workoutSets[realIdx] || []; const last = lastResults[exerciseName];
-    const isLastExercise = currentExerciseIndex === activeEx.length - 1;
-    let setsHTML = '';
-    sets.forEach((s, i) => {
-        let inputFields = '';
-        if (type === 'strength') {
-            inputFields = `<input type="text" inputmode="decimal" placeholder="Вес" value="${s.weight || ''}" onchange="updateSet(${realIdx}, ${i}, 'weight', this.value)" style="flex:1; font-size:20px;">
-                <input type="text" inputmode="decimal" placeholder="Повторы" value="${s.reps || ''}" onchange="updateSet(${realIdx}, ${i}, 'reps', this.value)" style="flex:1; font-size:20px;">`;
-        } else if (type === 'cardio') {
-            inputFields = `<input type="text" inputmode="decimal" placeholder="Мин" value="${s.time || ''}" onchange="updateSet(${realIdx}, ${i}, 'time', this.value)" style="flex:1; font-size:20px;">
-                <input type="text" inputmode="decimal" placeholder="Инт. (1-10)" value="${s.intensity || ''}" onchange="updateSet(${realIdx}, ${i}, 'intensity', this.value)" style="flex:1; font-size:20px;">`;
-        } else {
-            inputFields = `<input type="text" inputmode="numeric" placeholder="Повторы" value="${s.reps || ''}" onchange="updateSet(${realIdx}, ${i}, 'reps', this.value)" style="flex:2; font-size:20px;">`;
-        }
-        setsHTML += `<div class="set-row"><span class="set-num">${i+1}</span>${inputFields}
-            <div class="set-done-btn ${s.done ? 'done' : ''}" onclick="markSetDone(${realIdx}, ${i})">✓</div>
-            <div class="set-delete-btn" onclick="deleteSet(${realIdx}, ${i})">🗑️</div></div>`;
+    const program=data.programs[currentProgram]; const activeEx=getActiveExercises();
+    if(currentExerciseIndex>=activeEx.length){ finishWorkout(); return; }
+    const exerciseName=activeEx[currentExerciseIndex]; const realIdx=program.exercises.indexOf(exerciseName);
+    const type=program.types[realIdx]; const sets=workoutSets[realIdx]||[]; const last=lastResults[exerciseName];
+    const isLastExercise=currentExerciseIndex===activeEx.length-1;
+    const completedSets=sets.filter(s=>s.done).length;
+    let setsHTML='';
+    sets.forEach((s,i)=>{
+        let inputFields='';
+        if(type==='strength') inputFields=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0;"><input type="text" inputmode="decimal" placeholder="Вес, кг" value="${s.weight||''}" onchange="updateSet(${realIdx},${i},'weight',this.value)"><input type="text" inputmode="numeric" placeholder="Повторы" value="${s.reps||''}" onchange="updateSet(${realIdx},${i},'reps',this.value)"></div>`;
+        else if(type==='cardio') inputFields=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0;"><input type="text" inputmode="decimal" placeholder="Минуты" value="${s.time||''}" onchange="updateSet(${realIdx},${i},'time',this.value)"><input type="text" inputmode="decimal" placeholder="Инт. 1–10" value="${s.intensity||''}" onchange="updateSet(${realIdx},${i},'intensity',this.value)"></div>`;
+        else inputFields=`<input type="text" inputmode="numeric" placeholder="Повторы" value="${s.reps||''}" onchange="updateSet(${realIdx},${i},'reps',this.value)">`;
+        setsHTML+=`<div class="set-row workout-set-row"><span class="set-num">${i+1}</span>${inputFields}<div class="set-done-btn ${s.done?'done':''}" onclick="markSetDone(${realIdx},${i})" title="${s.done?'Подход выполнен':'Отметить выполненным'}">${s.done?'✓':'○'}</div><div class="set-delete-btn" onclick="deleteSet(${realIdx},${i})" title="Удалить подход">🗑️</div></div>`;
     });
-    const container = document.getElementById('exerciseContainer');
-    container.innerHTML = `<div class="card">
-        <div style="font-size:24px; font-weight:700; margin-bottom:12px; cursor:pointer;" onclick="openExerciseModal(${realIdx})">${exerciseName} <span class="exercise-click-hint">›</span></div>
-        ${last ? `<div style="color:var(--subtext); margin-bottom:12px;">Последний: ${formatLastResult(last, type)}</div>` : ''}
+    const lastHtml=last?`<div class="workout-last-result"><div class="workout-last-icon">↺</div><div class="workout-last-copy"><div class="workout-last-label">ПРОШЛЫЙ РЕЗУЛЬТАТ</div><div class="workout-last-value">${escapeHtml(formatLastResult(last,type))}</div></div><div class="workout-best-badge" onclick="openExerciseModal(${realIdx})">Аналитика ›</div></div>`:'';
+    const container=document.getElementById('exerciseContainer');
+    container.innerHTML=`<div class="card workout-exercise-card">
+        <div class="workout-exercise-kicker"><span>${type==='strength'?'Силовое':type==='cardio'?'Кардио':'С собственным весом'}</span><span>${completedSets}/${sets.length||0} подходов</span></div>
+        <div class="workout-exercise-title" onclick="openExerciseModal(${realIdx})"><span>${escapeHtml(exerciseName)}</span><span class="arrow">›</span></div>
+        ${lastHtml}
         <div id="setsList">${setsHTML}</div>
-        <div id="restTimerContainer" class="timer-box hidden">
-            <div style="font-size:14px; color:var(--subtext);">Отдых</div>
-            <div class="big-number" id="timerDisplay">02:00</div>
-            <div class="row" style="margin-top:8px;">
-                <button class="gray small-btn" onclick="addRestTime()">+30 сек</button>
-                <button class="gray small-btn" onclick="stopRestTimer()">Пропустить</button>
+        <div id="restTimerContainer" class="rest-panel hidden">
+            <div class="rest-label">Время отдыха</div>
+            <div class="rest-time" id="timerDisplay">02:00</div>
+            <div class="rest-presets">
+                <button onclick="setRestDuration(30)">30 сек</button><button onclick="setRestDuration(60)">60 сек</button><button onclick="setRestDuration(90)">90 сек</button><button onclick="setRestDuration(120)">120 сек</button>
             </div>
+            <div class="rest-actions"><button class="gray" onclick="addRestTime()">+30 сек</button><button class="gray" onclick="stopRestTimer()">Пропустить</button></div>
         </div>
-        <div style="display:flex; gap:8px; margin-top:12px;">
-            <button class="gray" onclick="addSet()" style="flex:1;">➕ Добавить подход</button>
-            ${isLastExercise
-                ? '<button onclick="confirmExitWorkout()" style="flex:1;">🏁 Завершить тренировку</button>'
-                : '<button onclick="nextExercise()" style="flex:1;">Следующее упражнение</button>'}
+        <div class="workout-actions">
+            <button class="primary-action" onclick="addSet()">＋ Добавить подход</button>
+            ${isLastExercise?'':'<button class="next-action" onclick="nextExercise()">Следующее →</button>'}
         </div>
+        <button class="workout-analytics-card" onclick="openExerciseModal(${realIdx})" type="button">
+            <span class="workout-analytics-icon">↗</span>
+            <span class="workout-analytics-copy"><span class="workout-analytics-title">История и рекорд</span><span class="workout-analytics-sub">Открыть график и результаты упражнения</span></span>
+            <span class="workout-analytics-arrow">›</span>
+        </button>
+        ${isLastExercise?'<div class="workout-finish-wrap"><button onclick="confirmExitWorkout()">Завершить тренировку</button></div>':''}
     </div>`;
-    updateTotalTimer();
+    updateTotalTimer(); updateWorkoutProgressUI();
 }
 function formatLastResult(last, type) {
     if (type === 'strength') return `${last.weight || 0} кг × ${last.reps || 0}`;
@@ -1623,83 +2024,100 @@ function updateSet(exIdx, setIdx, field, value) { if (!workoutSets[exIdx] || !wo
 function markSetDone(exIdx, setIdx) { workoutSets[exIdx][setIdx].done = true; checkPersonalRecord(exIdx, setIdx); saveData(); saveDraft(); renderExerciseStrip(); renderExercise(); startRestTimer(120); }
 
 function checkPersonalRecord(exIdx, setIdx) {
-    const exerciseName = data.programs[currentProgram].exercises[exIdx];
-    const type = data.programs[currentProgram].types[exIdx];
-    const set = workoutSets[exIdx][setIdx];
+    const program = data.programs[currentProgram];
+    if (!program) return;
+    const exerciseName = program.exercises[exIdx];
+    const type = program.types[exIdx];
+    const set = workoutSets[exIdx]?.[setIdx];
+    if (!set || !exerciseName) return;
+
+    // Важный принцип: рекорд сравниваем только с результатами ДО этой тренировки.
+    // Поэтому второй одинаковый новый подход внутри одной тренировки не "съедает"
+    // первый рекорд и не отменяет уже найденное достижение.
+    const previousSets = [];
+    (data.history || []).forEach(entry => {
+        const ex = (entry.exercises || []).find(e => e.name === exerciseName);
+        if (ex) (ex.sets || []).forEach(s => previousSets.push(s));
+    });
+
     let achievementText = null;
+
     if (type === 'strength') {
         const weight = parseFloat(set.weight) || 0;
         const reps = parseInt(set.reps) || 0;
-        if (weight === 0) return;
-        let maxWeightEver = 0, bestRepsForWeight = 0;
-        const allSets = [];
-        data.history.forEach(entry => { const ex = entry.exercises.find(e=>e.name===exerciseName); if(ex) ex.sets.forEach(s=>allSets.push(s)); });
-        Object.values(workoutSets).forEach(sets => sets.forEach(s => { if(s!==set) allSets.push(s); }));
-        allSets.forEach(s => {
-            const w = parseFloat(s.weight)||0, r = parseInt(s.reps)||0;
-            if (w > maxWeightEver) maxWeightEver = w;
-            if (w === weight && r > bestRepsForWeight) bestRepsForWeight = r;
+        if (weight <= 0 || reps <= 0) return;
+
+        let maxWeightEver = 0;
+        let bestRepsAtWeight = 0;
+        previousSets.forEach(s => {
+            const w = parseFloat(s.weight) || 0;
+            const r = parseInt(s.reps) || 0;
+            maxWeightEver = Math.max(maxWeightEver, w);
+            if (w === weight) bestRepsAtWeight = Math.max(bestRepsAtWeight, r);
         });
+
         if (weight > maxWeightEver) {
             achievementText = `Новый рекорд веса: ${weight} кг × ${reps}`;
-        } else if (weight === maxWeightEver && reps > bestRepsForWeight) {
+        } else if (weight === maxWeightEver && reps > bestRepsAtWeight) {
             achievementText = `Новый рекорд повторений с ${weight} кг: ${reps}`;
         }
     } else if (type === 'bodyweight') {
         const reps = parseInt(set.reps) || 0;
-        let bestEver = 0;
-        const allSets = [];
-        data.history.forEach(entry => { const ex = entry.exercises.find(e=>e.name===exerciseName); if(ex) ex.sets.forEach(s=>allSets.push(s)); });
-        Object.values(workoutSets).forEach(sets => sets.forEach(s => { if(s!==set) allSets.push(s); }));
-        allSets.forEach(s => { const r = parseInt(s.reps)||0; if(r>bestEver) bestEver=r; });
+        if (reps <= 0) return;
+        const bestEver = Math.max(0, ...previousSets.map(s => parseInt(s.reps) || 0));
         if (reps > bestEver) achievementText = `Новый рекорд повторений: ${reps}`;
     } else if (type === 'cardio') {
-        const time = parseFloat(set.time) || Infinity;
-        const intensity = parseFloat(set.intensity) || 0;
-        if (time === Infinity) return;
-        const score = intensity / time;
-        let bestScore = 0;
-        const allSets = [];
-        data.history.forEach(entry => { const ex = entry.exercises.find(e=>e.name===exerciseName); if(ex) ex.sets.forEach(s=>allSets.push(s)); });
-        Object.values(workoutSets).forEach(sets => sets.forEach(s => { if(s!==set) allSets.push(s); }));
-        allSets.forEach(s => {
-            const t = parseFloat(s.time)||Infinity; if(t===Infinity) return;
-            const i = parseFloat(s.intensity)||0; const sc = i/t;
-            if(sc>bestScore) bestScore=sc;
-        });
-        if (score > bestScore) achievementText = `Новый рекорд интенсивности`;
+        const time = parseFloat(set.time);
+        const intensity = parseFloat(set.intensity);
+        if (!Number.isFinite(time) || time <= 0) return;
+
+        const maxTimeEver = Math.max(0, ...previousSets.map(s => parseFloat(s.time) || 0));
+        const maxIntensityEver = Math.max(0, ...previousSets.map(s => parseFloat(s.intensity) || 0));
+        if (Number.isFinite(time) && time > maxTimeEver) {
+            achievementText = `Новый рекорд времени: ${formatNum(time)} мин`;
+        } else if (Number.isFinite(intensity) && intensity > maxIntensityEver) {
+            achievementText = `Новый рекорд интенсивности: ${formatNum(intensity)}`;
+        }
     }
+
     if (achievementText) {
-        if (!currentAchievements[exerciseName]) currentAchievements[exerciseName] = achievementText;
-        else if (achievementText.includes('Новый рекорд веса')) currentAchievements[exerciseName] = achievementText;
+        // Не перезаписываем уже найденный PR менее значимым повторным подходом.
+        // Если позже в этой же тренировке найден более сильный PR, обновляем текст.
+        const existing = currentAchievements[exerciseName];
+        if (!existing) {
+            currentAchievements[exerciseName] = achievementText;
+        } else if (type === 'strength') {
+            const currentWeight = parseFloat((existing.match(/([0-9]+(?:[.,][0-9]+)?)\s*кг/) || [])[1]?.replace(',', '.')) || 0;
+            const newWeight = parseFloat(set.weight) || 0;
+            const currentReps = parseInt((existing.match(/×\s*([0-9]+)/) || [])[1]) || 0;
+            const newReps = parseInt(set.reps) || 0;
+            if (newWeight > currentWeight || (newWeight === currentWeight && newReps > currentReps)) {
+                currentAchievements[exerciseName] = achievementText;
+            }
+        } else {
+            currentAchievements[exerciseName] = achievementText;
+        }
     }
 }
 
 function startRestTimer(seconds) {
-    stopRestTimer();
-    restEndTime = Date.now() + seconds * 1000;
-    updateRestTimerDisplay();
-    const container = document.getElementById('restTimerContainer');
-    if (container) container.classList.remove('hidden');
-    restTimerInterval = setInterval(updateRestTimerDisplay, 200);
+    stopRestTimer(); restEndTime=Date.now()+seconds*1000; updateRestTimerDisplay();
+    const container=document.getElementById('restTimerContainer'); if(container) container.classList.remove('hidden');
+    restTimerInterval=setInterval(updateRestTimerDisplay,200);
 }
-function updateRestTimerDisplay() {
-    if (!restEndTime) return;
-    const remaining = Math.max(0, Math.ceil((restEndTime - Date.now()) / 1000));
-    const display = document.getElementById('timerDisplay');
-    const container = document.getElementById('restTimerContainer');
-    if (!display || !container) return;
-    display.textContent = formatTime(remaining);
-    if (remaining <= 10) container.classList.add('warning');
-    else container.classList.remove('warning');
-    if (remaining <= 0) {
-        stopRestTimer();
-        if (navigator.vibrate) navigator.vibrate(200);
-    }
+function setRestDuration(seconds){ startRestTimer(seconds); }
+function updateRestTimerDisplay(){
+    if(!restEndTime) return;
+    const remaining=Math.max(0,Math.ceil((restEndTime-Date.now())/1000));
+    const display=document.getElementById('timerDisplay'); const container=document.getElementById('restTimerContainer');
+    if(!display||!container) return;
+    display.textContent=formatTime(remaining);
+    if(remaining<=10) container.classList.add('warning'); else container.classList.remove('warning');
+    if(remaining<=0){ stopRestTimer(); if(navigator.vibrate) navigator.vibrate(200); }
 }
-function addRestTime() { if (restEndTime) restEndTime += 30000; updateRestTimerDisplay(); }
-function stopRestTimer() { if (restTimerInterval) clearInterval(restTimerInterval); restTimerInterval = null; restEndTime = null; const container = document.getElementById('restTimerContainer'); if (container) container.classList.add('hidden'); }
-function formatTime(sec) { const m = Math.floor(sec / 60); const s = sec % 60; return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; }
+function addRestTime(){ if(restEndTime){ restEndTime+=30000; updateRestTimerDisplay(); } }
+function stopRestTimer(){ if(restTimerInterval) clearInterval(restTimerInterval); restTimerInterval=null; restEndTime=null; const container=document.getElementById('restTimerContainer'); if(container) container.classList.add('hidden'); }
+function formatTime(sec){ const m=Math.floor(sec/60); const s=sec%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
 function nextExercise() { stopRestTimer(); currentExerciseIndex++; renderExerciseStrip(); renderExercise(); saveDraft(); }
 function confirmExitWorkout() { document.getElementById('confirmExitModal').classList.remove('hidden'); }
 function closeConfirmExit() { document.getElementById('confirmExitModal').classList.add('hidden'); }
@@ -2846,6 +3264,108 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('SW failed', err));
     });
 }
+
+
+/* ===== FINAL: Exercise Progress only — clean mobile UX ===== */
+window.progressExerciseQuery = window.progressExerciseQuery || '';
+window.progressSelectedExercise = window.progressSelectedExercise || '';
+function setProgressPeriod(period){ progressPeriod=period; renderProgressDashboard(); }
+function setProgressExerciseSearch(value){
+    window.progressExerciseQuery=value||'';
+    // Пока пользователь печатает, ничего не выбираем автоматически.
+    renderProgressDashboard(true);
+}
+function chooseProgressExercise(name){
+    window.progressSelectedExercise=name;
+    // Выбранное упражнение становится значением единственного поля выбора.
+    window.progressExerciseQuery=name;
+    renderProgressDashboard(false);
+}
+function clearProgressExercise(){
+    window.progressExerciseQuery='';
+    window.progressSelectedExercise='';
+    renderProgressDashboard(true);
+}
+function progressDelta(first,last,unit){
+    if(!Number.isFinite(first)||!Number.isFinite(last)) return '<span class="progress-ex-neutral">—</span>';
+    const diff=last-first;
+    if(diff===0) return '<span class="progress-ex-neutral">Без изменений</span>';
+    const pct=first!==0?(diff/first*100):null, sign=diff>0?'+':'';
+    return `<span class="${diff>0?'progress-ex-positive':'progress-ex-negative'}">${sign}${formatNum(diff)}${unit}${pct!==null?` (${pct>0?'+':''}${pct.toFixed(1)}%)`:''}</span>`;
+}
+function renderProgressDashboard(keepSearchFocus){
+    const container=document.getElementById('progressContent'); if(!container)return;
+    const names=getAllExerciseNames();
+    const selected=names.includes(window.progressSelectedExercise)?window.progressSelectedExercise:'';
+    window.progressSelectedExercise=selected;
+    const query=(window.progressExerciseQuery||'').trim();
+    const normalized=query.toLocaleLowerCase('ru');
+    const showMatches=Boolean(normalized) && !(selected && query===selected);
+    const matches=showMatches ? names.filter(n=>n.toLocaleLowerCase('ru').includes(normalized)).slice(0,10) : [];
+    const history=getHistoryInPeriod(progressPeriod).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const rows=selected?getExerciseSeries(selected,history):[];
+    const type=selected?getExerciseTypeByName(selected):'strength';
+    const cfg=selected?getExerciseMetricConfig(type):[];
+    const record=selected?getExerciseRecordData(selected):null;
+    const first=rows[0], last=rows[rows.length-1];
+    const periodLabel=progressPeriod==='all'?'Всё время':`Последние ${progressPeriod} дней`;
+    const metricKey=window.progressMetricKey && cfg.some(c=>c.key===window.progressMetricKey) ? window.progressMetricKey : (cfg[0]?.key||'');
+    window.progressMetricKey=metricKey;
+
+    let pickerResults='';
+    if(showMatches && matches.length){
+        pickerResults=`<div class="progress-ex-results">${matches.map(n=>`<button class="progress-ex-result" onclick='chooseProgressExercise(${JSON.stringify(n)})' type="button"><span>${progressEsc(n)}</span><span class="progress-ex-result-arrow">›</span></button>`).join('')}</div>`;
+    } else if(showMatches && !matches.length){
+        pickerResults='<div class="progress-ex-no-results">Ничего не найдено</div>';
+    }
+
+    let metrics='';
+    if(record) metrics=record.metrics.map(m=>`<div class="progress-ex-metric"><div class="progress-ex-metric-label">${escapeHtml(m[0])}</div><div class="progress-ex-metric-value">${escapeHtml(m[1])}</div></div>`).join('');
+
+    let changes='';
+    if(first&&last){
+        changes=cfg.map(c=>`<div class="progress-ex-change-row"><span>${escapeHtml(c.label)}</span>${progressDelta(Number(first[c.key])||0,Number(last[c.key])||0,c.unit?` ${c.unit}`:'')}</div>`).join('');
+    }
+
+    const metricButtons=cfg.map(c=>`<button type="button" class="progress-chart-metric ${metricKey===c.key?'active':''}" onclick="setProgressMetric('${c.key}')">${escapeHtml(c.label)}</button>`).join('');
+    const activeMetric=cfg.find(c=>c.key===metricKey) || cfg[0];
+    const chartBlock=(selected&&rows.length&&activeMetric)?`
+        <div class="progress-ex-section progress-chart-section">
+            <div class="progress-ex-section-head"><div><div class="progress-ex-section-title">Динамика</div></div><span class="progress-section-chevron">⌄</span></div>
+            <div class="progress-chart-metrics">${metricButtons}</div>
+            <div class="progress-ex-chart progress-single-chart"><canvas id="progressExChartMain"></canvas></div>
+        </div>`:'';
+
+    let historyHtml='';
+    if(rows.length){
+        historyHtml=rows.slice().reverse().map(r=>{
+            let main='';
+            if(type==='strength') main=`${formatKg(r.weight)} × ${formatNum(r.reps)} повт.`;
+            else if(type==='cardio') main=`${formatNum(r.maxTime)} мин · интенсивность ${formatNum(r.maxIntensity)}`;
+            else main=`${formatNum(r.reps)} повторов`;
+            return `<div class="progress-ex-history-row"><span class="progress-ex-history-date">${r.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}</span><span class="progress-ex-history-value">${main}${type==='strength'?`<small>Объём ${formatKg(r.volume)}</small>`:''}</span></div>`;
+        }).join('');
+    } else historyHtml='<div class="progress-ex-no-results">За выбранный период данных нет</div>';
+
+    container.innerHTML=`<div class="progress-ex">
+        <div class="progress-ex-head"><div class="progress-ex-title">Прогресс упражнений</div></div>
+        <div class="progress-ex-period"><button class="${progressPeriod===30?'active':''}" onclick="setProgressPeriod(30)" type="button">30 дней</button><button class="${progressPeriod===90?'active':''}" onclick="setProgressPeriod(90)" type="button">90 дней</button><button class="${progressPeriod==='all'?'active':''}" onclick="setProgressPeriod('all')" type="button">Всё время</button></div>
+        <div class="progress-ex-picker">
+            <div class="progress-ex-picker-label">Упражнение</div>
+            <div class="progress-ex-search-wrap"><span class="progress-ex-search-icon">⌕</span><input id="progressExerciseSearch" class="progress-ex-search" value="${progressEsc(query)}" oninput="setProgressExerciseSearch(this.value)" placeholder="Начни вводить название…" autocomplete="off"><button class="progress-ex-search-clear ${query?'visible':''}" onclick="clearProgressExercise()" aria-label="Очистить" type="button">×</button></div>
+            ${pickerResults}
+            ${selected?`<div class="progress-ex-current-inline"><span class="progress-ex-current-dot"></span><span class="progress-ex-current-name">${progressEsc(selected)}</span><button type="button" onclick="clearProgressExercise()" aria-label="Сменить упражнение">Изменить</button></div>`:''}
+        </div>
+        ${selected?`<div class="progress-ex-section"><div class="progress-ex-section-title">Сводка</div><div class="progress-ex-section-sub">${progressEsc(periodLabel)} · рекорды считаются за всё время.</div><div class="progress-ex-metrics">${metrics}</div>${changes?`<div class="progress-ex-change">${changes}</div>`:''}</div>`:`<div class="progress-ex-empty-state"><div class="progress-ex-empty-icon">⌕</div><div class="progress-ex-empty-title">Найди упражнение</div><div class="progress-ex-empty-sub">Введи несколько букв — покажу только подходящие упражнения.</div></div>`}
+        ${chartBlock}
+        ${selected?`<div class="progress-ex-section progress-history-section"><div class="progress-ex-section-head"><div><div class="progress-ex-section-title">История</div><div class="progress-ex-section-sub">Результаты по тренировкам за выбранный период.</div></div><span class="progress-section-chevron">⌄</span></div><div class="progress-ex-history">${historyHtml}</div></div>`:''}
+    </div>`;
+    if(keepSearchFocus){const el=document.getElementById('progressExerciseSearch');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}}
+    if(selected&&rows.length&&activeMetric){drawLineChart(document.getElementById('progressExChartMain'),rows.map(r=>({date:r.date,value:Number(r[activeMetric.key])||0})))}
+}
+function setProgressMetric(key){ window.progressMetricKey=key; renderProgressDashboard(); }
+
+window.addEventListener('resize',()=>{ if(!document.getElementById('progressScreen')?.classList.contains('hidden')) renderProgressDashboard(); });
 
 loadData();
 </script>
