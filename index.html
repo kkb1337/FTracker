@@ -25,7 +25,7 @@ button.outline { background: transparent; border: 1px solid var(--button-green);
 .big-number { font-size: 42px; font-weight: 700; color: var(--button-green); text-align: center; margin: 10px 0; }
 input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; background: var(--input-bg); color: var(--text); font-size: 16px; text-align: left; margin: 4px 0; }
 .row { display: flex; gap: 8px; } .row > * { flex: 1; }
-.exercise-strip { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; }
+.exercise-strip { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; scroll-behavior: smooth; }
 .exercise-dot { flex: 0 0 auto; padding: 10px 16px; background: var(--input-bg); border-radius: 20px; font-size: 14px; font-weight: 600; color: var(--subtext); cursor: pointer; transition: 0.2s; white-space: nowrap; }
 .exercise-dot.active { background: var(--accent-gradient); color: #fff; }
 .exercise-dot.done { background: #1c3a1c; color: var(--button-green); }
@@ -64,7 +64,6 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .comparison .positive { color: var(--positive); } .comparison .negative { color: var(--negative); }
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
-/* Delete confirmation must always appear above every other modal (including parameter manager). */
 #deleteConfirmModal { z-index: 1000 !important; }
 #deleteConfirmModal .confirm-modal-content { position: relative; z-index: 1001; }
 .theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
@@ -87,7 +86,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .exercise-click-hint { font-size: 14px; color: var(--subtext); margin-left: 4px; cursor: pointer; }
 .split-title { font-size: 24px; font-weight: 700; color: var(--text); }
 .split-subtitle { font-size: 18px; color: var(--subtext); }
-.screen-header { position: sticky; top: 0; z-index: 15; background: var(--bg); padding: 8px 0; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+.screen-header { position: sticky; top: 0; z-index: 100; background: var(--bg); padding: 8px 0; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .screen-header .title { margin-bottom: 0; font-size: 28px; }
 .screen-header button.gray { width: auto; padding: 10px 16px; margin: 0; }
 .food-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
@@ -227,6 +226,16 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 #measurementSaveConfirmModal { z-index: 1000 !important; }
 #newMeasurementModal, #editMeasurementModal, #historicalMeasurementEditModal { z-index: 400 !important; }
 #foodCopyConfirmModal { z-index: 1000 !important; }
+/* Новый CSS для графика в прогрессе */
+.progress-chart-container {
+    position: relative;
+    height: 200px;
+    margin-top: 10px;
+}
+.progress-chart-container canvas {
+    width: 100%;
+    height: 100%;
+}
 </style>
 
 <style id="measurement-v27-style">
@@ -239,6 +248,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 </head>
 <body>
 <div class="container" id="app">
+    <!-- Экраны -->
     <div id="homeScreen">
         <div class="theme-toggle-btn" onclick="openThemeModal()" title="Выбор темы">⚙️</div>
         <div class="title">FTracker</div>
@@ -274,13 +284,13 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     <div id="progressScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📊 Прогресс</div></div>
         <div class="card">
-    <div class="progress-filter" id="progressPeriodFilter">
-        <button class="active" data-period="30" onclick="setProgressPeriod(30)">30 дней</button>
-        <button data-period="90" onclick="setProgressPeriod(90)">90 дней</button>
-        <button data-period="all" onclick="setProgressPeriod('all')">Всё время</button>
-    </div>
-    <div id="progressContent"></div>
-</div>
+            <div class="progress-filter" id="progressPeriodFilter">
+                <button class="active" data-period="30" onclick="setProgressPeriod(30)">30 дней</button>
+                <button data-period="90" onclick="setProgressPeriod(90)">90 дней</button>
+                <button data-period="all" onclick="setProgressPeriod('all')">Всё время</button>
+            </div>
+            <div id="progressContent"></div>
+        </div>
     </div>
     <div id="bodyScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title">📏 Параметры тела</div></div>
@@ -372,7 +382,11 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     <div class="exercise-modal-content">
         <span class="modal-close-btn" onclick="closeExerciseModal()">&times;</span>
         <div id="exerciseModalTitle" style="font-size:22px; font-weight:700; margin-bottom:16px;"></div>
-        <div class="tabs"><div class="tab active" data-tab="history">История</div><div class="tab" data-tab="records">Рекорд</div><div class="tab" data-tab="graph">График</div></div>
+        <div class="tabs">
+            <div class="tab active" data-tab="history" onclick="switchExerciseModalTab('history')">История</div>
+            <div class="tab" data-tab="records" onclick="switchExerciseModalTab('records')">Рекорд</div>
+            <div class="tab" data-tab="graph" onclick="switchExerciseModalTab('graph')">График</div>
+        </div>
         <div class="tab-content active" id="tabHistory"></div>
         <div class="tab-content" id="tabRecords"></div>
         <div class="tab-content" id="tabGraph"><div class="graph-container"><canvas id="progressGraph"></canvas></div></div>
@@ -759,7 +773,7 @@ function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(dat
 function saveDraft() { if (currentProgram === null) return; localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime })); }
 function clearDraft() { localStorage.removeItem(DRAFT_KEY); document.getElementById('draftBanner').classList.add('hidden'); }
 function checkDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (draft) { try { const p = JSON.parse(draft); if (p.programIndex !== undefined) document.getElementById('draftBanner').classList.remove('hidden'); } catch(e) {} } }
-function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); clearDraft(); } catch(e) { clearDraft(); } }
+function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); /* clearDraft(); УДАЛЕНО: не очищаем черновик при восстановлении */ } catch(e) { clearDraft(); } }
 function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EXPORT_KEY); if (lastExport && (Date.now() - parseInt(lastExport)) > 7*24*60*60*1000) document.getElementById('exportReminder').classList.remove('hidden'); }
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
@@ -892,6 +906,12 @@ function renderProgressDashboard() {
             <div class="smart-stat"><div class="smart-stat-value">${avgDuration||'—'}</div><div class="smart-stat-label">СРЕДНЯЯ, МИН</div></div>
             <div class="smart-stat"><div class="smart-stat-value">${recordEntries.length}</div><div class="smart-stat-label">РЕКОРДОВ</div></div>
         </div>
+        <div class="analysis-card">
+            <div class="analysis-title">📈 Объём тренировок по датам</div>
+            <div class="progress-chart-container">
+                <canvas id="progressVolumeChart"></canvas>
+            </div>
+        </div>
         ${comparisonHtml}
         <div class="analysis-card"><div class="analysis-title">🏆 Личные рекорды</div>
             ${recordEntries.length ? recordEntries.map(([name,r])=>`<div class="record-row"><div class="record-name">${escapeHtml(name)}</div><div class="record-value">${r.maxWeight ? `${r.maxWeight} кг` : `${r.maxReps} повт.`}</div></div>`).join('') : '<div class="analysis-line">Пока нет рекордов</div>'}
@@ -900,6 +920,101 @@ function renderProgressDashboard() {
             ${analysis.length ? analysis.slice(0,8).map(x=>`<div class="analysis-line">${escapeHtml(x)}</div>`).join('') : '<div class="analysis-line">Нужно ещё несколько записей, чтобы увидеть динамику.</div>'}
         </div>
     `;
+    // Отрисовка графика объёма
+    renderProgressVolumeChart(history);
+}
+
+function renderProgressVolumeChart(history) {
+    const canvas = document.getElementById('progressVolumeChart');
+    if (!canvas) return;
+
+    const container = canvas.parentElement;
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (history.length < 2) {
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Недостаточно данных для графика', canvas.width / 2, canvas.height / 2);
+        return;
+    }
+
+    const sorted = history.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
+    const points = sorted.map(entry => ({
+        date: new Date(entry.date),
+        volume: Math.round(calculateWorkoutVolume(entry))
+    }));
+
+    const minVolume = Math.min(...points.map(p => p.volume));
+    const maxVolume = Math.max(...points.map(p => p.volume));
+    const range = (maxVolume - minVolume) || 1;
+
+    const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+    const chartWidth = canvas.width - margin.left - margin.right;
+    const chartHeight = canvas.height - margin.top - margin.bottom;
+    const baseY = margin.top + chartHeight;
+
+    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, margin.top);
+    ctx.lineTo(margin.left, baseY);
+    ctx.lineTo(margin.left + chartWidth, baseY);
+    ctx.stroke();
+
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 4; i++) {
+        const value = minVolume + (range * i / 4);
+        const y = baseY - (chartHeight * i / 4);
+        ctx.fillText(Math.round(value), margin.left - 5, y + 3);
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(margin.left + chartWidth, y);
+        ctx.stroke();
+        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
+    }
+
+    const stepX = chartWidth / Math.max(1, points.length - 1);
+    ctx.strokeStyle = '#34c759';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    points.forEach((p, i) => {
+        const x = margin.left + i * stepX;
+        const y = baseY - ((p.volume - minVolume) / range) * chartHeight;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = '#34c759';
+    points.forEach((p, i) => {
+        const x = margin.left + i * stepX;
+        const y = baseY - ((p.volume - minVolume) / range) * chartHeight;
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    const labelStep = Math.max(1, Math.ceil(points.length / 6));
+    points.forEach((p, i) => {
+        if (i % labelStep === 0 || i === points.length - 1) {
+            const x = margin.left + i * stepX;
+            ctx.fillText(
+                p.date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }),
+                x,
+                baseY + 20
+            );
+        }
+    });
 }
 
 function showBodyMeasurements() { showScreen('bodyScreen'); renderMeasurementScreen(); }
@@ -929,6 +1044,11 @@ function renderMeasurementScreen() {
                     Пока нет сохранённых замеров
                 </div>
                 <button class="body-save-btn" onclick="openNewMeasurementModal()">＋ Новый замер</button>
+            </div>
+            <div id="comparisonBlock"></div>
+            <div class="body-history-card">
+                <div class="body-history-title">История замеров</div>
+                <div id="measurementHistory"></div>
             </div>
         `;
         document.getElementById('comparisonBlock').innerHTML = '';
@@ -1430,7 +1550,13 @@ function startTotalTimer() { clearInterval(totalTimerInterval); updateTotalTimer
 function updateTotalTimer() { if (!workoutStartTime) return; const elapsed=Math.floor((Date.now()-workoutStartTime)/1000); document.getElementById('totalTimer').textContent=`${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`; }
 function stopTotalTimer() { clearInterval(totalTimerInterval); workoutStartTime=null; }
 function getActiveExercises() { const prog=data.programs[currentProgram]; return prog.exercises.filter((_,i)=>prog.active[i]); }
-function renderExerciseStrip() { const activeEx=getActiveExercises(); const strip=document.getElementById('exerciseStrip'); strip.innerHTML=activeEx.map((ex,idx)=>{ const realIdx=data.programs[currentProgram].exercises.indexOf(ex); const sets=workoutSets[realIdx]||[]; const hasDone=sets.some(s=>s.done); const active=idx===currentExerciseIndex?'active':''; const doneClass=hasDone?'done':''; return `<div class="exercise-dot ${active} ${doneClass}" onclick="switchExercise(${idx})">${ex}</div>`; }).join(''); }
+function renderExerciseStrip() { const activeEx=getActiveExercises(); const strip=document.getElementById('exerciseStrip'); strip.innerHTML=activeEx.map((ex,idx)=>{ const realIdx=data.programs[currentProgram].exercises.indexOf(ex); const sets=workoutSets[realIdx]||[]; const hasDone=sets.some(s=>s.done); const active=idx===currentExerciseIndex?'active':''; const doneClass=hasDone?'done':''; return `<div class="exercise-dot ${active} ${doneClass}" onclick="switchExercise(${idx})">${ex}</div>`; }).join('');
+    // Автопрокрутка к активному элементу
+    setTimeout(() => {
+        const activeEl = document.querySelector('.exercise-dot.active');
+        if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }, 50);
+}
 function switchExercise(idx) { stopRestTimer(); currentExerciseIndex = idx; renderExerciseStrip(); renderExercise(); saveDraft(); }
 function getRealExerciseIndex() { const activeEx = getActiveExercises(); const exName = activeEx[currentExerciseIndex]; return data.programs[currentProgram].exercises.indexOf(exName); }
 function renderExercise() {
@@ -1457,7 +1583,7 @@ function renderExercise() {
     });
     const container = document.getElementById('exerciseContainer');
     container.innerHTML = `<div class="card">
-        <div style="font-size:24px; font-weight:700; margin-bottom:12px; cursor:pointer;" onclick="openExerciseModal('${exerciseName}')">${exerciseName} <span class="exercise-click-hint">›</span></div>
+        <div style="font-size:24px; font-weight:700; margin-bottom:12px; cursor:pointer;" onclick="openExerciseModal(${realIdx})">${exerciseName} <span class="exercise-click-hint">›</span></div>
         ${last ? `<div style="color:var(--subtext); margin-bottom:12px;">Последний: ${formatLastResult(last, type)}</div>` : ''}
         <div id="setsList">${setsHTML}</div>
         <div id="restTimerContainer" class="timer-box hidden">
@@ -1468,8 +1594,12 @@ function renderExercise() {
                 <button class="gray small-btn" onclick="stopRestTimer()">Пропустить</button>
             </div>
         </div>
-        <button onclick="addSet()" style="margin-top:8px;">➕ Добавить подход</button>
-        ${isLastExercise ? '<button onclick="confirmExitWorkout()" style="margin-top:8px;">🏁 Завершить тренировку</button>' : '<button onclick="nextExercise()" style="margin-top:8px;">Следующее упражнение</button>'}
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="gray" onclick="addSet()" style="flex:1;">➕ Добавить подход</button>
+            ${isLastExercise
+                ? '<button onclick="confirmExitWorkout()" style="flex:1;">🏁 Завершить тренировку</button>'
+                : '<button onclick="nextExercise()" style="flex:1;">Следующее упражнение</button>'}
+        </div>
     </div>`;
     updateTotalTimer();
 }
@@ -1903,6 +2033,22 @@ function renderFoodHistory() {
         </div>`;
     }).join('');
 }
+function openFoodDay(date) {
+    switchFoodTab('today');
+    document.getElementById('foodDate').value = date;
+    renderFoodDiary();
+}
+function deleteFoodDay(date) {
+    pendingDeleteType = 'foodDay';
+    pendingDeleteDate = date;
+    const dayEntries = data.foodDiary.entries.filter(e => e.date === date);
+    const limit = data.foodDiary.limits[date];
+    let message = `Удалить все записи за ${getDateWithWeekday(date)}?`;
+    if (dayEntries.length) message += ` (${dayEntries.length} записей)`;
+    if (limit) message += ' и лимиты КБЖУ';
+    showDeleteConfirm(message);
+}
+
 function setTextStatsPeriod(period) {
     statsTextPeriod = period;
     document.querySelectorAll('.stats-tab').forEach(tab => tab.classList.remove('active'));
@@ -2120,8 +2266,6 @@ function renderChart() {
         ? ['calories', 'protein', 'fat', 'carbs']
         : [chartDataType];
 
-    // Для выбранного периода показываем каждый день, даже если в какой-то день было 0.
-    // Это особенно важно для пользовательского диапазона Пн–Ср.
     const allDates = [];
     let cursor = new Date(startStr + 'T12:00:00');
     const endDate = new Date(endStr + 'T12:00:00');
