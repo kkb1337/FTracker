@@ -214,10 +214,10 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .progress-filter button.active{background:var(--accent-gradient);color:#fff}
 .body-graph-btn{width:auto;margin:0;padding:8px 10px;font-size:13px}
 .body-graph-modal-content{width:min(94%,560px);max-height:88vh}
-.body-graph-chart{height:270px;background:var(--input-bg);border-radius:18px;padding:8px;margin-top:12px}
-.body-graph-chart canvas{width:100%;height:100%}
+.body-graph-chart{height:210px;background:var(--input-bg);border-radius:15px;padding:0;margin-top:12px;position:relative;overflow:hidden}
+.body-graph-chart canvas{width:100%;height:100%;display:block}
 .summary-record{background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.25);border-radius:13px;padding:10px;margin-top:7px}
-.summary-improvement{font-size:13px;color:var(--subtext);margin-top:3px}
+.summary-improvement{font-size:13px;color:var(--subtext);margin-top:3px}.summary-program-name{font-weight:800;font-size:16px;margin-bottom:4px}.summary-overall{padding:15px}.overall-result{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}.overall-result span{color:var(--subtext)}.overall-result b{font-weight:800}.overall-diff{margin-top:11px;padding:10px 12px;border-radius:12px;font-weight:800;text-align:center}.overall-diff.positive{background:rgba(52,199,89,.12);color:var(--positive)}.overall-diff.negative{background:rgba(255,59,48,.10);color:var(--negative)}.overall-diff.same{background:var(--card-bg);color:var(--subtext)}.analysis-subtitle{font-size:12px;color:var(--subtext);line-height:1.35;margin:-2px 0 8px}.best-compare-row{padding:11px 0;border-top:1px solid var(--border)}.best-compare-name{font-weight:800;font-size:14px;margin-bottom:6px}.best-compare-values{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:12px;color:var(--subtext)}.best-compare-values span{background:var(--card-bg);border-radius:10px;padding:8px}.best-compare-values b{display:block;color:var(--text);font-size:13px;margin-top:2px}.best-compare-values em{grid-column:1/-1;font-style:normal;font-weight:800;padding-top:3px}.best-compare-values em.positive{color:var(--positive)}.best-compare-values em.negative{color:var(--negative)}.best-compare-values em.same{color:var(--subtext)}.summary-record{display:flex;justify-content:space-between;align-items:center;gap:10px}.summary-record b{color:var(--positive);font-size:13px;text-align:right}.final-insight-card .analysis-line b{color:var(--text)}
 @media(max-width:420px){.smart-summary-grid{grid-template-columns:repeat(2,1fr)}}
 
 #measurementManagerModal { z-index: 200 !important; }
@@ -261,6 +261,11 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .progress-record-name{font-weight:700;min-width:0}
 .progress-record-value{font-weight:800;color:var(--positive);white-space:nowrap}
 @media(max-width:420px){.progress-stats,.progress-metrics{grid-template-columns:repeat(2,1fr)}}
+
+/* Chart interaction fix — reliable iPhone/iOS taps */
+#chartModal .period-selector,#chartModal .data-type-selector{position:relative;z-index:20;pointer-events:auto;}
+#chartModal .period-selector button,#chartModal .data-type-selector button,#chartModal .apply-period-btn{position:relative;z-index:21;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,255,255,.08);}
+#chartModal .chart-container{position:relative;z-index:1;}
 </style>
 
 <style id="measurement-v27-style">
@@ -620,6 +625,84 @@ button{min-height:44px;}
 }
 </style>
 
+
+<style id="clean-v4-css">
+.split-card{padding:0!important;overflow:hidden}
+.split-head{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:transparent!important;border:0!important;padding:16px!important;margin:0!important;border-radius:0!important}
+.split-head-main{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.split-title{font-size:18px;font-weight:800}
+.split-sub{font-size:12px;color:var(--subtext)}
+.split-chevron{width:34px;height:34px;border-radius:10px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .18s}
+.split-card.open .split-chevron{transform:rotate(90deg)}
+.split-body{display:none;border-top:1px solid var(--border);padding:10px 15px 15px}
+.split-card.open .split-body{display:block}
+.split-exercise-line{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.split-exercise-index{width:25px;color:var(--subtext);font-size:13px;text-align:center}
+.split-exercise-name{font-weight:600;flex:1;min-width:0}
+.split-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.split-actions button{margin:0}
+.progress-open-picker{width:100%;display:flex;align-items:center;justify-content:space-between;margin:0!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--text)!important;text-align:left!important;padding:13px 14px!important}
+.progress-open-picker span{font-size:24px;color:var(--subtext)}
+.progress-selected-exercise{display:flex;align-items:center;gap:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:13px;padding:11px 12px}
+.progress-selected-exercise>span{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.progress-selected-exercise small{font-size:11px;color:var(--subtext)}
+.progress-selected-exercise strong{font-size:16px}
+.progress-selected-exercise button{width:auto;margin:0;padding:8px 11px}
+.progressExercisePickerModalFix{}
+#progressExercisePickerModal .date-modal-content{position:relative;z-index:201;pointer-events:auto;}
+#progressExercisePickerModal .progress-picker-list{pointer-events:auto;}
+.progress-picker-list{display:flex;flex-direction:column;gap:5px;max-height:58vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.progress-picker-row{position:relative;z-index:2;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,.08);width:100%;display:flex;align-items:center;gap:10px;background:transparent;border:0;border-radius:12px;text-align:left;margin:0;padding:12px}
+.progress-picker-row:active,.progress-picker-row.selected{background:var(--input-bg)}
+.progress-picker-row-main{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.progress-picker-row-main strong{font-size:16px}
+.progress-picker-row-main small{font-size:12px;color:var(--subtext)}
+.progress-picker-row-mark{font-size:22px;color:var(--subtext)}
+.order-position-list{display:flex;flex-direction:column;gap:8px;max-height:58vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.order-position-row{display:flex;align-items:center;gap:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:13px;padding:10px}
+.order-position-num{width:30px;height:30px;border-radius:9px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
+.order-position-name{flex:1;min-width:0;font-weight:650}
+.order-position-select{width:72px!important;margin:0!important;padding:8px!important}
+</style>
+
+<style id="programs-original-collapsible-css">
+.programs-original-card{padding:0!important;overflow:hidden}
+.program-original-header{display:flex;align-items:center;gap:10px;min-height:78px;padding:14px 14px 14px 15px;cursor:pointer}
+.program-original-header-main{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.program-original-header-main input[type="text"]{outline:none}
+.program-original-trash{flex:none;margin:0!important}
+.program-original-chevron{width:34px;height:34px;border-radius:10px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;flex:none;transform:rotate(0deg);transition:transform .18s}
+.programs-original-card.open .program-original-chevron{transform:rotate(180deg)}
+.program-original-body{display:none;padding:0 15px 15px;border-top:1px solid var(--border)}
+.programs-original-card.open .program-original-body{display:block}
+.program-original-body .checkbox-label{margin-top:8px}
+</style>
+<style id="programs-optimization-v5">
+.program-action-stack{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.program-action-stack button{margin:0!important;min-height:48px;font-size:15px}
+.program-add-btn{font-weight:700}
+.program-order-btn{font-weight:650}
+.program-delete-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px 0 2px;border-top:1px solid var(--border)}
+.program-delete-info{display:flex;align-items:center;gap:10px;min-width:0}
+.program-delete-info>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.program-delete-info strong{font-size:14px}
+.program-delete-info small{font-size:11px;color:var(--subtext)}
+.program-delete-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,70,70,.10);display:flex;align-items:center;justify-content:center;flex:none}
+.program-delete-btn{width:auto!important;margin:0!important;padding:9px 13px!important;border:1px solid rgba(255,70,70,.35)!important;background:transparent!important;color:var(--negative)!important;font-weight:700!important}
+.program-original-header{min-height:74px}
+.order-position-row{min-height:58px}
+.order-position-select{font-size:15px!important}
+@media(max-width:420px){.program-action-stack{grid-template-columns:1fr}.program-delete-row{align-items:flex-start}.program-delete-btn{padding:8px 11px!important}}
+</style>
+
+<style id="exercise-analytics-v3">
+.workout-exercise-title .workout-analytics-link{margin-left:auto;display:inline-flex;align-items:center;gap:4px;color:var(--positive);font-size:13px;font-weight:800;white-space:nowrap;flex:none;}
+.workout-exercise-title .workout-analytics-link .analytics-arrow{font-size:18px;line-height:1;}
+.exercise-graph-metrics{display:flex;gap:8px;margin-bottom:12px;}
+.exercise-graph-metric{flex:1!important;margin:0!important;padding:10px 12px!important;background:var(--input-bg)!important;color:var(--subtext)!important;border:1px solid var(--border)!important;border-radius:12px!important;font-size:14px!important;font-weight:800!important;}
+.exercise-graph-metric.active{background:var(--button-green)!important;border-color:var(--button-green)!important;color:#fff!important;}
+</style>
+
 </head>
 <body>
 <div class="container" id="app">
@@ -766,7 +849,7 @@ button{min-height:44px;}
         </div>
         <div class="tab-content active" id="tabHistory"></div>
         <div class="tab-content" id="tabRecords"></div>
-        <div class="tab-content" id="tabGraph"><div class="graph-container"><canvas id="progressGraph"></canvas></div></div>
+        <div class="tab-content" id="tabGraph"><div id="exerciseGraphControls" class="exercise-graph-metrics"></div><div class="graph-container"><canvas id="progressGraph"></canvas></div></div>
         <button onclick="closeExerciseModal()" style="margin-top:16px;">Закрыть</button>
     </div>
 </div>
@@ -983,23 +1066,23 @@ button{min-height:44px;}
         </div>
         <div class="chart-section-label">Период</div>
         <div class="period-selector">
-            <button data-period="week" class="active" onclick="setChartPeriod('week')">7 дней</button>
-            <button data-period="month" onclick="setChartPeriod('month')">30 дней</button>
-            <button data-period="year" onclick="setChartPeriod('year')">Год</button>
-            <button data-period="custom" onclick="setChartPeriod('custom')">Свой</button>
+            <button data-period="week" class="active" type="button">7 дней</button>
+            <button data-period="month" type="button">30 дней</button>
+            <button data-period="year" type="button">Год</button>
+            <button data-period="custom" type="button">Свой</button>
         </div>
         <div id="chartCustomDateRange" class="custom-date-range hidden">
             <div class="date-field"><label>НАЧАЛО</label><input type="date" id="chartStartDate"></div>
             <div class="date-field"><label>КОНЕЦ</label><input type="date" id="chartEndDate"></div>
-            <button class="apply-period-btn" onclick="applyChartCustom()">Применить период</button>
+            <button class="apply-period-btn" type="button">Применить период</button>
         </div>
         <div class="chart-section-label">Показатель</div>
         <div class="data-type-selector">
-            <button data-type="calories" class="active" onclick="setChartDataType('calories')">Калории</button>
-            <button data-type="protein" onclick="setChartDataType('protein')">Белки</button>
-            <button data-type="fat" onclick="setChartDataType('fat')">Жиры</button>
-            <button data-type="carbs" onclick="setChartDataType('carbs')">Углеводы</button>
-            <button data-type="all" onclick="setChartDataType('all')">Все показатели</button>
+            <button data-type="calories" class="active" type="button">Калории</button>
+            <button data-type="protein" type="button">Белки</button>
+            <button data-type="fat" type="button">Жиры</button>
+            <button data-type="carbs" type="button">Углеводы</button>
+            <button data-type="all" type="button">Все показатели</button>
         </div>
         <div class="chart-container"><canvas id="chartCanvas"></canvas></div>
         <div id="chartLegend" class="legend"></div>
@@ -1165,8 +1248,7 @@ function renderHome() {
         const i = data.programs.indexOf(p);
         return `<div class="card centered-card" onclick="confirmStart(${i})" style="cursor:pointer">
             <div class="program-icon">${['💪','🔙','🦵'][i]||'🏋️'}</div>
-            <div class="split-title">Сплит №${i+1}</div>
-            <div class="split-subtitle">${p.name.replace(/^Сплит \d+: /, '')}</div>
+            <div class="split-title">${escapeHtml(p.name.replace(/^Сплит\s*\d+\s*:\s*/i, ''))}</div>
             <div style="color:var(--subtext); margin-top:4px;">${p.active.filter(Boolean).length} упражнений</div>
         </div>`;
     }).join('');
@@ -1218,22 +1300,156 @@ function getPreviousWorkoutForProgram(currentEntry) {
         .sort((a,b) => new Date(b.date)-new Date(a.date));
     return same[0] || null;
 }
-function compareWorkoutEntries(currentEntry, previousEntry) {
-    if (!previousEntry) return [];
+
+/* Лучший исторический результат до текущей тренировки.
+   Важно: для каждого показателя ниже сравнение идёт с максимумом за всю историю,
+   а не просто с предыдущей тренировкой. */
+function getBestWorkoutForProgram(currentEntry) {
+    const same = (data.history || [])
+        .filter(e => e.program === currentEntry.program && e !== currentEntry)
+        .sort((a,b) => new Date(a.date)-new Date(b.date));
+    if (!same.length) return null;
+
+    const best = { date: null, program: currentEntry.program, exercises: [] };
+    const names = new Set();
+    same.forEach(entry => (entry.exercises || []).forEach(ex => names.add(ex.name)));
+
+    names.forEach(name => {
+        const entries = [];
+        same.forEach(entry => {
+            const ex = (entry.exercises || []).find(x => x.name === name);
+            if (ex && (ex.sets || []).length) entries.push({ entry, ex });
+        });
+        if (!entries.length) return;
+        const type = getExerciseTypeByName(name);
+        const score = item => {
+            const sets = item.ex.sets || [];
+            if (type === 'strength') return calculateWorkoutVolume({exercises:[item.ex]});
+            if (type === 'cardio') return Math.max(0,...sets.map(s => (parseFloat(s.time)||0) * (parseFloat(s.intensity)||1)));
+            return Math.max(0,...sets.map(s => parseInt(s.reps)||0));
+        };
+        entries.sort((a,b) => score(b)-score(a));
+        best.exercises.push({ name, sets: entries[0].ex.sets || [] });
+    });
+    return best.exercises.length ? best : null;
+}
+
+function getBestSetForExercise(ex,type){
+    const sets=(ex?.sets||[]).filter(Boolean);if(!sets.length)return null;
+    const score=s=>{
+        if(type==='strength'){const w=parseFloat(s.weight)||0,r=parseInt(s.reps)||0;return [w,r,w*r];}
+        if(type==='cardio'){const t=parseFloat(s.time)||0,i=parseFloat(s.intensity)||0;return [t,i,t*i];}
+        const r=parseInt(s.reps)||0;return [r,r,0];
+    };
+    return sets.reduce((best,set)=>{if(!best)return set;const A=score(set),B=score(best);for(let i=0;i<A.length;i++)if(A[i]!==B[i])return A[i]>B[i]?set:best;return best;},null);
+}
+function getBestStrengthSet(sets) {
+    const valid = (sets || []).filter(s => Number.isFinite(parseFloat(s.weight)) && Number.isFinite(parseInt(s.reps)));
+    if (!valid.length) return null;
+    return valid.reduce((best, set) => {
+        if (!best) return set;
+        const w = parseFloat(set.weight) || 0, bw = parseFloat(best.weight) || 0;
+        const r = parseInt(set.reps) || 0, br = parseInt(best.reps) || 0;
+        return (w > bw || (w === bw && r > br)) ? set : best;
+    }, null);
+}
+
+function getBestExerciseHistory(name, currentEntry) {
+    const type = getExerciseTypeByName(name);
+    const items = [];
+
+    // Индивидуальный лучший результат упражнения ищется ЗА ВСЮ ИСТОРИЮ,
+    // независимо от сплита/программы. Количество подходов не учитывается.
+    (data.history || []).forEach(entry => {
+        if (entry === currentEntry) return;
+        const ex = (entry.exercises || []).find(x => x.name === name);
+        if (!ex || !(ex.sets || []).length) return;
+
+        const bestSet = getBestSetForExercise(ex, type);
+        if (bestSet) items.push({ entry, ex, bestSet });
+    });
+
+    if (!items.length) return null;
+
+    // Для силовых упражнений приоритет всегда:
+    // 1) больший вес; 2) при одинаковом весе — больше повторений.
+    // Поэтому 50×8 ВСЕГДА лучше 25×10.
+    const compareSets = (a, b) => {
+        if (type === 'strength') {
+            const aw = parseFloat(a?.weight) || 0;
+            const bw = parseFloat(b?.weight) || 0;
+            if (aw !== bw) return aw - bw;
+            return (parseInt(a?.reps) || 0) - (parseInt(b?.reps) || 0);
+        }
+        if (type === 'cardio') {
+            const at = parseFloat(a?.time) || 0;
+            const bt = parseFloat(b?.time) || 0;
+            if (at !== bt) return at - bt;
+            return (parseFloat(a?.intensity) || 0) - (parseFloat(b?.intensity) || 0);
+        }
+        return (parseInt(a?.reps) || 0) - (parseInt(b?.reps) || 0);
+    };
+
+    items.sort((a, b) => compareSets(b.bestSet, a.bestSet));
+    return items[0];
+}
+
+function compareWorkoutEntries(currentEntry, bestEntry) {
+    if (!bestEntry) return [];
     const result = [];
     (currentEntry.exercises || []).forEach(ex => {
-        const prev = (previousEntry.exercises || []).find(x => x.name === ex.name);
-        if (!prev) return;
-        const curSets = ex.sets || [], prevSets = prev.sets || [];
-        const curVol = calculateWorkoutVolume({exercises:[ex]});
-        const prevVol = calculateWorkoutVolume({exercises:[prev]});
-        if (curVol !== prevVol) result.push({name:ex.name, diff:curVol-prevVol, type:'volume'});
-        const curMax = Math.max(0,...curSets.map(s=>parseFloat(s.weight)||0));
-        const prevMax = Math.max(0,...prevSets.map(s=>parseFloat(s.weight)||0));
-        if (curMax > 0 && prevMax > 0 && curMax !== prevMax) result.push({name:ex.name, diff:curMax-prevMax, type:'weight'});
+        const best = (bestEntry.exercises || []).find(x => x.name === ex.name);
+        if (!best) return;
+        const curSets = ex.sets || [], bestSets = best.sets || [];
+        const type = getExerciseTypeByName(ex.name);
+
+        if(type === 'strength'){
+            const curBest = getBestStrengthSet(curSets);
+            const bestBest = getBestStrengthSet(bestSets);
+            if(curBest && bestBest){
+                const curWeight = parseFloat(curBest.weight)||0;
+                const bestWeight = parseFloat(bestBest.weight)||0;
+                const curReps = parseInt(curBest.reps)||0;
+                const bestReps = parseInt(bestBest.reps)||0;
+
+                // Сравниваем именно лучший ОДИН подход.
+                // Вес имеет приоритет; повторения используются только при одинаковом весе.
+                const betterByWeight = curWeight !== bestWeight;
+                const diff = betterByWeight ? curWeight-bestWeight : curReps-bestReps;
+                const metricType = betterByWeight ? 'weight' : 'reps';
+                const isDifferent = betterByWeight ? curWeight !== bestWeight : curReps !== bestReps;
+
+                if(isDifferent){
+                    result.push({
+                        name:ex.name,
+                        diff,
+                        type:metricType,
+                        current:metricType==='weight'?curWeight:curReps,
+                        best:metricType==='weight'?bestWeight:bestReps,
+                        currentWeight:curWeight,
+                        currentReps:curReps,
+                        bestWeight:bestWeight,
+                        bestReps:bestReps
+                    });
+                }
+            }
+        } else if(type === 'cardio'){
+            const curTime = Math.max(0,...curSets.map(s=>parseFloat(s.time)||0));
+            const bestTime = Math.max(0,...bestSets.map(s=>parseFloat(s.time)||0));
+            if(curTime !== bestTime) result.push({name:ex.name,diff:curTime-bestTime,type:'time',current:curTime,best:bestTime});
+            const curIntensity = Math.max(0,...curSets.map(s=>parseFloat(s.intensity)||0));
+            const bestIntensity = Math.max(0,...bestSets.map(s=>parseFloat(s.intensity)||0));
+            if(curIntensity !== bestIntensity) result.push({name:ex.name,diff:curIntensity-bestIntensity,type:'intensity',current:curIntensity,best:bestIntensity});
+        } else {
+            const curReps = Math.max(0,...curSets.map(s=>parseInt(s.reps)||0));
+            const bestReps = Math.max(0,...bestSets.map(s=>parseInt(s.reps)||0));
+            if(curReps !== bestReps) result.push({name:ex.name,diff:curReps-bestReps,type:'reps',current:curReps,best:bestReps});
+        }
     });
     return result;
 }
+
+
 function progressEsc(value){ return escapeHtml(value); }
 function formatKg(v){ return Number.isFinite(Number(v)) ? `${Number(v).toLocaleString('ru-RU',{maximumFractionDigits:1})} кг` : '—'; }
 function formatNum(v){ return Number.isFinite(Number(v)) ? Number(v).toLocaleString('ru-RU',{maximumFractionDigits:1}) : '—'; }
@@ -1248,6 +1464,13 @@ function getExerciseTypeByName(name){
         const i=(p.exercises||[]).indexOf(name);
         if(i>=0) return p.types?.[i] || 'strength';
     }
+
+    // Fallback for archived/replaced exercises: use the type stored in history.
+    for(const entry of (data.history||[])){
+        const ex=(entry.exercises||[]).find(x=>x.name===name);
+        if(ex?.type) return ex.type;
+    }
+
     return 'strength';
 }
 function getExerciseSeries(name, history){
@@ -1279,8 +1502,8 @@ function getExerciseRecordData(name){
         return {type, metrics:[
             ['Макс. время', rows.length?`${formatNum(Math.max(...rows.map(r=>r.maxTime)))} мин`:'—'],
             ['Макс. интенсивность', rows.length?formatNum(Math.max(...rows.map(r=>r.maxIntensity))):'—'],
-            ['Тренировок', rows.length?String(rows.length):'—'],
-            ['Последний результат', rows.length?`${formatNum(rows[rows.length-1].maxTime)} мин · ${formatNum(rows[rows.length-1].maxIntensity)}`:'—']
+            ['Макс. повторов', rows.length?`${formatNum(Math.max(...rows.map(r=>r.reps)))} повт.`:'—'],
+            ['Тренировок', rows.length?String(rows.length):'—']
         ]};
     }
     return {type:'bodyweight', metrics:[
@@ -1293,12 +1516,13 @@ function getExerciseRecordData(name){
 function getExerciseMetricConfig(type){
     if(type==='strength') return [
         {key:'weight',label:'Вес',unit:'кг'},
-        {key:'volume',label:'Объём',unit:'кг'},
-        {key:'reps',label:'Повторы',unit:'повт.'}
+        {key:'reps',label:'Повторы',unit:'повт.'},
+        {key:'volume',label:'Объём',unit:'кг'}
     ];
     if(type==='cardio') return [
         {key:'maxTime',label:'Время',unit:'мин'},
-        {key:'maxIntensity',label:'Интенсивность',unit:''}
+        {key:'maxIntensity',label:'Интенсивность',unit:''},
+        {key:'reps',label:'Повторы',unit:'повт.'}
     ];
     return [{key:'reps',label:'Повторы',unit:'повт.'}];
 }
@@ -1311,99 +1535,140 @@ function getWorkoutStats(history){
 }
 function drawLineChart(canvas, points, options={}){
     if(!canvas) return;
-    const box=canvas.parentElement; const dpr=Math.max(1,window.devicePixelRatio||1);
-    const w=Math.max(280,box.clientWidth||300), h=Math.max(180,box.clientHeight||200);
-    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr); canvas.style.width=w+'px'; canvas.style.height=h+'px';
-    const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
-    const sub=getComputedStyle(document.body).getPropertyValue('--subtext');
-    const border=getComputedStyle(document.body).getPropertyValue('--border');
-    const accent=getComputedStyle(document.body).getPropertyValue('--button-green');
-    if(!points || !points.length){ctx.fillStyle=sub;ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('Нет данных',w/2,h/2);return;}
+    const box=canvas.parentElement;
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    const w=Math.max(280,box?.clientWidth||300), h=Math.max(180,box?.clientHeight||200);
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+    canvas.style.width=w+'px'; canvas.style.height=h+'px';
+    const ctx=canvas.getContext('2d'); if(!ctx) return;
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    const sub=getComputedStyle(document.body).getPropertyValue('--subtext').trim()||'#999';
+    const border=getComputedStyle(document.body).getPropertyValue('--border').trim()||'rgba(128,128,128,.18)';
+    const accent=(options && options.color) || getComputedStyle(document.body).getPropertyValue('--button-green').trim() || '#34c759';
+    if(!points||!points.length){ctx.fillStyle=sub;ctx.font='14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Нет данных',w/2,h/2);return;}
     const vals=points.map(p=>Number(p.value)||0), min=Math.min(...vals), max=Math.max(...vals), range=(max-min)||1;
-    const m={top:18,right:14,bottom:34,left:48}, cw=w-m.left-m.right,ch=h-m.top-m.bottom, base=m.top+ch;
+    const m={top:18,right:14,bottom:34,left:48}, cw=Math.max(1,w-m.left-m.right), ch=Math.max(1,h-m.top-m.bottom), base=m.top+ch;
     ctx.strokeStyle=border;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.left,m.top);ctx.lineTo(m.left,base);ctx.lineTo(m.left+cw,base);ctx.stroke();
-    ctx.font='10px sans-serif';ctx.fillStyle=sub;ctx.textAlign='right';
+    ctx.font='10px sans-serif';ctx.fillStyle=sub;ctx.textAlign='right';ctx.textBaseline='alphabetic';
     for(let i=0;i<=4;i++){const v=min+range*i/4,y=base-ch*i/4;ctx.fillText(formatNum(v),m.left-5,y+3);ctx.strokeStyle=border;ctx.beginPath();ctx.moveTo(m.left,y);ctx.lineTo(m.left+cw,y);ctx.stroke();}
     const xAt=i=>m.left+(points.length===1?cw/2:i*cw/(points.length-1));
     const yAt=v=>base-((v-min)/range)*ch;
     ctx.strokeStyle=accent;ctx.lineWidth=2.5;ctx.beginPath();points.forEach((p,i)=>{const x=xAt(i),y=yAt(Number(p.value)||0);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
     ctx.fillStyle=accent;points.forEach((p,i)=>{const x=xAt(i),y=yAt(Number(p.value)||0);ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);ctx.fill();});
     ctx.fillStyle=sub;ctx.textAlign='center';const step=Math.max(1,Math.ceil(points.length/6));
-    points.forEach((p,i)=>{if(i%step===0||i===points.length-1)ctx.fillText(new Date(p.date).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}),xAt(i),base+20);});
-}
-function renderProgressDashboard(){
-    const container=document.getElementById('progressContent'); if(!container)return;
-    const history=getHistoryInPeriod(progressPeriod).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const totalVolume=history.reduce((s,e)=>s+calculateWorkoutVolume(e),0);
-    const durations=history.filter(e=>Number(e.durationSeconds)>0).map(e=>Number(e.durationSeconds));
-    const avgDuration=durations.length?Math.round(durations.reduce((a,b)=>a+b,0)/durations.length/60):0;
-    const exerciseNames=getAllExerciseNames();
-    const current=window.progressSelectedExercise && exerciseNames.includes(window.progressSelectedExercise)?window.progressSelectedExercise:(exerciseNames[0]||'');
-    window.progressSelectedExercise=current;
-    const stats=getWorkoutStats(history);
-    const records=getExerciseRecords();
-    const recordEntries=Object.entries(records).sort((a,b)=>(b[1].maxWeight||0)-(a[1].maxWeight||0));
-    let bodyHtml='';
-    const measurements=(data.measurements||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
-    if(measurements.length){
-        const fields=getMeasurementFields();
-        const bodyRows=fields.map(f=>{const vals=measurements.filter(m=>m[f.key]!=null).map(m=>Number(m[f.key]));if(!vals.length)return '';const first=vals[0],last=vals[vals.length-1],diff=last-first;return `<div class="progress-record"><span class="progress-record-name">${progressEsc(f.label)}</span><span class="progress-record-value">${formatNum(last)} ${diff?`(${diff>0?'+':''}${formatNum(diff)})`:''}</span></div>`;}).join('');
-        bodyHtml=`<div class="progress-section"><div class="progress-section-title">📏 Параметры тела</div><div class="progress-section-subtitle">Последние значения и изменение относительно первого замера</div>${bodyRows||'<div class="progress-empty">Нет числовых замеров</div>'}<div class="progress-chart"><canvas id="progressBodyChart"></canvas></div></div>`;
-    }
-    const exerciseHtml=current?`<div class="progress-section"><div class="progress-section-title">🏋️ Прогресс упражнения</div><div class="progress-section-subtitle">История, рекорды и динамика выбранного упражнения</div><select class="progress-exercise-select" onchange="selectProgressExercise(this.value)">${exerciseNames.map(n=>`<option value="${progressEsc(n)}" ${n===current?'selected':''}>${progressEsc(n)}</option>`).join('')}</select><div id="selectedExerciseProgress"></div></div>`:'';
-    container.innerHTML=`<div class="progress-dashboard">
-        <div><div style="font-size:20px;font-weight:800">Аналитика прогресса</div><div style="color:var(--subtext);font-size:12px;margin-top:3px">${progressPeriod==='all'?'Всё время':`Последние ${progressPeriod} дней`}</div></div>
-        <div class="progress-section"><div class="progress-stats">
-            <div class="progress-stat"><div class="progress-stat-value">${history.length}</div><div class="progress-stat-label">Тренировок</div></div>
-            <div class="progress-stat"><div class="progress-stat-value">${Math.round(totalVolume).toLocaleString('ru-RU')}</div><div class="progress-stat-label">Объём, кг</div></div>
-            <div class="progress-stat"><div class="progress-stat-value">${avgDuration||'—'}</div><div class="progress-stat-label">Средняя, мин</div></div>
-            <div class="progress-stat"><div class="progress-stat-value">${recordEntries.length}</div><div class="progress-stat-label">Упражнений с рекордами</div></div>
-        </div></div>
-        <div class="progress-section"><div class="progress-section-title">📈 Динамика тренировочного объёма</div><div class="progress-chart"><canvas id="progressVolumeChart"></canvas></div></div>
-        <div class="progress-section"><div class="progress-section-title">⏱️ Длительность тренировок</div><div class="progress-chart"><canvas id="progressDurationChart"></canvas></div></div>
-        <div class="progress-section"><div class="progress-section-title">🏆 Личные рекорды</div>${recordEntries.length?recordEntries.map(([n,r])=>`<div class="progress-record"><span class="progress-record-name">${progressEsc(n)}</span><span class="progress-record-value">${r.bestWeightReps||formatKg(r.maxWeight)||formatNum(r.maxReps)+' повт.'}</span></div>`).join(''):'<div class="progress-empty">Пока нет записанных рекордов</div>'}</div>
-        ${exerciseHtml}${bodyHtml}
-        <div class="progress-section"><div class="progress-section-title">🗓️ История тренировок</div>${history.length?history.slice().reverse().map(e=>`<div class="progress-history-row"><span>${new Date(e.date).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}<br><span style="color:var(--subtext)">${progressEsc(e.program||'Тренировка')}</span></span><strong>${Math.round(calculateWorkoutVolume(e)).toLocaleString('ru-RU')} кг</strong></div>`).join(''):'<div class="progress-empty">За выбранный период тренировок нет</div>'}</div>
-    </div>`;
-    drawLineChart(document.getElementById('progressVolumeChart'),stats.volume);
-    drawLineChart(document.getElementById('progressDurationChart'),stats.duration);
-    if(measurements.length){const weightPoints=measurements.filter(m=>m.weight!=null).map(m=>({date:new Date(m.date),value:Number(m.weight)}));drawLineChart(document.getElementById('progressBodyChart'),weightPoints);}
-    renderSelectedExerciseProgress(current,history);
+    points.forEach((p,i)=>{if(i%step===0||i===points.length-1){const d=new Date(p.date);const label=Number.isNaN(d.getTime())?'':d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});ctx.fillText(label,xAt(i),base+20);}});
 }
 function selectProgressExercise(name){window.progressSelectedExercise=name;renderProgressDashboard();}
 function renderSelectedExerciseProgress(name,history){
     const box=document.getElementById('selectedExerciseProgress');if(!box)return;
     const rows=getExerciseSeries(name,history), allRows=getExerciseSeries(name,data.history||[]), type=getExerciseTypeByName(name);
     if(!rows.length){box.innerHTML='<div class="progress-empty">За выбранный период данных по этому упражнению нет</div>';return;}
-    const bestWeight=Math.max(0,...allRows.map(r=>r.weight)),bestReps=Math.max(0,...allRows.map(r=>r.reps)),bestVolume=Math.max(0,...allRows.map(r=>r.volume));
+
     const first=rows[0],last=rows[rows.length-1];
-    const pct=(a,b)=>a&&b?((b-a)/a*100):null;
-    const volumeDiff=last.volume-first.volume,weightDiff=last.weight-first.weight,repsDiff=last.reps-first.reps;
-    box.innerHTML=`<div class="progress-metrics">
-        <div class="progress-metric"><div class="progress-metric-label">Рекорд веса</div><div class="progress-metric-value">${bestWeight?formatKg(bestWeight):'—'}</div></div>
-        <div class="progress-metric"><div class="progress-metric-label">Рекорд повторов</div><div class="progress-metric-value">${bestReps?formatNum(bestReps)+' повт.':'—'}</div></div>
-        <div class="progress-metric"><div class="progress-metric-label">Лучший объём</div><div class="progress-metric-value">${bestVolume?formatKg(bestVolume):'—'}</div></div>
-        <div class="progress-metric"><div class="progress-metric-label">Тренировок</div><div class="progress-metric-value">${rows.length}</div></div>
-    </div>
-    <div class="analysis-card" style="margin-top:10px"><div class="analysis-title">📊 Изменение за период</div><div class="analysis-line">Вес: ${weightDiff>0?'+':''}${formatNum(weightDiff)} кг${pct(first.weight,last.weight)!=null?` (${pct(first.weight,last.weight)>0?'+':''}${pct(first.weight,last.weight).toFixed(1)}%)`:''}</div><div class="analysis-line">Повторы: ${repsDiff>0?'+':''}${formatNum(repsDiff)}</div><div class="analysis-line">Объём: ${volumeDiff>0?'+':''}${formatNum(volumeDiff)} кг</div></div>
-    ${type==='strength'?'<div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Вес</div><div class="progress-chart"><canvas id="exerciseWeightChart"></canvas></div></div>':''}
-    <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Объём</div><div class="progress-chart"><canvas id="exerciseVolumeChart"></canvas></div></div>
-    <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Повторы</div><div class="progress-chart"><canvas id="exerciseRepsChart"></canvas></div></div>
-    <div style="margin-top:10px"><div class="progress-section-title">История упражнения</div>${rows.slice().reverse().map(r=>`<div class="progress-history-row"><span>${r.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}</span><span>${r.weight?formatKg(r.weight)+' × ':''}${r.reps?r.reps+' повт. ':''}${r.volume?`· ${Math.round(r.volume)} кг`:r.duration?`· ${r.duration} мин`:''}</span></div>`).join('')}</div>`;
-    if(type==='strength')drawLineChart(document.getElementById('exerciseWeightChart'),rows.map(r=>({date:r.date,value:r.weight})));
-    drawLineChart(document.getElementById('exerciseVolumeChart'),rows.map(r=>({date:r.date,value:r.volume})));
-    drawLineChart(document.getElementById('exerciseRepsChart'),rows.map(r=>({date:r.date,value:r.reps||r.duration})));
+    const metrics = type==='strength'
+        ? [
+            ['Рекорд веса',formatKg(Math.max(0,...allRows.map(r=>r.weight)))],
+            ['Рекорд повторов',formatNum(Math.max(0,...allRows.map(r=>r.reps)))+' повт.'],
+            ['Лучший объём',formatKg(Math.max(0,...allRows.map(r=>r.volume)))],
+            ['Тренировок',String(allRows.length)]
+        ]
+        : type==='cardio'
+        ? [
+            ['Макс. время',formatNum(Math.max(0,...allRows.map(r=>r.maxTime)))+' мин'],
+            ['Макс. интенсивность',formatNum(Math.max(0,...allRows.map(r=>r.maxIntensity)))],
+            ['Макс. повторов',formatNum(Math.max(0,...allRows.map(r=>r.reps)))+' повт.'],
+            ['Тренировок',String(allRows.length)]
+        ]
+        : [
+            ['Рекорд повторов',formatNum(Math.max(0,...allRows.map(r=>r.reps)))+' повт.'],
+            ['Тренировок',String(allRows.length)],
+            ['Последний результат',formatNum(last.reps)+' повторов']
+        ];
+
+    const metricHtml=metrics.map(m=>`<div class="progress-metric"><div class="progress-metric-label">${escapeHtml(m[0])}</div><div class="progress-metric-value">${escapeHtml(m[1])}</div></div>`).join('');
+    let changes='';
+    if(type==='strength'){
+        changes=`<div class="analysis-line">Вес: ${progressDelta(first.weight,last.weight,' кг')}</div><div class="analysis-line">Повторы: ${progressDelta(first.reps,last.reps)}</div><div class="analysis-line">Объём: ${progressDelta(first.volume,last.volume,' кг')}</div>`;
+    }else if(type==='cardio'){
+        changes=`<div class="analysis-line">Время: ${progressDelta(first.maxTime,last.maxTime,' мин')}</div><div class="analysis-line">Интенсивность: ${progressDelta(first.maxIntensity,last.maxIntensity)}</div><div class="analysis-line">Повторы: ${progressDelta(first.reps,last.reps)}</div>`;
+    }else{
+        changes=`<div class="analysis-line">Повторы: ${progressDelta(first.reps,last.reps)}</div>`;
+    }
+
+    let charts='';
+    if(type==='strength'){
+        charts=`<div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Вес</div><div class="progress-chart"><canvas id="exerciseWeightChart"></canvas></div></div>
+        <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Повторы</div><div class="progress-chart"><canvas id="exerciseRepsChart"></canvas></div></div>
+        <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Объём</div><div class="progress-chart"><canvas id="exerciseVolumeChart"></canvas></div></div>`;
+    }else if(type==='cardio'){
+        charts=`<div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Время</div><div class="progress-chart"><canvas id="exerciseTimeChart"></canvas></div></div>
+        <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Интенсивность</div><div class="progress-chart"><canvas id="exerciseIntensityChart"></canvas></div></div>
+        <div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Повторы</div><div class="progress-chart"><canvas id="exerciseRepsChart"></canvas></div></div>`;
+    }else{
+        charts=`<div class="progress-section" style="padding:0;background:transparent"><div class="progress-section-title" style="margin-top:12px">Повторы</div><div class="progress-chart"><canvas id="exerciseRepsChart"></canvas></div></div>`;
+    }
+
+    box.innerHTML=`<div class="progress-metrics">${metricHtml}</div>
+    <div class="analysis-card" style="margin-top:10px"><div class="analysis-title">📊 Изменение за период</div>${changes}</div>
+    ${charts}
+    <div style="margin-top:10px"><div class="progress-section-title">История упражнения</div>${rows.slice().reverse().map(r=>{
+        let value='';
+        if(type==='strength') value=`${formatKg(r.weight)} × ${formatNum(r.reps)} повт. · ${formatKg(r.volume)}`;
+        else if(type==='cardio') value=`${formatNum(r.maxTime)} мин · интенсивность ${formatNum(r.maxIntensity)}${r.reps?` · ${formatNum(r.reps)} повт.`:''}`;
+        else value=`${formatNum(r.reps)} повторов`;
+        return `<div class="progress-history-row"><span>${r.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}</span><span>${value}</span></div>`;
+    }).join('')}</div>`;
+
+    if(type==='strength'){
+        drawLineChart(document.getElementById('exerciseWeightChart'),rows.map(r=>({date:r.date,value:r.weight})));
+        drawLineChart(document.getElementById('exerciseVolumeChart'),rows.map(r=>({date:r.date,value:r.volume})));
+        drawLineChart(document.getElementById('exerciseRepsChart'),rows.map(r=>({date:r.date,value:r.reps})));
+    }else if(type==='cardio'){
+        drawLineChart(document.getElementById('exerciseTimeChart'),rows.map(r=>({date:r.date,value:r.maxTime})));
+        drawLineChart(document.getElementById('exerciseIntensityChart'),rows.map(r=>({date:r.date,value:r.maxIntensity})));
+        drawLineChart(document.getElementById('exerciseRepsChart'),rows.map(r=>({date:r.date,value:r.reps})));
+    }else{
+        drawLineChart(document.getElementById('exerciseRepsChart'),rows.map(r=>({date:r.date,value:r.reps})));
+    }
 }
 
 function openExerciseModal(realIdx){
     if(currentProgram===null || !data.programs[currentProgram]) return;
     const program=data.programs[currentProgram]; const name=program.exercises[realIdx]; if(!name)return;
     openedExerciseName=name;
+    exerciseGraphMetric=getExerciseTypeByName(name)==='strength'?'weight':'reps';
     document.getElementById('exerciseModalTitle').textContent=name;
     document.getElementById('exerciseModal').classList.remove('hidden');
     switchExerciseModalTab('history');
 }
 function closeExerciseModal(){document.getElementById('exerciseModal').classList.add('hidden');openedExerciseName=null;}
+let exerciseGraphMetric='weight';
+function getExerciseGraphMetrics(type){
+    if(type==='strength') return [
+        {key:'weight',label:'Вес'},
+        {key:'reps',label:'Повторы'}
+    ];
+    if(type==='cardio') return [
+        {key:'maxTime',label:'Время'},
+        {key:'maxIntensity',label:'Интенсивность'},
+        {key:'reps',label:'Повторы'}
+    ];
+    return [{key:'reps',label:'Повторы'}];
+}
+function renderExerciseGraph(){
+    const name=openedExerciseName;if(!name)return;
+    const type=getExerciseTypeByName(name), all=getExerciseSeries(name,data.history||[]);
+    const metrics=getExerciseGraphMetrics(type);
+    if(!metrics.some(m=>m.key===exerciseGraphMetric)) exerciseGraphMetric=metrics[0]?.key||'reps';
+    const controls=document.getElementById('exerciseGraphControls');
+    if(controls){
+        controls.innerHTML=metrics.map(m=>`<button type="button" class="exercise-graph-metric ${m.key===exerciseGraphMetric?'active':''}" onclick="setExerciseGraphMetric('${m.key}')">${escapeHtml(m.label)}</button>`).join('');
+    }
+    const canvas=document.getElementById('progressGraph');
+    const pts=all.map(r=>({date:r.date,value:Number(r[exerciseGraphMetric])||0}));
+    setTimeout(()=>drawLineChart(canvas,pts),0);
+}
+function setExerciseGraphMetric(metric){exerciseGraphMetric=metric;renderExerciseGraph();}
 function switchExerciseModalTab(tab){
     const modal=document.getElementById('exerciseModal');if(!modal)return;
     modal.querySelectorAll('.tabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
@@ -1415,7 +1680,7 @@ function switchExerciseModalTab(tab){
         const html=all.length?all.slice().reverse().map(r=>{
             let main='';
             if(type==='strength') main=`${formatKg(r.weight)} × ${formatNum(r.reps)} повт.`;
-            else if(type==='cardio') main=`${formatNum(r.maxTime)} мин · интенсивность ${formatNum(r.maxIntensity)}`;
+            else if(type==='cardio') main=`${formatNum(r.maxTime)} мин · интенсивность ${formatNum(r.maxIntensity)}${r.reps ? ` · ${formatNum(r.reps)} повт.` : ''}`;
             else main=`${formatNum(r.reps)} повторов`;
             return `<div class="history-item"><strong>${r.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}</strong><div style="color:var(--subtext);margin-top:4px">${main}</div></div>`;
         }).join(''):'<div class="progress-empty">Истории пока нет</div>';
@@ -1424,10 +1689,7 @@ function switchExerciseModalTab(tab){
         const record=getExerciseRecordData(name);
         document.getElementById('tabRecords').innerHTML=`<div class="best-result">${record.metrics.map(m=>`<div class="best-item"><div class="best-value">${escapeHtml(m[1])}</div><div class="best-label">${escapeHtml(m[0])}</div></div>`).join('')}</div>`;
     } else {
-        const canvas=document.getElementById('progressGraph');
-        const metric=cfg[0];
-        const pts=all.map(r=>({date:r.date,value:Number(r[metric.key])||0}));
-        setTimeout(()=>drawLineChart(canvas,pts),0);
+        renderExerciseGraph();
     }
 }
 
@@ -1590,17 +1852,29 @@ function openNewMeasurementModal() {
     }
 
     const today = new Date().toISOString().slice(0,10);
+    // Для нового замера автоматически подставляем последнее сохранённое
+    // значение каждого параметра. Если в последнем замере параметр пустой,
+    // берём самое свежее непустое значение из истории.
+    const latestValueForField = key => {
+        for(let i=(data.measurements||[]).length-1;i>=0;i--){
+            const value=data.measurements[i]?.[key];
+            if(value!==null && value!==undefined && value!=='') return value;
+        }
+        return '';
+    };
     modal.innerHTML = `
         <div class="catalog-modal-content measurement-manager-modal-content">
             <span class="close-btn" onclick="closeNewMeasurementModal()">&times;</span>
             <div style="font-size:21px;font-weight:800;margin-bottom:4px;">＋ Новый замер</div>
-            <div class="measurement-modal-note">Заполните только те параметры, которые хотите сохранить.</div>
+            <div class="measurement-modal-note">Последние значения подставлены автоматически — измени только то, что поменялось.</div>
             <label class="field-label">Дата</label>
             <input type="date" id="newMeasurementDate" value="${today}">
-            ${fields.map(f => `
+            ${fields.map(f => {
+                const latest=latestValueForField(f.key);
+                return `
                 <label class="field-label">${escapeHtml(f.label)}</label>
-                <input type="number" step="any" id="newMeas_${escapeHtml(f.key)}" placeholder="Введите значение">
-            `).join('')}
+                <input type="number" step="any" id="newMeas_${escapeHtml(f.key)}" value="${latest!==''?escapeHtml(latest):''}" placeholder="Введите значение">`;
+            }).join('')}
             <button onclick="prepareNewMeasurementSave()">💾 Сохранить</button>
             <button class="gray" onclick="closeNewMeasurementModal()">Отмена</button>
         </div>`;
@@ -1963,31 +2237,42 @@ function openBodyGraph() {
 }
 function closeBodyGraph(){ document.getElementById('bodyGraphModal').classList.add('hidden'); }
 function renderBodyGraph(){
-    const key=document.getElementById('bodyGraphField').value;
+    const select=document.getElementById('bodyGraphField');
+    const key=select ? select.value : currentBodyGraphKey;
     currentBodyGraphKey=key;
     const field=getMeasurementFields().find(f=>f.key===key);
-    const points=data.measurements.map((m,i)=>({date:m.date,value:Number(m[key]),i})).filter(p=>Number.isFinite(p.value));
     const summary=document.getElementById('bodyGraphSummary');
-    if(!field) return;
-    if(!points.length){ summary.innerHTML='<div style="color:var(--subtext);">Нет данных для графика.</div>'; return; }
+    const canvas=document.getElementById('bodyGraphCanvas');
+    if(!field || !summary || !canvas) return;
+
+    // Используем тот же отрисовщик, что и графики Progress/Питания.
+    // Это важно для iPhone/Retina: один общий механизм масштабирования canvas.
+    const points=(data.measurements||[])
+        .map(m=>({date:new Date(m.date),value:Number(m[key])}))
+        .filter(p=>Number.isFinite(p.value) && !Number.isNaN(p.date.getTime()))
+        .sort((a,b)=>a.date-b.date);
+
+    if(!points.length){
+        summary.innerHTML='<div style="color:var(--subtext);">Нет данных для графика.</div>';
+        const ctx=canvas.getContext('2d');
+        if(ctx) ctx.clearRect(0,0,canvas.width,canvas.height);
+        return;
+    }
+
     const first=points[0], last=points[points.length-1], diff=last.value-first.value;
-    summary.innerHTML=`<div style="font-weight:700;">${escapeHtml(field.label)}: ${last.value}</div>
-        <div style="color:var(--subtext);font-size:13px;">С первого значения: ${diff>0?'+':''}${diff.toFixed(1).replace(/\.0$/,'')}</div>`;
-    const canvas=document.getElementById('bodyGraphCanvas'), container=canvas.parentElement;
-    canvas.width=Math.max(300,container.clientWidth); canvas.height=270;
-    const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
-    const vals=points.map(p=>p.value), min=Math.min(...vals), max=Math.max(...vals), range=(max-min)||1;
-    const margin={top:20,right:18,bottom:42,left:42}, w=canvas.width-margin.left-margin.right, h=canvas.height-margin.top-margin.bottom, baseY=margin.top+h;
-    ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--border'); ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(margin.left,margin.top);ctx.lineTo(margin.left,baseY);ctx.lineTo(margin.left+w,baseY);ctx.stroke();
-    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--subtext');ctx.font='10px sans-serif';ctx.textAlign='right';
-    for(let i=0;i<=4;i++){const v=min+range*i/4,y=baseY-h*i/4;ctx.fillText(Number(v.toFixed(1)),margin.left-5,y+3);ctx.strokeStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.moveTo(margin.left,y);ctx.lineTo(margin.left+w,y);ctx.stroke();}
-    ctx.strokeStyle='#34c759';ctx.lineWidth=3;ctx.beginPath();
-    points.forEach((p,i)=>{const x=margin.left+(points.length===1?w/2:i*w/(points.length-1)),y=baseY-(p.value-min)/range*h;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
-    ctx.fillStyle='#34c759';points.forEach((p,i)=>{const x=margin.left+(points.length===1?w/2:i*w/(points.length-1)),y=baseY-(p.value-min)/range*h;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();});
-    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--subtext');ctx.font='10px sans-serif';ctx.textAlign='center';
-    const step=Math.max(1,Math.ceil(points.length/6));
-    points.forEach((p,i)=>{if(i%step===0||i===points.length-1){const x=margin.left+(points.length===1?w/2:i*w/(points.length-1));ctx.fillText(new Date(p.date).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}),x,baseY+22);}});
+    const unit=field.unit ? ` ${field.unit}` : '';
+    const diffText=diff===0 ? 'Без изменений' : `С первого значения: ${diff>0?'+':''}${formatNum(diff)}${unit}`;
+    summary.innerHTML=`<div style="font-weight:700;">${escapeHtml(field.label)}: ${formatNum(last.value)}${unit}</div>
+        <div style="color:var(--subtext);font-size:13px;">${diffText}</div>`;
+
+    // Модальное окно только что показалось, поэтому ждём расчёта размеров.
+    // После этого drawLineChart сам корректно создаст HiDPI canvas.
+    const draw=()=>{
+        if(document.getElementById('bodyGraphModal')?.classList.contains('hidden')) return;
+        drawLineChart(canvas,points,{color:getComputedStyle(document.body).getPropertyValue('--button-green').trim()});
+    };
+    requestAnimationFrame(()=>requestAnimationFrame(draw));
+    setTimeout(draw,80);
 }
 
 function confirmStart(index) { pendingProgramIndex=index; document.getElementById('confirmTitle').textContent=data.programs[index].name; showScreen('confirmScreen'); }
@@ -1998,6 +2283,7 @@ function startConfirmed() {
     currentProgram=index;
     currentExerciseIndex=0;
     workoutSets={};
+    seedWorkoutSetsFromHistory();
     workoutStartTime=Date.now();
     startTotalTimer();
     showScreen('workoutScreen');
@@ -2049,11 +2335,93 @@ function updateWorkoutProgressUI(){
 }
 function switchExercise(idx) { stopRestTimer(); currentExerciseIndex=idx; renderExerciseStrip(); renderExercise(); saveDraft(); }
 function getRealExerciseIndex() { const activeEx = getActiveExercises(); const exName = activeEx[currentExerciseIndex]; return data.programs[currentProgram].exercises.indexOf(exName); }
+
+function getPreviousExerciseResult(exerciseName, beforeDate){
+    const history = (data.history || []).slice().sort((a,b)=>{
+        return new Date(b.date || 0) - new Date(a.date || 0);
+    });
+    const cutoff = beforeDate ? new Date(beforeDate) : new Date();
+    for(const entry of history){
+        const entryDate = new Date(entry.date || 0);
+        if(!Number.isFinite(entryDate.getTime())) continue;
+        if(entryDate >= cutoff) continue;
+        const ex = (entry.exercises || []).find(x => x && x.name === exerciseName);
+        if(!ex || !Array.isArray(ex.sets) || !ex.sets.length) continue;
+        const validSets = ex.sets.filter(s => s && (
+            s.weight !== undefined || s.reps !== undefined ||
+            s.time !== undefined || s.durationSeconds !== undefined ||
+            s.intensity !== undefined
+        ));
+        if(validSets.length) return {date: entry.date, exercise: ex, sets: validSets};
+    }
+    return null;
+}
+function formatPreviousSetResult(set, exerciseName){
+    const type = getExerciseTypeByName(exerciseName);
+    if(type === 'cardio'){
+        const parts = [];
+        const time = Number(set.time ?? set.minutes);
+        const durationSeconds = Number(set.durationSeconds);
+        const intensity = Number(set.intensity);
+        const reps = Number(set.reps);
+        if(Number.isFinite(durationSeconds) && durationSeconds > 0) parts.push(`${formatNum(durationSeconds/60)} мин`);
+        else if(Number.isFinite(time) && time > 0) parts.push(`${formatNum(time)} мин`);
+        if(Number.isFinite(intensity) && intensity > 0) parts.push(`инт. ${formatNum(intensity)}`);
+        if(Number.isFinite(reps) && reps > 0) parts.push(`${formatNum(reps)} повт.`);
+        return parts.join(' · ') || 'Данные сохранены';
+    }
+    if(type === 'bodyweight'){
+        const reps = Number(set.reps);
+        return Number.isFinite(reps) && reps > 0 ? `${formatNum(reps)} повторов` : 'Данные сохранены';
+    }
+    const weight = Number(set.weight);
+    const reps = Number(set.reps);
+    if(Number.isFinite(weight) && weight > 0 && Number.isFinite(reps) && reps > 0)
+        return `${formatNum(weight)} кг × ${formatNum(reps)}`;
+    if(Number.isFinite(weight) && weight > 0) return `${formatNum(weight)} кг`;
+    if(Number.isFinite(reps) && reps > 0) return `${formatNum(reps)} повторов`;
+    return 'Данные сохранены';
+}
+
+
+function seedWorkoutSetsFromHistory(){
+    if(currentProgram === null || !data.programs[currentProgram]) return;
+    const program = data.programs[currentProgram];
+    const today = new Date().toISOString();
+
+    program.exercises.forEach((exerciseName, realIdx) => {
+        if(program.active?.[realIdx] === false) return;
+
+        const previous = getPreviousExerciseResult(exerciseName, today);
+        if(!previous || !previous.sets?.length) return;
+
+        // Берём только последний сохранённый подход предыдущей тренировки.
+        // Именно он становится стартовым значением первого нового подхода.
+        const source = previous.sets[previous.sets.length - 1];
+        const type = program.types?.[realIdx] || getExerciseTypeByName(exerciseName);
+        const row = {done:false};
+
+        if(type === 'strength'){
+            row.weight = source.weight ?? '';
+            row.reps = source.reps ?? '';
+        } else if(type === 'cardio'){
+            row.time = source.time ?? source.minutes ?? '';
+            row.intensity = source.intensity ?? '';
+            if(source.reps !== undefined) row.reps = source.reps;
+        } else {
+            row.reps = source.reps ?? '';
+        }
+
+        workoutSets[realIdx] = [row];
+    });
+    saveDraft();
+}
+
 function renderExercise() {
     const program=data.programs[currentProgram]; const activeEx=getActiveExercises();
     if(currentExerciseIndex>=activeEx.length){ finishWorkout(); return; }
     const exerciseName=activeEx[currentExerciseIndex]; const realIdx=program.exercises.indexOf(exerciseName);
-    const type=program.types[realIdx]; const sets=workoutSets[realIdx]||[]; const last=lastResults[exerciseName];
+const type=program.types[realIdx]; const sets=workoutSets[realIdx]||[]; const last=lastResults[exerciseName];
     const isLastExercise=currentExerciseIndex===activeEx.length-1;
     const completedSets=sets.filter(s=>s.done).length;
     let setsHTML='';
@@ -2068,7 +2436,7 @@ function renderExercise() {
     const container=document.getElementById('exerciseContainer');
     container.innerHTML=`<div class="card workout-exercise-card">
         <div class="workout-exercise-kicker"><span>${type==='strength'?'Силовое':type==='cardio'?'Кардио':'С собственным весом'}</span><span>${completedSets}/${sets.length||0} подходов</span></div>
-        <div class="workout-exercise-title" onclick="openExerciseModal(${realIdx})"><span>${escapeHtml(exerciseName)}</span><span class="arrow">›</span></div>
+        <div class="workout-exercise-title" onclick="openExerciseModal(${realIdx})"><span>${escapeHtml(exerciseName)}</span><span class="workout-analytics-link">Аналитика <span class="analytics-arrow">›</span></span></div>
         ${lastHtml}
         <div id="setsList">${setsHTML}</div>
         <div id="restTimerContainer" class="rest-panel hidden">
@@ -2083,11 +2451,6 @@ function renderExercise() {
             <button class="primary-action" onclick="addSet()">＋ Добавить подход</button>
             ${isLastExercise?'':'<button class="next-action" onclick="nextExercise()">Следующее →</button>'}
         </div>
-        <button class="workout-analytics-card" onclick="openExerciseModal(${realIdx})" type="button">
-            <span class="workout-analytics-icon">↗</span>
-            <span class="workout-analytics-copy"><span class="workout-analytics-title">История и рекорд</span><span class="workout-analytics-sub">Открыть график и результаты упражнения</span></span>
-            <span class="workout-analytics-arrow">›</span>
-        </button>
         ${isLastExercise?'<div class="workout-finish-wrap"><button onclick="confirmExitWorkout()">Завершить тренировку</button></div>':''}
     </div>`;
     updateTotalTimer(); updateWorkoutProgressUI();
@@ -2101,7 +2464,10 @@ function addSet() {
     const realIdx = getRealExerciseIndex(); const type = data.programs[currentProgram].types[realIdx];
     if (!workoutSets[realIdx]) workoutSets[realIdx] = [];
     const lastSet = workoutSets[realIdx].slice(-1)[0]; const exercise = data.programs[currentProgram].exercises[realIdx];
-    const prev = lastResults[exercise] || {}; const newSet = { done: false };
+    const historyPrev = getPreviousExerciseResult(exercise, new Date().toISOString());
+    const historySet = historyPrev?.sets?.[historyPrev.sets.length - 1] || {};
+    const prev = lastResults[exercise] || historySet || {};
+    const newSet = { done: false };
     if (type === 'strength') { newSet.weight = lastSet ? lastSet.weight : (prev.weight || ''); newSet.reps = lastSet ? lastSet.reps : (prev.reps || ''); }
     else if (type === 'cardio') { newSet.time = lastSet ? lastSet.time : (prev.time || ''); newSet.intensity = lastSet ? lastSet.intensity : (prev.intensity || ''); }
     else { newSet.reps = lastSet ? lastSet.reps : (prev.reps || ''); }
@@ -2212,6 +2578,7 @@ function closeConfirmExit() { document.getElementById('confirmExitModal').classL
 function exitWorkoutWithoutSaving() { closeConfirmExit(); stopRestTimer(); stopTotalTimer(); clearDraft(); currentProgram = null; goHome(); }
 
 function finishWorkout() {
+    try {
     const sessionDurationSeconds = workoutStartTime ? Math.max(0, Math.floor((Date.now() - workoutStartTime) / 1000)) : 0;
     closeConfirmExit(); stopRestTimer(); stopTotalTimer();
     if (currentProgram === null) return;
@@ -2231,31 +2598,82 @@ function finishWorkout() {
     data.history.push(newHistoryEntry);
     saveData(); clearDraft(); currentProgram = null;
     showWorkoutSummary(newHistoryEntry);
+
+    } catch(err) {
+        console.error('finishWorkout error:', err);
+        stopRestTimer();
+        stopTotalTimer();
+        clearDraft();
+        currentProgram = null;
+        goHome();
+        showToast('Тренировка сохранена');
+    }
 }
 function showWorkoutSummary(entry) {
     const duration = entry.durationSeconds || 0;
     const sets = (entry.exercises||[]).reduce((n,e)=>n+(e.sets||[]).length,0);
     const volume = Math.round(calculateWorkoutVolume(entry));
-    const prev = getPreviousWorkoutForProgram(entry);
-    const comparisons = compareWorkoutEntries(entry, prev);
-    const improved = comparisons.filter(x=>x.diff>0);
+    const hasVolume = volume > 0;
+    const cardioMinutes = (entry.exercises||[]).reduce((sum,e)=>sum+(e.sets||[]).reduce((s,x)=>s+(parseFloat(x.time)||0),0),0);
+    const best = getBestWorkoutForProgram(entry);
+    const comparisons = compareWorkoutEntries(entry, best);
     const records = Object.entries(currentAchievements);
     const title = document.getElementById('workoutSummaryTitle');
     const content = document.getElementById('workoutSummaryContent');
+
+    const bestVolume = best ? Math.round(calculateWorkoutVolume(best)) : 0;
+    const volumeDiff = bestVolume ? volume - bestVolume : 0;
+    const volumePct = bestVolume ? Math.abs(volumeDiff / bestVolume * 100) : 0;
+    const volumeArrow = volumeDiff > 0 ? '↑' : volumeDiff < 0 ? '↓' : '＝';
+    const volumeClass = volumeDiff > 0 ? 'positive' : volumeDiff < 0 ? 'negative' : 'same';
+
+    const labels={weight:'вес',setVolume:'объём подхода',volume:'объём',time:'время',intensity:'интенсивность',reps:'повторы'};
+    const units={weight:' кг',setVolume:' кг',volume:' кг',time:' мин',intensity:'',reps:' повт.'};
+    const formatExerciseBest = (ex,type) => {
+        const sets=ex?.sets||[];
+        if(type==='strength'){
+            const maxSet=getBestStrengthSet(sets);
+            return maxSet ? `${maxSet.weight||0} кг × ${maxSet.reps||0}` : '—';
+        }
+        if(type==='cardio'){
+            const maxSet=sets.reduce((a,b)=>(parseFloat(b.time)||0)>(parseFloat(a?.time)||0)?b:a,null);
+            return maxSet ? `${maxSet.time||0} мин × ${maxSet.intensity||0}` : '—';
+        }
+        const maxSet=sets.reduce((a,b)=>(parseInt(b.reps)||0)>(parseInt(a?.reps)||0)?b:a,null);
+        return maxSet ? `${maxSet.reps||0} повт.` : '—';
+    };
+
+    const comparisonRows = (entry.exercises||[]).map(ex=>{
+        const bestItem = getBestExerciseHistory(ex.name, entry);
+        if(!bestItem) return '';
+        const type=getExerciseTypeByName(ex.name);
+        const currentBestSet=getBestSetForExercise(ex,type);
+        const bestTextSet=getBestSetForExercise(bestItem.ex,type);
+        const currentText=currentBestSet?formatExerciseBest({sets:[currentBestSet]},type):'—';
+        const bestText=bestTextSet?formatExerciseBest({sets:[bestTextSet]},type):'—';
+        const comparison=compareWorkoutEntries({exercises:[ex]},{exercises:[bestItem.ex]}).filter(x=>x.name===ex.name);
+        const primary=comparison.find(x=>x.type==='setVolume'||x.type==='weight'||x.type==='reps'||x.type==='time'||x.type==='intensity') || comparison[0];
+        if(!primary) return `<div class="best-compare-row"><div class="best-compare-name">${escapeHtml(ex.name)}</div><div class="best-compare-values"><span>Сегодня <b>${escapeHtml(currentText)}</b></span><span>Лучший <b>${escapeHtml(bestText)}</b></span><em class="same">＝ лучший результат</em></div></div>`;
+        const pct=primary.best ? Math.abs(primary.diff/primary.best*100) : 0;
+        const cls=primary.diff>0?'positive':primary.diff<0?'negative':'same';
+        const direction=primary.diff>0?'↑':primary.diff<0?'↓':'＝';
+        const text=primary.diff===0?'на уровне лучшего':`${direction} ${Math.abs(Math.round(primary.diff))}${units[primary.type]||''} ${labels[primary.type]||'результат'}${primary.best && pct>=0.1 ? ` · ${Math.round(pct*10)/10}%` : ''}`;
+        return `<div class="best-compare-row"><div class="best-compare-name">${escapeHtml(ex.name)}</div><div class="best-compare-values"><span>Сегодня <b>${escapeHtml(currentText)}</b></span><span>Лучший <b>${escapeHtml(bestText)}</b></span><em class="${cls}">${text}</em></div></div>`;
+    }).join('');
+
     title.textContent = '🏁 Тренировка завершена';
     content.innerHTML = `
-        <div style="font-weight:700;font-size:16px;">${escapeHtml(entry.program)}</div>
+        <div class="summary-program-name">${escapeHtml(entry.program)}</div>
         <div class="smart-summary-grid">
             <div class="smart-stat"><div class="smart-stat-value">${formatTime(duration)}</div><div class="smart-stat-label">ВРЕМЯ</div></div>
             <div class="smart-stat"><div class="smart-stat-value">${entry.exercises.length}</div><div class="smart-stat-label">УПРАЖНЕНИЙ</div></div>
             <div class="smart-stat"><div class="smart-stat-value">${sets}</div><div class="smart-stat-label">ПОДХОДОВ</div></div>
-            <div class="smart-stat"><div class="smart-stat-value">${volume.toLocaleString('ru-RU')}</div><div class="smart-stat-label">ОБЪЁМ, КГ</div></div>
+            <div class="smart-stat"><div class="smart-stat-value">${hasVolume?volume.toLocaleString('ru-RU'):(cardioMinutes?formatNum(cardioMinutes):'—')}</div><div class="smart-stat-label">${hasVolume?'ОБЪЁМ, КГ':'КАРДИО, МИН'}</div></div>
         </div>
-        ${prev ? `<div class="analysis-card"><div class="analysis-title">📈 Сравнение с прошлой тренировкой</div>
-            ${comparisons.length ? comparisons.slice(0,6).map(x=>`<div class="summary-improvement">${escapeHtml(x.name)} — ${x.type==='weight'?'максимальный вес':'объём'}: <b>${x.diff>0?'↑ +':'↓ '}${Math.abs(Math.round(x.diff))}${x.type==='weight'?' кг':' кг'}</b></div>`).join('') : '<div class="analysis-line">Существенных изменений нет.</div>'}
-        </div>` : '<div class="analysis-card"><div class="analysis-title">📈 Сравнение</div><div class="analysis-line">Это первая сохранённая тренировка этого сплита.</div></div>'}
-        ${records.length ? `<div class="analysis-card"><div class="analysis-title">🏆 Личные рекорды</div>${records.map(([ex,txt])=>`<div class="summary-record">✨ ${escapeHtml(ex)}: ${escapeHtml(txt)}</div>`).join('')}</div>` : ''}
-        ${improved.length ? `<div class="analysis-card"><div class="analysis-title">💪 Что улучшилось</div><div class="analysis-line">${improved.length} показател${improved.length===1?'ь':'я'} стали лучше прошлой тренировки.</div></div>` : ''}
+        ${best ? `<div class="analysis-card summary-overall"><div class="analysis-title">📊 Общий объём тренировки</div><div class="overall-result"><span>Сегодня</span><b>${hasVolume ? volume.toLocaleString('ru-RU')+' кг' : formatNum(cardioMinutes)+' мин'}</b></div><div class="overall-result"><span>Максимальный объём тренировки</span><b>${bestVolume ? bestVolume.toLocaleString('ru-RU')+' кг' : '—'}</b></div><div class="overall-diff ${volumeClass}">${volumeArrow} ${bestVolume ? (volumeDiff===0 ? 'На уровне лучшего результата' : `${Math.abs(volumeDiff).toLocaleString('ru-RU')} кг · ${Math.round(volumePct*10)/10}% ${volumeDiff>0?'выше':'ниже'} лучшего`) : 'Недостаточно данных для сравнения'}</div></div>` : `<div class="analysis-card"><div class="analysis-title">📊 Общая аналитика</div><div class="analysis-line">Это первая сохранённая тренировка этого сплита. Дальше приложение начнёт сравнивать результаты с лучшими показателями.</div></div>`}
+        ${records.length ? `<div class="analysis-card records-card"><div class="analysis-title">🏆 Новые рекорды</div>${records.map(([ex,txt])=>`<div class="summary-record"><span>✨ ${escapeHtml(ex)}</span><b>${escapeHtml(txt)}</b></div>`).join('')}</div>` : ''}
+        ${best && comparisonRows ? `<div class="analysis-card best-comparison-card"><div class="analysis-title">📈 Сравнение с лучшими результатами</div><div class="analysis-subtitle">Сравнение одного лучшего подхода упражнения с лучшим подходом за всю историю. Количество подходов не влияет на результат.</div>${comparisonRows}</div>` : ''}
+        <div class="analysis-card final-insight-card"><div class="analysis-title">💡 Итог</div><div class="analysis-line">${records.length ? `Сегодня установлено новых рекордов: <b>${records.length}</b>.` : 'Новых личных рекордов сегодня не установлено.'} ${best && bestVolume ? (volumeDiff>0 ? `Общий объём выше твоего предыдущего максимума на ${Math.round(volumePct*10)/10}%.` : volumeDiff<0 ? `Общий объём ниже твоего максимума на ${Math.round(volumePct*10)/10}%.` : 'Общий объём совпал с твоим максимумом.') : ''}</div></div>
     `;
     document.getElementById('workoutSummaryModal').classList.remove('hidden');
 }
@@ -2274,34 +2692,59 @@ function showSettings() { showScreen('settingsScreen'); renderSettings(); }
 function renderSettings() {
     const editor = document.getElementById('programsEditor');
     editor.innerHTML = data.programs.map((p, idx) => `
-        <div class="card">
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                <input type="checkbox" ${p.programActive ? 'checked' : ''} onchange="toggleProgramActive(${idx}, this.checked)" style="width:22px; height:22px;">
-                <input value="${p.name}" onchange="updateProgramName(${idx}, this.value)" onfocus="if(this.value==='Новая программа') this.value=''" style="font-weight:600; font-size:18px; border:none; background:transparent; color:var(--text); flex:1;">
-                <button class="small-btn gray" onclick="deleteProgram(${idx})" style="width:auto; color:var(--negative);">🗑️</button>
-            </div>
-            <div style="margin-bottom:8px; font-weight:600; color:var(--subtext); font-size:14px;">Упражнения:</div>
-            ${p.exercises.map((ex, exIdx) => `
-                <div class="checkbox-label">
-                    <input type="checkbox" ${p.active[exIdx] ? 'checked' : ''} onchange="toggleExercise(${idx}, ${exIdx}, this.checked)">
-                    <input type="text" value="${ex}" onchange="updateExercise(${idx}, ${exIdx}, this.value)" onfocus="if(this.value==='Новое упражнение'||this.value==='Упражнение 1') this.value=''" style="flex:1; min-width:60px; font-size:16px;">
-                    <select onchange="updateExerciseType(${idx}, ${exIdx}, this.value)" class="inline-select">
-                        <option value="strength" ${p.types[exIdx] === 'strength' ? 'selected' : ''}>Сила</option>
-                        <option value="cardio" ${p.types[exIdx] === 'cardio' ? 'selected' : ''}>Кардио</option>
-                        <option value="bodyweight" ${p.types[exIdx] === 'bodyweight' ? 'selected' : ''}>Повторы</option>
-                    </select>
-                    <button class="small-btn gray" onclick="deleteExercise(${idx}, ${exIdx})" style="width:auto; color:var(--negative);">✕</button>
+        <div class="card programs-original-card" id="splitCard_${idx}">
+            <div class="program-original-header" onclick="toggleSplitCard(${idx})">
+                <div class="program-original-header-main" onclick="event.stopPropagation()">
+                    <input type="checkbox" ${p.programActive ? 'checked' : ''} onchange="toggleProgramActive(${idx}, this.checked)" style="width:22px;height:22px;flex:none;">
+                    <input value="${escapeHtml(p.name.replace(/^Сплит\s*\d+\s*:\s*/i, ''))}" onchange="updateProgramName(${idx}, this.value)" onfocus="if(this.value==='Новая программа') this.value=''" style="font-weight:600;font-size:18px;border:none;background:transparent;color:var(--text);flex:1;min-width:0;">
                 </div>
-            `).join('')}
-            <button onclick="addExercise(${idx})" style="margin-top:8px; font-size:16px;">➕ Добавить упражнение</button>
+                <span class="program-original-chevron">⌄</span>
+            </div>
+
+            <div class="program-original-body">
+                <div style="margin-bottom:8px;font-weight:600;color:var(--subtext);font-size:14px;">Упражнения:</div>
+
+                ${p.exercises.map((ex, exIdx) => `
+                    <div class="checkbox-label">
+                        <input type="checkbox" ${p.active[exIdx] ? 'checked' : ''} onchange="toggleExercise(${idx}, ${exIdx}, this.checked)">
+                        <input type="text" value="${escapeHtml(ex)}" onchange="updateExercise(${idx}, ${exIdx}, this.value)" onfocus="if(this.value==='Новое упражнение'||this.value==='Упражнение 1') this.value=''" style="flex:1;min-width:60px;font-size:16px;">
+                        <select onchange="updateExerciseType(${idx}, ${exIdx}, this.value)" class="inline-select">
+                            <option value="strength" ${p.types[exIdx] === 'strength' ? 'selected' : ''}>Сила</option>
+                            <option value="cardio" ${p.types[exIdx] === 'cardio' ? 'selected' : ''}>Кардио</option>
+                            <option value="bodyweight" ${p.types[exIdx] === 'bodyweight' ? 'selected' : ''}>Повторы</option>
+                        </select>
+                        <button type="button" class="small-btn gray" onclick="deleteExercise(${idx}, ${exIdx})" style="width:auto;color:var(--negative);">✕</button>
+                    </div>
+                `).join('')}
+
+                <div class="program-action-stack">
+                    <button type="button" class="program-add-btn" onclick="addExercise(${idx})">＋ Добавить упражнение</button>
+                    <button type="button" class="gray program-order-btn" onclick="openExerciseOrderModal(${idx})">☰ Изменить порядок</button>
+                </div>
+                <div class="program-delete-row">
+                    <div class="program-delete-info"><span class="program-delete-icon">🗑️</span><span><strong>Удалить сплит</strong><small>Удаляет только программу из списка</small></span></div>
+                    <button type="button" class="program-delete-btn" onclick="deleteProgram(${idx})">Удалить</button>
+                </div>
+            </div>
         </div>
     `).join('');
 }
+function toggleSplitCard(idx){
+    document.getElementById('splitCard_'+idx)?.classList.toggle('open');
+}
+
 function toggleExercise(progIdx, exIdx, isActive) { data.programs[progIdx].active[exIdx] = isActive; saveData(); }
 function updateProgramName(idx, name) { data.programs[idx].name = name; saveData(); }
 function updateExercise(progIdx, exIdx, value) { data.programs[progIdx].exercises[exIdx] = value; saveData(); }
 function updateExerciseType(progIdx, exIdx, value) { data.programs[progIdx].types[exIdx] = value; saveData(); }
-function addExercise(progIdx) { data.programs[progIdx].exercises.push('Новое упражнение'); data.programs[progIdx].active.push(true); data.programs[progIdx].types.push('strength'); saveData(); renderSettings(); }
+function addExercise(progIdx) {
+    data.programs[progIdx].exercises.push('Новое упражнение');
+    data.programs[progIdx].active.push(true);
+    data.programs[progIdx].types.push('strength');
+    saveData();
+    renderSettings();
+    setTimeout(() => document.getElementById('splitCard_'+progIdx)?.classList.add('open'), 0);
+}
 function deleteExercise(progIdx, exIdx) {
     if (data.programs[progIdx].exercises.length <= 1) { showToast('Нельзя удалить последнее упражнение'); return; }
     data.programs[progIdx].exercises.splice(exIdx, 1); data.programs[progIdx].active.splice(exIdx, 1); data.programs[progIdx].types.splice(exIdx, 1);
@@ -2322,7 +2765,7 @@ function renderHistory() {
         const realIdx = data.history.length - 1 - idx;
         return `<div class="card" onclick="viewWorkout(${realIdx})" style="cursor:pointer">
             <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font-weight:600;font-size:18px;">${entry.program}</div>
+                <div style="font-weight:600;font-size:18px;">${escapeHtml(entry.program)}</div>
                 <div style="display:flex;gap:8px;">
                     <button class="small-btn gray" onclick="event.stopPropagation();editHistoryDate(${realIdx})">✏️ ${new Date(entry.date).toLocaleDateString()}</button>
                     <button class="small-btn gray" onclick="event.stopPropagation();deleteHistoryEntry(${realIdx})" style="color:var(--negative);">🗑️</button>
@@ -2368,7 +2811,7 @@ function viewWorkout(index) {
     document.getElementById('workoutDetailTitle').textContent = entry.program + ' — ' + new Date(entry.date).toLocaleDateString();
     let html = '';
     entry.exercises.forEach(ex => {
-        html += `<div style="font-weight:600;margin-top:12px;">${ex.name}</div>`;
+        html += `<div style="font-weight:600;margin-top:12px;">${escapeHtml(ex.name)}</div>`;
         if (!ex.sets || !ex.sets.length) html += '<div style="color:var(--subtext);">Нет данных</div>';
         else ex.sets.forEach((s,i) => { if(s.weight) html+=`<div style="margin-left:12px;">Подход ${i+1}: ${s.weight} кг × ${s.reps}</div>`; else if(s.time) html+=`<div style="margin-left:12px;">Подход ${i+1}: ${s.time} мин × ${s.intensity}</div>`; else html+=`<div style="margin-left:12px;">Подход ${i+1}: ${s.reps} повт.</div>`; });
     });
@@ -2377,33 +2820,120 @@ function viewWorkout(index) {
 }
 function closeWorkoutDetail() { document.getElementById('workoutDetailModal').classList.add('hidden'); }
 
-async function exportData() {
-    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    const file = new File([blob], `ftracker_backup_${new Date().toISOString().slice(0,10)}.json`, { type: 'application/json' });
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-            await navigator.share({ files: [file], title: 'FTracker backup' });
-            localStorage.setItem(LAST_EXPORT_KEY, Date.now().toString());
-            closeExportReminder();
-            showToast('Экспорт выполнен');
-            return;
-        } catch(e) {}
-    }
+function exportData() {
+    // Экспортируем только один резервный файл JSON.
+    // Не используем navigator.share: на iPhone/iPad он может создавать
+    // дополнительное текстовое представление файла при сохранении через меню «Поделиться».
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `ftracker_backup_${date}.json`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ftracker_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = filename;
+    a.type = 'application/json';
+    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     localStorage.setItem(LAST_EXPORT_KEY, Date.now().toString());
     closeExportReminder();
-    showToast('Данные экспортированы');
+    showToast('Данные экспортированы одним JSON-файлом');
 }
 function importData(event) { const file=event.target.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=function(e){try{const json=JSON.parse(e.target.result); if(json.programs&&Array.isArray(json.programs)&&json.history){ pendingImportData=json; document.getElementById('importConfirmModal').classList.remove('hidden'); } else showToast('Неверный формат файла'); }catch(e){showToast('Ошибка чтения файла');}}; reader.readAsText(file); event.target.value=''; }
 function closeImportConfirm() { document.getElementById('importConfirmModal').classList.add('hidden'); pendingImportData=null; }
-function confirmImport() { if(pendingImportData){ data=pendingImportData; saveData(); loadData(); showToast('Данные импортированы'); } closeImportConfirm(); }
+function confirmImport() {
+    if(pendingImportData){
+        data=pendingImportData;
+        lastResults={};
+        localStorage.removeItem('strong_last_results');
+        saveData();
+        
+/* Safe food preset selection: no user text is embedded into inline onclick. */
+let foodPresetDelegationInstalled = false;
+function installFoodPresetDelegation(){
+    if(foodPresetDelegationInstalled) return;
+    foodPresetDelegationInstalled = true;
+    const list = document.getElementById('foodPresetList');
+    if(!list) return;
+    const handlePreset = function(e){
+        const item = e.target.closest ? e.target.closest('.food-preset-item') : null;
+        if(!item || !list.contains(item)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const name = item.getAttribute('data-food-preset-name');
+        if(name != null) selectFoodPreset(name);
+    };
+    list.addEventListener('click', handlePreset, false);
+    list.addEventListener('touchend', handlePreset, false);
+}
+installFoodPresetDelegation();
+
+
+function setupHiDPICanvas(canvas, cssWidth, cssHeight){
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const w = Math.max(1, Math.round(cssWidth));
+    const h = Math.max(1, Math.round(cssHeight));
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx, width:w, height:h, dpr};
+}
+
+
+let foodHistoryDelegationInstalled=false;
+function installFoodHistoryDelegation(){
+    if(foodHistoryDelegationInstalled)return;
+    foodHistoryDelegationInstalled=true;
+    document.addEventListener('click',function(e){
+        const openEl=e.target.closest?e.target.closest('[data-food-history-date]'):null;
+        if(openEl){
+            openFoodDay(openEl.getAttribute('data-food-history-date'));
+            return;
+        }
+        const delEl=e.target.closest?e.target.closest('[data-delete-food-history-date]'):null;
+        if(delEl){
+            deleteFoodDay(delEl.getAttribute('data-delete-food-history-date'));
+        }
+    },false);
+}
+installFoodHistoryDelegation();
+
+
+function resolveCssColor(value, fallback){
+    if(!value) return fallback || '#34c759';
+    if(!value.includes('var(')) return value;
+    const probe = document.createElement('div');
+    probe.style.color = value;
+    document.body.appendChild(probe);
+    const resolved = getComputedStyle(probe).color;
+    probe.remove();
+    return resolved || fallback || '#34c759';
+}
+
+function buildWorkoutAnalysis(entry, previousEntry){
+    const out=[];
+    if(!previousEntry) return out;
+    const comparisons=compareWorkoutEntries(entry,previousEntry);
+    comparisons.forEach(x=>{
+        const direction=x.diff>0?'↑':'↓';
+        const labels={weight:'вес',setVolume:'объём подхода',volume:'объём',time:'время',intensity:'интенсивность',reps:'повторы'};
+        const units={weight:' кг',setVolume:' кг',volume:' кг',time:' мин',intensity:'',reps:' повт.'};
+        out.push({name:x.name,text:`${direction} ${Math.abs(Math.round(x.diff))}${units[x.type]||''} ${labels[x.type]||'результат'}`});
+    });
+    return out;
+}
+
+loadData();
+        showToast('Данные импортированы');
+    }
+    closeImportConfirm();
+}
 
 function openManualWorkoutModal() {
     const splitSelect = document.getElementById('manualSplitSelect');
@@ -2436,6 +2966,7 @@ function saveManualWorkout() {
     if (!hasAny) { showToast('Добавьте хотя бы один подход'); return; }
     data.history.push({
         date: new Date(date).toISOString(),
+        durationSeconds: 0,
         program: program.name,
         exercises: activeEx.map((ex,idx) => ({ name: ex, sets: manualSets[ex] || [] }))
     });
@@ -2509,7 +3040,7 @@ function renderFoodDiary() {
     entriesContainer.innerHTML = dayEntries.map((entry, idx) => {
         const realIdx = data.foodDiary.entries.indexOf(entry);
         return `<div class="food-item">
-            <div style="flex:1;"><div style="font-weight:600;">${entry.name}</div><div style="font-size:14px; color:var(--subtext);">${entry.portion} — ${entry.calories} ккал</div><div style="font-size:12px; color:var(--subtext);">Б ${entry.protein||0} · Ж ${entry.fat||0} · У ${entry.carbs||0}</div></div>
+            <div style="flex:1;"><div style="font-weight:600;">${escapeHtml(entry.name)}</div><div style="font-size:14px; color:var(--subtext);">${entry.portion} — ${entry.calories} ккал</div><div style="font-size:12px; color:var(--subtext);">Б ${entry.protein||0} · Ж ${entry.fat||0} · У ${entry.carbs||0}</div></div>
             <button class="small-btn gray" onclick="editFoodEntry(${realIdx})" style="width:auto;">✏️</button>
             <button class="small-btn gray" onclick="duplicateFoodEntry(${realIdx})" style="width:auto;">📋</button>
             <button class="small-btn gray" onclick="deleteFoodEntry(${realIdx})" style="width:auto;">🗑️</button>
@@ -2528,13 +3059,13 @@ function renderFoodHistory() {
         const dayEntries = data.foodDiary.entries.filter(e => e.date === date);
         let totalCal = 0;
         dayEntries.forEach(e => totalCal += parseFloat(e.calories)||0);
-        return `<div class="card" style="cursor:pointer;" onclick="openFoodDay('${date}')">
+        return `<div class="card" style="cursor:pointer;" data-food-history-date="${escapeHtml(date)}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <div style="font-weight:600;">${getDateWithWeekday(date)}</div>
                     <div style="font-size:14px; color:var(--subtext);">Съедено: ${totalCal} ккал ${lim.calories ? ' / Лимит: '+lim.calories : ''}</div>
                 </div>
-                <button class="small-btn gray" onclick="event.stopPropagation(); deleteFoodDay('${date}')" style="width:auto;">🗑️</button>
+                <button class="small-btn gray" data-delete-food-history-date="${escapeHtml(date)}" style="width:auto;">🗑️</button>
             </div>
         </div>`;
     }).join('');
@@ -2624,88 +3155,44 @@ let chartCustomStart = '';
 let chartCustomEnd = '';
 
 function openChartModal() {
-    document.getElementById('chartModal').classList.remove('hidden');
-    if (chartPeriod === 'custom' && chartCustomStart && chartCustomEnd) {
-        setChartPeriod('custom');
-    } else {
-        setChartPeriod('week');
-    }
-    setChartDataType(chartDataType || 'calories');
-}
-
-function closeChartModal() {
-    document.getElementById('chartModal').classList.add('hidden');
-}
-
-function setChartPeriod(period) {
-    chartPeriod = period;
-
-    document.querySelectorAll('#chartModal .period-selector button').forEach(b => {
-        b.classList.toggle('active', b.dataset.period === period);
+    const modal=document.getElementById('chartModal'); if(!modal) return;
+    modal.classList.remove('hidden');
+    requestAnimationFrame(()=>{
+        setChartPeriod(chartPeriod==='custom'&&chartCustomStart&&chartCustomEnd?'custom':'week',{render:false});
+        setChartDataType(chartDataType||'calories',{render:false});
+        requestAnimationFrame(()=>renderChart());
     });
-
-    const customRange = document.getElementById('chartCustomDateRange');
-
-    if (period === 'custom') {
-        customRange.classList.remove('hidden');
-
-        const entriesDates = data.foodDiary.entries.map(e => e.date).sort();
-        if (!document.getElementById('chartStartDate').value && entriesDates.length) {
-            document.getElementById('chartStartDate').value = entriesDates[0];
-        }
-        if (!document.getElementById('chartEndDate').value && entriesDates.length) {
-            document.getElementById('chartEndDate').value = entriesDates[entriesDates.length - 1];
-        }
-
-        if (chartCustomStart && chartCustomEnd) {
-            document.getElementById('chartStartDate').value = chartCustomStart;
-            document.getElementById('chartEndDate').value = chartCustomEnd;
-            renderChart();
-        }
-    } else {
-        customRange.classList.add('hidden');
-        renderChart();
-    }
 }
-
-function setChartDataType(type) {
-    chartDataType = type;
-
-    document.querySelectorAll('#chartModal .data-type-selector button').forEach(b => {
-        b.classList.toggle('active', b.dataset.type === type);
-    });
-
-    renderChart();
+function closeChartModal(){document.getElementById('chartModal')?.classList.add('hidden');}
+function setChartPeriod(period,options={}){
+    chartPeriod=period;
+    document.querySelectorAll('#chartModal .period-selector button').forEach(b=>{const active=b.dataset.period===period;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');});
+    const customRange=document.getElementById('chartCustomDateRange');
+    if(period==='custom'){
+        customRange?.classList.remove('hidden');
+        const dates=(data.foodDiary?.entries||[]).map(e=>e.date).filter(Boolean).sort();
+        const start=document.getElementById('chartStartDate'),end=document.getElementById('chartEndDate');
+        if(start&&!start.value&&dates.length)start.value=dates[0];
+        if(end&&!end.value&&dates.length)end.value=dates[dates.length-1];
+        if(chartCustomStart&&chartCustomEnd){if(start)start.value=chartCustomStart;if(end)end.value=chartCustomEnd;}
+    }else customRange?.classList.add('hidden');
+    if(options.render!==false)requestAnimationFrame(()=>renderChart());
 }
-
-function applyChartCustom() {
-    let start = document.getElementById('chartStartDate').value;
-    let end = document.getElementById('chartEndDate').value;
-
-    if (!start || !end) {
-        showToast('Выберите дату начала и окончания');
-        return;
-    }
-
-    if (start > end) {
-        [start, end] = [end, start];
-        document.getElementById('chartStartDate').value = start;
-        document.getElementById('chartEndDate').value = end;
-    }
-
-    chartCustomStart = start;
-    chartCustomEnd = end;
-    chartPeriod = 'custom';
-
-    document.querySelectorAll('#chartModal .period-selector button').forEach(b => {
-        b.classList.toggle('active', b.dataset.period === 'custom');
-    });
-
-    document.getElementById('chartCustomDateRange').classList.remove('hidden');
-    renderChart();
-    showToast(`Период: ${formatShortDate(start)} — ${formatShortDate(end)}`);
+function setChartDataType(type,options={}){
+    chartDataType=type;
+    document.querySelectorAll('#chartModal .data-type-selector button').forEach(b=>{const active=b.dataset.type===type;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');});
+    if(options.render!==false)requestAnimationFrame(()=>renderChart());
 }
-
+function applyChartCustom(){
+    let start=document.getElementById('chartStartDate')?.value,end=document.getElementById('chartEndDate')?.value;
+    if(!start||!end){showToast('Выберите дату начала и окончания');return;}
+    if(start>end)[start,end]=[end,start];
+    document.getElementById('chartStartDate').value=start;document.getElementById('chartEndDate').value=end;
+    chartCustomStart=start;chartCustomEnd=end;chartPeriod='custom';
+    document.querySelectorAll('#chartModal .period-selector button').forEach(b=>b.classList.toggle('active',b.dataset.period==='custom'));
+    document.getElementById('chartCustomDateRange')?.classList.remove('hidden');
+    requestAnimationFrame(()=>renderChart());showToast(`Период: ${formatShortDate(start)} — ${formatShortDate(end)}`);
+}
 function formatShortDate(dateStr) {
     const parts = dateStr.split('-');
     return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : dateStr;
@@ -2743,168 +3230,162 @@ function renderChart() {
     const range = getChartDateRange();
     if (!range) return;
 
-    const ctx = canvas.getContext('2d');
     const container = canvas.parentElement;
-    canvas.width = Math.max(300, container.clientWidth);
-    canvas.height = 260;
+    if (!container) return;
 
-    const { startStr, endStr } = range;
+    const startStr = range.startStr;
+    const endStr = range.endStr;
     const caption = document.getElementById('chartRangeCaption');
     if (caption) caption.textContent = `${formatShortDate(startStr)} — ${formatShortDate(endStr)}`;
 
-    const dailyData = {
-        calories: {},
-        protein: {},
-        fat: {},
-        carbs: {}
-    };
+    const dailyData = { calories:{}, protein:{}, fat:{}, carbs:{} };
+    const entries = Array.isArray(data?.foodDiary?.entries) ? data.foodDiary.entries : [];
 
-    data.foodDiary.entries.forEach(e => {
-        if (e.date >= startStr && e.date <= endStr) {
-            dailyData.calories[e.date] = (dailyData.calories[e.date] || 0) + (parseFloat(e.calories) || 0);
-            dailyData.protein[e.date] = (dailyData.protein[e.date] || 0) + (parseFloat(e.protein) || 0);
-            dailyData.fat[e.date] = (dailyData.fat[e.date] || 0) + (parseFloat(e.fat) || 0);
-            dailyData.carbs[e.date] = (dailyData.carbs[e.date] || 0) + (parseFloat(e.carbs) || 0);
+    entries.forEach(e => {
+        const date = String(e.date || '');
+        if (date >= startStr && date <= endStr) {
+            dailyData.calories[date] = (dailyData.calories[date] || 0) + (parseFloat(e.calories) || 0);
+            dailyData.protein[date]  = (dailyData.protein[date]  || 0) + (parseFloat(e.protein)  || 0);
+            dailyData.fat[date]      = (dailyData.fat[date]      || 0) + (parseFloat(e.fat)      || 0);
+            dailyData.carbs[date]    = (dailyData.carbs[date]    || 0) + (parseFloat(e.carbs)    || 0);
         }
     });
 
-    const typesToShow = chartDataType === 'all'
-        ? ['calories', 'protein', 'fat', 'carbs']
-        : [chartDataType];
-
     const allDates = [];
-    let cursor = new Date(startStr + 'T12:00:00');
+    const cursor = new Date(startStr + 'T12:00:00');
     const endDate = new Date(endStr + 'T12:00:00');
-
     while (cursor <= endDate) {
         allDates.push(localDateString(cursor));
         cursor.setDate(cursor.getDate() + 1);
     }
 
+    const typesToShow = chartDataType === 'all'
+        ? ['calories','protein','fat','carbs']
+        : [CHART_COLORS[chartDataType] ? chartDataType : 'calories'];
+
     const hasAnyValue = allDates.some(date =>
-        typesToShow.some(type => (dailyData[type][date] || 0) > 0)
+        typesToShow.some(type => Number(dailyData[type][date] || 0) !== 0)
     );
 
-    if (!hasAnyValue) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
-        ctx.font = '14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Нет данных для отображения', canvas.width / 2, canvas.height / 2);
-        document.getElementById('chartLegend').innerHTML = '';
-        return;
+    // The exercise/progress graphs use drawLineChart. Use the exact same renderer
+    // for a single nutrition metric so iPhone/Retina canvas scaling is identical.
+    if (typesToShow.length === 1) {
+        const type = typesToShow[0];
+        const points = allDates.map(date => ({
+            date: new Date(date + 'T12:00:00'),
+            value: Number(dailyData[type][date] || 0)
+        }));
+        drawLineChart(canvas, points, { color: CHART_COLORS[type] });
+    } else {
+        drawFoodMultiChart(canvas, allDates, dailyData, typesToShow);
     }
-
-    let maxVal = 0;
-    typesToShow.forEach(type => {
-        allDates.forEach(date => {
-            maxVal = Math.max(maxVal, dailyData[type][date] || 0);
-        });
-    });
-
-    maxVal = maxVal || 1;
-    const minVal = 0;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const margin = { top: 20, right: 20, bottom: 42, left: 50 };
-    const chartWidth = Math.max(1, canvas.width - margin.left - margin.right);
-    const chartHeight = canvas.height - margin.top - margin.bottom;
-    const baseY = margin.top + chartHeight;
-    const stepX = chartWidth / Math.max(1, allDates.length - 1);
-
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.left, margin.top);
-    ctx.lineTo(margin.left, baseY);
-    ctx.lineTo(margin.left + chartWidth, baseY);
-    ctx.stroke();
-
-    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'right';
-
-    const ySteps = 4;
-    for (let i = 0; i <= ySteps; i++) {
-        const value = minVal + (maxVal - minVal) * (i / ySteps);
-        const y = baseY - (chartHeight * i / ySteps);
-
-        ctx.fillText(Math.round(value), margin.left - 5, y + 3);
-
-        ctx.beginPath();
-        ctx.moveTo(margin.left, y);
-        ctx.lineTo(margin.left + chartWidth, y);
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-        ctx.stroke();
-        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border');
-    }
-
-    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--subtext');
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-
-    const totalDates = allDates.length;
-    const labelStep = totalDates <= 7 ? 1 : (totalDates <= 31 ? Math.ceil(totalDates / 7) : Math.ceil(totalDates / 10));
-
-    allDates.forEach((date, i) => {
-        if (i % labelStep === 0 || i === allDates.length - 1) {
-            const d = new Date(date + 'T12:00:00');
-            const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-            const label = totalDates <= 7
-                ? days[d.getDay()]
-                : `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${days[d.getDay()]}`;
-
-            const x = margin.left + i * stepX;
-            ctx.fillText(label, x, baseY + 22);
-        }
-    });
-
-    typesToShow.forEach(type => {
-        ctx.strokeStyle = CHART_COLORS[type];
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-
-        allDates.forEach((date, i) => {
-            const value = dailyData[type][date] || 0;
-            const x = margin.left + i * stepX;
-            const y = baseY - ((value - minVal) / (maxVal - minVal)) * chartHeight;
-
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        });
-
-        ctx.stroke();
-
-        ctx.fillStyle = CHART_COLORS[type];
-        allDates.forEach((date, i) => {
-            const value = dailyData[type][date] || 0;
-            const x = margin.left + i * stepX;
-            const y = baseY - ((value - minVal) / (maxVal - minVal)) * chartHeight;
-
-            ctx.beginPath();
-            ctx.arc(x, y, 4, 0, Math.PI * 2);
-            ctx.fill();
-        });
-    });
 
     const legendContainer = document.getElementById('chartLegend');
-    if (typesToShow.length > 1) {
+    if (legendContainer) {
         legendContainer.innerHTML = typesToShow.map(type => `
             <div class="legend-item">
                 <span class="legend-dot" style="background:${CHART_COLORS[type]}"></span>
                 ${CHART_LABELS[type]}
             </div>
         `).join('');
-    } else {
-        legendContainer.innerHTML = `
-            <div class="legend-item">
-                <span class="legend-dot" style="background:${CHART_COLORS[typesToShow[0]]}"></span>
-                ${CHART_LABELS[typesToShow[0]]}
-            </div>
-        `;
     }
+
+    // drawLineChart already shows an empty-state message, but keep the information
+    // in the DOM as well so the user never gets an unexplained empty gray canvas.
+    if (!hasAnyValue && caption) caption.textContent += ' · нет записей';
 }
+
+function drawFoodMultiChart(canvas, dates, dailyData, types) {
+    if (!canvas) return;
+    const box = canvas.parentElement;
+    const rect = box?.getBoundingClientRect?.();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const w = Math.max(280, Math.round(rect?.width || box?.clientWidth || 300));
+    const h = Math.max(180, Math.round(rect?.height || box?.clientHeight || 240));
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+
+    const sub = getComputedStyle(document.body).getPropertyValue('--subtext').trim() || '#999';
+    const border = getComputedStyle(document.body).getPropertyValue('--border').trim() || 'rgba(128,128,128,.18)';
+    const margin = {top:18,right:14,bottom:34,left:48};
+    const cw = Math.max(1,w-margin.left-margin.right);
+    const ch = Math.max(1,h-margin.top-margin.bottom);
+    const base = margin.top + ch;
+    const stepX = cw / Math.max(1,dates.length-1);
+
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 1;
+    ctx.font = '10px sans-serif';
+    ctx.fillStyle = sub;
+    ctx.textAlign = 'right';
+    for(let i=0;i<=4;i++){
+        const y = base - ch*i/4;
+        ctx.beginPath(); ctx.moveTo(margin.left,y); ctx.lineTo(margin.left+cw,y); ctx.stroke();
+        ctx.fillText(i === 0 ? '0' : String(i*25)+'%', margin.left-5, y+3);
+    }
+
+    types.forEach(type=>{
+        const vals = dates.map(d=>Number(dailyData[type][d]||0));
+        const max = Math.max(1,...vals);
+        const color = CHART_COLORS[type] || '#34c759';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        vals.forEach((v,i)=>{
+            const x = margin.left + i*stepX;
+            const y = base - (v/max)*ch;
+            if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        });
+        ctx.stroke();
+        ctx.fillStyle = color;
+        vals.forEach((v,i)=>{
+            const x = margin.left + i*stepX;
+            const y = base - (v/max)*ch;
+            ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+        });
+    });
+
+    ctx.fillStyle = sub;
+    ctx.textAlign = 'center';
+    const step = Math.max(1,Math.ceil(dates.length/6));
+    dates.forEach((date,i)=>{
+        if(i%step===0 || i===dates.length-1){
+            const d = new Date(date+'T12:00:00');
+            ctx.fillText(d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}), margin.left+i*stepX, base+20);
+        }
+    });
+}
+
+
+let chartInteractionDelegationInstalled=false;
+function installChartInteractionDelegation(){
+    if(chartInteractionDelegationInstalled)return;
+    chartInteractionDelegationInstalled=true;
+    const modal=document.getElementById('chartModal'); if(!modal)return;
+    let lastHandled=0;
+    const handle=e=>{
+        const button=e.target?.closest?.('#chartModal .period-selector button,#chartModal .data-type-selector button,#chartModal .apply-period-btn');
+        if(!button)return;
+        const now=Date.now();
+        if(e.type==='click' && now-lastHandled<500)return;
+        lastHandled=now;
+        e.preventDefault();
+        e.stopPropagation();
+        if(button.dataset.period) setChartPeriod(button.dataset.period);
+        else if(button.dataset.type) setChartDataType(button.dataset.type);
+        else if(button.classList.contains('apply-period-btn')) applyChartCustom();
+    };
+    modal.addEventListener('click',handle,false);
+    modal.addEventListener('touchend',handle,{passive:false});
+}
+installChartInteractionDelegation();
+
 
 function renderCatalogList() {
     const container = document.getElementById('catalogContainer');
@@ -2915,7 +3396,7 @@ function renderCatalogList() {
     container.innerHTML = data.productCatalog.map((prod, idx) => `
         <div class="food-item">
             <div style="flex:1;">
-                <div style="font-weight:600;">${prod.name}</div>
+                <div style="font-weight:600;">${escapeHtml(prod.name)}</div>
                 <div style="font-size:12px; color:var(--subtext);">
                     ${prod.type === 'dish' 
                         ? `Блюдо: ${prod.calories} ккал, Б ${prod.protein}, Ж ${prod.fat}, У ${prod.carbs}` 
@@ -2991,6 +3472,16 @@ function saveCatalogProduct() {
         product.fat100 = parseFloat(document.getElementById('catalogFat100').value) || 0;
         product.carbs100 = parseFloat(document.getElementById('catalogCarbs100').value) || 0;
         if (!product.cal100) { showToast('Введите калории на 100 г'); return; }
+    }
+
+    // Не допускаем одинаковые названия в каталоге. Сравнение точное после trim.
+    // При редактировании текущая запись исключается из проверки.
+    const duplicateIndex = data.productCatalog.findIndex((p, i) =>
+        i !== editingCatalogProduct && String(p.name || '').trim() === name
+    );
+    if (duplicateIndex !== -1) {
+        showToast('Продукт с таким названием уже есть в каталоге');
+        return;
     }
 
     if (editingCatalogProduct !== null) {
@@ -3132,8 +3623,8 @@ function filterFoodPresets() {
         } else if (item.cal100 !== undefined) {
             info = ` (на 100г: ${item.cal100} ккал)`;
         }
-        return `<div class="food-preset-item" onclick="selectFoodPreset('${item.name.replace(/'/g, "\\'")}')">
-            ${item.name} ${info}
+        return `<div class="food-preset-item" data-food-preset-name="${escapeHtml(item.name)}" role="button" tabindex="0">
+            ${escapeHtml(item.name)} ${info}
         </div>`;
     }).join('');
     list.classList.remove('hidden');
@@ -3224,7 +3715,7 @@ function addFoodEntry() {
         showToast('Запись обновлена');
     } else {
         data.foodDiary.entries.push(entryData);
-        const existingInCatalog = data.productCatalog.find(p => p.name === name);
+        const existingInCatalog = data.productCatalog.find(p => String(p.name || '').trim() === name);
         if (!existingInCatalog) {
             if (currentFoodMode === '100') {
                 data.productCatalog.push({
@@ -3354,25 +3845,29 @@ if ('serviceWorker' in navigator) {
 }
 
 
-/* ===== FINAL: Exercise Progress only — clean mobile UX ===== */
+
+/* ===== Exercise Progress — modal exercise list ===== */
 window.progressExerciseQuery = window.progressExerciseQuery || '';
 window.progressSelectedExercise = window.progressSelectedExercise || '';
-function setProgressPeriod(period){ progressPeriod=period; renderProgressDashboard(); }
+
+function setProgressPeriod(period){
+    progressPeriod=period;
+    renderProgressDashboard();
+}
 function setProgressExerciseSearch(value){
     window.progressExerciseQuery=value||'';
-    // Пока пользователь печатает, ничего не выбираем автоматически.
-    renderProgressDashboard(true);
+    renderProgressExercisePicker();
 }
 function chooseProgressExercise(name){
     window.progressSelectedExercise=name;
-    // Выбранное упражнение становится значением единственного поля выбора.
-    window.progressExerciseQuery=name;
-    renderProgressDashboard(false);
+    window.progressExerciseQuery='';
+    closeProgressExercisePicker();
+    renderProgressDashboard();
 }
 function clearProgressExercise(){
     window.progressExerciseQuery='';
     window.progressSelectedExercise='';
-    renderProgressDashboard(true);
+    renderProgressDashboard();
 }
 function progressDelta(first,last,unit){
     if(!Number.isFinite(first)||!Number.isFinite(last)) return '<span class="progress-ex-neutral">—</span>';
@@ -3381,15 +3876,85 @@ function progressDelta(first,last,unit){
     const pct=first!==0?(diff/first*100):null, sign=diff>0?'+':'';
     return `<span class="${diff>0?'progress-ex-positive':'progress-ex-negative'}">${sign}${formatNum(diff)}${unit}${pct!==null?` (${pct>0?'+':''}${pct.toFixed(1)}%)`:''}</span>`;
 }
-function renderProgressDashboard(keepSearchFocus){
+function getProgressExerciseNames(){
+    const names = new Set();
+
+    // Any exercise that has saved history is eligible for progress analysis,
+    // regardless of whether it is strength, reps or cardio.
+    (data.history || []).forEach(entry => {
+        (entry.exercises || []).forEach(ex => {
+            if(!ex || !ex.name || !(ex.sets || []).length) return;
+            names.add(ex.name);
+        });
+    });
+
+    // Also include currently active exercises if they already have history.
+    (data.programs || []).forEach(program => {
+        (program.exercises || []).forEach((name, idx) => {
+            if(!name || program.active?.[idx] === false) return;
+            const rows = getExerciseSeries(name, getHistoryInPeriod('all'));
+            if(rows && rows.length) names.add(name);
+        });
+    });
+
+    return [...names].sort((a,b)=>a.localeCompare(b,'ru'));
+}
+function openProgressExercisePicker(){
+    const modal=document.getElementById('progressExercisePickerModal');
+    if(!modal)return;
+    const input=document.getElementById('progressExercisePickerSearch');
+    if(input)input.value='';
+    renderProgressExercisePicker();
+    modal.classList.remove('hidden');
+}
+function closeProgressExercisePicker(){
+    document.getElementById('progressExercisePickerModal')?.classList.add('hidden');
+}
+function renderProgressExercisePicker(){
+    const list=document.getElementById('progressPickerList');
+    const input=document.getElementById('progressExercisePickerSearch');
+    if(!list)return;
+    const q=(input?.value||'').trim().toLocaleLowerCase('ru');
+    const current=window.progressSelectedExercise||'';
+    const names=getProgressExerciseNames().filter(n=>!q||n.toLocaleLowerCase('ru').includes(q));
+    if(!names.length){
+        list.innerHTML='<div style="padding:22px;text-align:center;color:var(--subtext);">Упражнений с сохранёнными данными не найдено</div>';
+        return;
+    }
+    /* Не используем inline onclick с названием упражнения: кавычки/апострофы в имени
+       могут ломать HTML-атрибут. Обработчик навешивается через delegation ниже. */
+    list.innerHTML=names.map((name,i)=>{
+        const rows=getExerciseSeries(name,getHistoryInPeriod('all'))||[];
+        const last=rows[rows.length-1];
+        let detail=`Тренировок: ${rows.length}`;
+        if(last){
+            const type=getExerciseTypeByName(name);
+            if(type==='strength') detail+=` · ${formatKg(last.weight)} × ${formatNum(last.reps)}`;
+            else if(type==='cardio') detail+=` · ${formatNum(last.maxTime)} мин`;
+            else detail+=` · ${formatNum(last.reps)} повт.`;
+        }
+        const safeName=progressEsc(name);
+        return `<button type="button" class="progress-picker-row ${name===current?'selected':''}" data-progress-exercise-index="${i}" aria-label="Выбрать ${safeName}">
+            <span class="progress-picker-row-main"><strong>${safeName}</strong><small>${progressEsc(detail)}</small></span>
+            <span class="progress-picker-row-mark">${name===current?'✓':'›'}</span>
+        </button>`;
+    }).join('');
+    list.querySelectorAll('[data-progress-exercise-index]').forEach((button,index)=>{
+        button.addEventListener('click',function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            const namesNow=getProgressExerciseNames().filter(n=>!q||n.toLocaleLowerCase('ru').includes(q));
+            const name=namesNow[index];
+            if(name) chooseProgressExercise(name);
+        },{passive:false});
+    });
+}
+function renderProgressDashboard(){
     const container=document.getElementById('progressContent'); if(!container)return;
     const names=getAllExerciseNames();
     const selected=names.includes(window.progressSelectedExercise)?window.progressSelectedExercise:'';
     window.progressSelectedExercise=selected;
-    const query=(window.progressExerciseQuery||'').trim();
-    const normalized=query.toLocaleLowerCase('ru');
-    const showMatches=Boolean(normalized) && !(selected && query===selected);
-    const matches=showMatches ? names.filter(n=>n.toLocaleLowerCase('ru').includes(normalized)).slice(0,10) : [];
+
     const history=getHistoryInPeriod(progressPeriod).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
     const rows=selected?getExerciseSeries(selected,history):[];
     const type=selected?getExerciseTypeByName(selected):'strength';
@@ -3399,13 +3964,6 @@ function renderProgressDashboard(keepSearchFocus){
     const periodLabel=progressPeriod==='all'?'Всё время':`Последние ${progressPeriod} дней`;
     const metricKey=window.progressMetricKey && cfg.some(c=>c.key===window.progressMetricKey) ? window.progressMetricKey : (cfg[0]?.key||'');
     window.progressMetricKey=metricKey;
-
-    let pickerResults='';
-    if(showMatches && matches.length){
-        pickerResults=`<div class="progress-ex-results">${matches.map(n=>`<button class="progress-ex-result" onclick='chooseProgressExercise(${JSON.stringify(n)})' type="button"><span>${progressEsc(n)}</span><span class="progress-ex-result-arrow">›</span></button>`).join('')}</div>`;
-    } else if(showMatches && !matches.length){
-        pickerResults='<div class="progress-ex-no-results">Ничего не найдено</div>';
-    }
 
     let metrics='';
     if(record) metrics=record.metrics.map(m=>`<div class="progress-ex-metric"><div class="progress-ex-metric-label">${escapeHtml(m[0])}</div><div class="progress-ex-metric-value">${escapeHtml(m[1])}</div></div>`).join('');
@@ -3417,6 +3975,7 @@ function renderProgressDashboard(keepSearchFocus){
 
     const metricButtons=cfg.map(c=>`<button type="button" class="progress-chart-metric ${metricKey===c.key?'active':''}" onclick="setProgressMetric('${c.key}')">${escapeHtml(c.label)}</button>`).join('');
     const activeMetric=cfg.find(c=>c.key===metricKey) || cfg[0];
+
     const chartBlock=(selected&&rows.length&&activeMetric)?`
         <div class="progress-ex-section progress-chart-section">
             <div class="progress-ex-section-head"><div><div class="progress-ex-section-title">Динамика</div></div><span class="progress-section-chevron">⌄</span></div>
@@ -3429,33 +3988,111 @@ function renderProgressDashboard(keepSearchFocus){
         historyHtml=rows.slice().reverse().map(r=>{
             let main='';
             if(type==='strength') main=`${formatKg(r.weight)} × ${formatNum(r.reps)} повт.`;
-            else if(type==='cardio') main=`${formatNum(r.maxTime)} мин · интенсивность ${formatNum(r.maxIntensity)}`;
+            else if(type==='cardio') main=`${formatNum(r.maxTime)} мин · интенсивность ${formatNum(r.maxIntensity)}${r.reps ? ` · ${formatNum(r.reps)} повт.` : ''}`;
             else main=`${formatNum(r.reps)} повторов`;
             return `<div class="progress-ex-history-row"><span class="progress-ex-history-date">${r.date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}</span><span class="progress-ex-history-value">${main}${type==='strength'?`<small>Объём ${formatKg(r.volume)}</small>`:''}</span></div>`;
         }).join('');
     } else historyHtml='<div class="progress-ex-no-results">За выбранный период данных нет</div>';
+
+    const pickerButton=selected
+      ? `<div class="progress-selected-exercise"><span><small>Выбрано упражнение</small><strong>${progressEsc(selected)}</strong></span><button type="button" onclick="openProgressExercisePicker()">Изменить</button></div>`
+      : `<button type="button" class="progress-open-picker" onclick="openProgressExercisePicker()">Выбрать упражнение <span>›</span></button>`;
 
     container.innerHTML=`<div class="progress-ex">
         <div class="progress-ex-head"><div class="progress-ex-title">Прогресс упражнений</div></div>
         <div class="progress-ex-period"><button class="${progressPeriod===30?'active':''}" onclick="setProgressPeriod(30)" type="button">30 дней</button><button class="${progressPeriod===90?'active':''}" onclick="setProgressPeriod(90)" type="button">90 дней</button><button class="${progressPeriod==='all'?'active':''}" onclick="setProgressPeriod('all')" type="button">Всё время</button></div>
         <div class="progress-ex-picker">
             <div class="progress-ex-picker-label">Упражнение</div>
-            <div class="progress-ex-search-wrap"><span class="progress-ex-search-icon">⌕</span><input id="progressExerciseSearch" class="progress-ex-search" value="${progressEsc(query)}" oninput="setProgressExerciseSearch(this.value)" placeholder="Начни вводить название…" autocomplete="off"><button class="progress-ex-search-clear ${query?'visible':''}" onclick="clearProgressExercise()" aria-label="Очистить" type="button">×</button></div>
-            ${pickerResults}
-            ${selected?`<div class="progress-ex-current-inline"><span class="progress-ex-current-dot"></span><span class="progress-ex-current-name">${progressEsc(selected)}</span><button type="button" onclick="clearProgressExercise()" aria-label="Сменить упражнение">Изменить</button></div>`:''}
+            ${pickerButton}
         </div>
-        ${selected?`<div class="progress-ex-section"><div class="progress-ex-section-title">Сводка</div><div class="progress-ex-section-sub">${progressEsc(periodLabel)} · рекорды считаются за всё время.</div><div class="progress-ex-metrics">${metrics}</div>${changes?`<div class="progress-ex-change">${changes}</div>`:''}</div>`:`<div class="progress-ex-empty-state"><div class="progress-ex-empty-icon">⌕</div><div class="progress-ex-empty-title">Найди упражнение</div><div class="progress-ex-empty-sub">Введи несколько букв — покажу только подходящие упражнения.</div></div>`}
+        ${selected?`<div class="progress-ex-section"><div class="progress-ex-section-title">Сводка</div><div class="progress-ex-section-sub">${progressEsc(periodLabel)} · рекорды считаются за всё время.</div><div class="progress-ex-metrics">${metrics}</div>${changes?`<div class="progress-ex-change">${changes}</div>`:''}</div>`:`<div class="progress-ex-empty-state"><div class="progress-ex-empty-icon">⌕</div><div class="progress-ex-empty-title">Выбери упражнение</div><div class="progress-ex-empty-sub">Открой список и выбери упражнение, по которому уже есть сохранённые результаты.</div></div>`}
         ${chartBlock}
         ${selected?`<div class="progress-ex-section progress-history-section"><div class="progress-ex-section-head"><div><div class="progress-ex-section-title">История</div><div class="progress-ex-section-sub">Результаты по тренировкам за выбранный период.</div></div><span class="progress-section-chevron">⌄</span></div><div class="progress-ex-history">${historyHtml}</div></div>`:''}
     </div>`;
-    if(keepSearchFocus){const el=document.getElementById('progressExerciseSearch');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}}
-    if(selected&&rows.length&&activeMetric){drawLineChart(document.getElementById('progressExChartMain'),rows.map(r=>({date:r.date,value:Number(r[activeMetric.key])||0})))}
+
+    if(selected&&rows.length&&activeMetric){
+        drawLineChart(document.getElementById('progressExChartMain'),rows.map(r=>({date:r.date,value:Number(r[activeMetric.key])||0})));
+    }
 }
 function setProgressMetric(key){ window.progressMetricKey=key; renderProgressDashboard(); }
 
-window.addEventListener('resize',()=>{ if(!document.getElementById('progressScreen')?.classList.contains('hidden')) renderProgressDashboard(); });
+
+/* ===== Program order: reliable position editor for iPhone/Yandex ===== */
+let exerciseOrderProgramIndex = null;
+let exerciseOrderDraft = null;
+function openExerciseOrderModal(idx) {
+    const p = data.programs[idx];
+    if (!p) return;
+    exerciseOrderProgramIndex = idx;
+    exerciseOrderDraft = {
+        exercises: [...p.exercises],
+        active: [...p.active],
+        types: [...p.types]
+    };
+    document.getElementById('exerciseOrderTitle').textContent = 'Порядок · ' + p.name;
+    renderExerciseOrderModal();
+    document.getElementById('exerciseOrderModal').classList.remove('hidden');
+}
+function closeExerciseOrderModal() {
+    document.getElementById('exerciseOrderModal').classList.add('hidden');
+    exerciseOrderProgramIndex = null;
+    exerciseOrderDraft = null;
+}
+function moveDraftToPosition(from, to) {
+    if (!exerciseOrderDraft || from === to) return;
+    const keys = ['exercises','active','types'];
+    keys.forEach(key => {
+        const item = exerciseOrderDraft[key].splice(from, 1)[0];
+        exerciseOrderDraft[key].splice(to, 0, item);
+    });
+    renderExerciseOrderModal();
+}
+function renderExerciseOrderModal() {
+    const p = exerciseOrderProgramIndex === null ? null : data.programs[exerciseOrderProgramIndex];
+    const list = document.getElementById('exerciseOrderList');
+    if (!p || !list || !exerciseOrderDraft) return;
+    document.getElementById('exerciseOrderTitle').textContent = 'Порядок · ' + p.name;
+    list.innerHTML = exerciseOrderDraft.exercises.map((name, i) => {
+        const options = exerciseOrderDraft.exercises.map((_, pos) => `<option value="${pos}" ${pos === i ? 'selected' : ''}>${pos + 1}</option>`).join('');
+        return `<div class="order-position-row">\n            <div class="order-position-num">${i + 1}</div>\n            <div class="order-position-name">${escapeHtml(name)}</div>\n            <select class="order-position-select" onchange="moveDraftToPosition(${i}, Number(this.value))" aria-label="Новая позиция">${options}</select>\n        </div>`;
+    }).join('');
+}
+function saveExerciseOrder() {
+    if (exerciseOrderProgramIndex === null || !exerciseOrderDraft) return;
+    const p = data.programs[exerciseOrderProgramIndex];
+    p.exercises = [...exerciseOrderDraft.exercises];
+    p.active = [...exerciseOrderDraft.active];
+    p.types = [...exerciseOrderDraft.types];
+    saveData();
+    const idx = exerciseOrderProgramIndex;
+    closeExerciseOrderModal();
+    renderSettings();
+    setTimeout(() => document.getElementById('splitCard_' + idx)?.classList.add('open'), 0);
+    renderHome();
+    showToast('Порядок упражнений сохранён');
+}
 
 loadData();
 </script>
+
+<div id="progressExercisePickerModal" class="date-modal hidden" onclick="if(event.target===this)closeProgressExercisePicker()">
+  <div class="date-modal-content" style="max-height:82vh;display:flex;flex-direction:column;">
+    <span class="close-btn" onclick="closeProgressExercisePicker()">&times;</span>
+    <div style="font-size:20px;font-weight:700;margin-bottom:5px;">Упражнения с прогрессом</div>
+    <div style="font-size:13px;color:var(--subtext);margin-bottom:12px;">Выбери упражнение, по которому уже есть сохранённые данные.</div>
+    <input id="progressExercisePickerSearch" placeholder="🔎 Поиск упражнения" autocomplete="off" oninput="renderProgressExercisePicker()">
+    <div id="progressPickerList" class="progress-picker-list" style="margin-top:10px;"></div>
+  </div>
+</div>
+<div id="exerciseOrderModal" class="date-modal hidden" onclick="if(event.target===this)closeExerciseOrderModal()">
+  <div class="date-modal-content" style="max-height:82vh;display:flex;flex-direction:column;">
+    <span class="close-btn" onclick="closeExerciseOrderModal()">&times;</span>
+    <div id="exerciseOrderTitle" style="font-size:20px;font-weight:700;margin-bottom:5px;">Порядок упражнений</div>
+    <div style="font-size:13px;color:var(--subtext);margin-bottom:12px;">Для каждого упражнения выбери новую позицию. Изменения применятся только после «Сохранить порядок».</div>
+    <div id="exerciseOrderList" class="order-position-list"></div>
+    <button type="button" onclick="saveExerciseOrder()" style="margin-top:12px;">Сохранить порядок</button>
+    <button type="button" class="gray" onclick="closeExerciseOrderModal()">Отмена</button>
+  </div>
+</div>
 </body>
 </html>
