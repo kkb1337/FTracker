@@ -2735,12 +2735,48 @@ function toggleSplitCard(idx){
 
 function toggleExercise(progIdx, exIdx, isActive) { data.programs[progIdx].active[exIdx] = isActive; saveData(); }
 function updateProgramName(idx, name) { data.programs[idx].name = name; saveData(); }
-function updateExercise(progIdx, exIdx, value) { data.programs[progIdx].exercises[exIdx] = value; saveData(); }
+function normalizeExerciseName(value) {
+    return String(value || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru');
+}
+function exerciseNameExists(progIdx, value, excludeIndex = -1) {
+    const normalized = normalizeExerciseName(value);
+    if (!normalized) return false;
+    const exercises = data.programs[progIdx]?.exercises || [];
+    return exercises.some((name, i) => i !== excludeIndex && normalizeExerciseName(name) === normalized);
+}
+function updateExercise(progIdx, exIdx, value) {
+    const program = data.programs[progIdx];
+    if (!program) return;
+    const oldValue = program.exercises[exIdx];
+    const name = String(value || '').trim().replace(/\s+/g, ' ');
+    if (!name) {
+        showToast('Название упражнения не может быть пустым');
+        renderSettings();
+        setTimeout(() => document.getElementById('splitCard_'+progIdx)?.classList.add('open'), 0);
+        return;
+    }
+    if (exerciseNameExists(progIdx, name, exIdx)) {
+        showToast('Упражнение с таким названием уже есть в этом сплите');
+        renderSettings();
+        setTimeout(() => document.getElementById('splitCard_'+progIdx)?.classList.add('open'), 0);
+        return;
+    }
+    program.exercises[exIdx] = name;
+    saveData();
+}
 function updateExerciseType(progIdx, exIdx, value) { data.programs[progIdx].types[exIdx] = value; saveData(); }
 function addExercise(progIdx) {
-    data.programs[progIdx].exercises.push('Новое упражнение');
-    data.programs[progIdx].active.push(true);
-    data.programs[progIdx].types.push('strength');
+    const program = data.programs[progIdx];
+    if (!program) return;
+    let base = 'Новое упражнение';
+    let name = base;
+    let n = 2;
+    while (exerciseNameExists(progIdx, name)) {
+        name = `${base} ${n++}`;
+    }
+    program.exercises.push(name);
+    program.active.push(true);
+    program.types.push('strength');
     saveData();
     renderSettings();
     setTimeout(() => document.getElementById('splitCard_'+progIdx)?.classList.add('open'), 0);
@@ -2891,14 +2927,18 @@ function installFoodHistoryDelegation(){
     if(foodHistoryDelegationInstalled)return;
     foodHistoryDelegationInstalled=true;
     document.addEventListener('click',function(e){
+        // Сначала обрабатываем корзину: кнопка находится внутри карточки даты,
+        // поэтому прежний обработчик карточки перехватывал клик и не давал удалить день.
+        const delEl=e.target.closest?e.target.closest('[data-delete-food-history-date]'):null;
+        if(delEl){
+            e.preventDefault();
+            e.stopPropagation();
+            deleteFoodDay(delEl.getAttribute('data-delete-food-history-date'));
+            return;
+        }
         const openEl=e.target.closest?e.target.closest('[data-food-history-date]'):null;
         if(openEl){
             openFoodDay(openEl.getAttribute('data-food-history-date'));
-            return;
-        }
-        const delEl=e.target.closest?e.target.closest('[data-delete-food-history-date]'):null;
-        if(delEl){
-            deleteFoodDay(delEl.getAttribute('data-delete-food-history-date'));
         }
     },false);
 }
