@@ -703,6 +703,162 @@ button{min-height:44px;}
 .exercise-graph-metric.active{background:var(--button-green)!important;border-color:var(--button-green)!important;color:#fff!important;}
 </style>
 
+
+<style id="replace-exercise-picker-css">
+.replace-exercise-sheet{max-height:88vh!important;overflow:hidden!important;padding:22px 18px 16px!important;}
+.replace-sheet-title{font-size:23px;font-weight:850;letter-spacing:-.4px;}
+.replace-sheet-current{margin-top:4px;color:var(--subtext);font-size:14px;font-weight:650;}
+.replace-search-wrap{position:relative;margin:18px 0 12px;}
+.replace-search-wrap input{width:100%;height:48px!important;padding:0 42px 0 42px!important;border-radius:15px!important;background:var(--surface-2)!important;border:1px solid rgba(255,255,255,.08)!important;font-size:16px!important;}
+.replace-search-icon{position:absolute;left:15px;top:50%;transform:translateY(-53%);font-size:25px;color:var(--subtext);z-index:2;pointer-events:none;}
+.replace-search-clear{position:absolute!important;right:7px;top:7px;width:34px!important;height:34px!important;padding:0!important;border-radius:50%!important;background:rgba(255,255,255,.08)!important;color:var(--subtext)!important;font-size:22px!important;line-height:1!important;box-shadow:none!important;}
+.replace-exercise-list{max-height:43vh;overflow:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch;}
+.replace-split-group{margin-bottom:12px;}
+.replace-split-title{display:flex;align-items:center;gap:8px;padding:8px 4px 7px;color:var(--subtext);font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.9px;}
+.replace-split-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:0 0 auto;}
+.replace-exercise-option{display:flex;align-items:center;width:100%;min-height:50px;padding:9px 12px;margin:4px 0;border:1px solid rgba(255,255,255,.055);border-radius:14px;background:var(--surface-2);color:var(--text);text-align:left;cursor:pointer;transition:transform .12s,background .12s,border-color .12s;}
+.replace-exercise-option:active{transform:scale(.985);background:var(--card-bg);}
+.replace-exercise-option.selected{border-color:var(--accent);background:rgba(102,210,102,.10);}
+.replace-exercise-option.disabled{opacity:.42;pointer-events:none;}
+.replace-option-name{font-size:16px;font-weight:750;line-height:1.2;flex:1;min-width:0;}
+.replace-option-type{font-size:11px;color:var(--subtext);margin-left:8px;white-space:nowrap;}
+.replace-option-check{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin-left:9px;border:1px solid rgba(255,255,255,.16);color:transparent;font-size:13px;font-weight:900;}
+.replace-exercise-option.selected .replace-option-check{background:var(--accent);border-color:var(--accent);color:#101010;}
+.replace-empty{padding:26px 12px;text-align:center;color:var(--subtext);font-size:14px;}
+.replace-create-btn{display:flex!important;align-items:center!important;gap:11px!important;width:100%!important;min-height:58px!important;margin:7px 0 10px!important;padding:10px 13px!important;border-radius:15px!important;background:rgba(102,210,102,.08)!important;border:1px solid rgba(102,210,102,.30)!important;color:var(--text)!important;box-shadow:none!important;text-align:left!important;}
+.replace-create-icon{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#111;display:grid;place-items:center;font-size:22px;font-weight:800;flex:0 0 auto;}
+.replace-create-btn strong{display:block;font-size:15px;line-height:1.2;}
+.replace-create-btn small{display:block;color:var(--subtext);font-size:11px;margin-top:3px;}
+.replace-row-arrow{margin-left:auto;color:var(--subtext);font-size:26px;line-height:1;}
+.replace-new-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px;}
+.replace-new-fields input,.replace-new-fields select{margin:0!important;height:46px!important;}
+.replace-sheet-note{padding:10px 2px 11px;color:var(--subtext);font-size:12px;line-height:1.35;}
+.replace-confirm-btn{margin-top:0!important;}
+@media(max-height:720px){.replace-exercise-list{max-height:34vh;}.replace-exercise-sheet{max-height:92vh!important;}}
+</style>
+<style id="workout-last-result-polish">
+.workout-last-result{display:flex!important;align-items:center!important;gap:14px!important;}
+.workout-last-copy{min-width:0!important;flex:1!important;}
+.workout-last-value{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+</style>
+<style id="workout-replace-css">
+.workout-title-actions{margin-left:auto;display:inline-flex;align-items:center;gap:8px;flex:none;}
+.workout-replace-btn{width:auto!important;min-width:0!important;padding:7px 9px!important;border-radius:10px!important;background:var(--surface-2)!important;color:var(--subtext)!important;font-size:12px!important;font-weight:800!important;line-height:1!important;box-shadow:none!important;}
+.workout-replace-btn:active{transform:scale(.97);}
+#replaceExerciseModal .exercise-modal-content{max-height:85vh;overflow:auto;}
+</style>
+
+<style id="workout-ui-polish-v7">
+/* Premium workout header polish */
+#workoutScreen .workout-exercise-card{
+  padding:18px!important;
+  border-radius:24px!important;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 96%,#fff 4%),var(--card-bg))!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.16);
+}
+.workout-exercise-heading{display:block;margin-bottom:14px;}
+.workout-exercise-heading .workout-exercise-title{
+  display:block!important;
+  font-size:clamp(24px,6.5vw,29px)!important;
+  line-height:1.08!important;
+  margin:0 0 12px!important;
+  letter-spacing:-.02em;
+  cursor:pointer;
+}
+.workout-exercise-name{display:block;overflow-wrap:anywhere;}
+.workout-title-actions{
+  width:100%;
+  display:grid!important;
+  grid-template-columns:1fr 1.35fr;
+  gap:8px;
+  margin:0!important;
+}
+.workout-title-actions button{
+  min-height:44px!important;
+  margin:0!important;
+  border-radius:13px!important;
+  padding:10px 12px!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+}
+.workout-replace-btn{
+  border:1px solid var(--border)!important;
+  background:var(--input-bg)!important;
+  color:var(--subtext)!important;
+}
+.workout-replace-btn .replace-icon{font-size:17px;line-height:1;font-weight:900;}
+.workout-replace-btn:active{background:var(--card-bg)!important;}
+.workout-title-actions .workout-analytics-link{
+  border:1px solid color-mix(in srgb,var(--positive) 45%,var(--border))!important;
+  background:rgba(52,199,89,.10)!important;
+  color:var(--positive)!important;
+  font-size:13px!important;
+}
+.workout-title-actions .workout-analytics-link .analytics-arrow{font-size:22px!important;font-weight:500!important;line-height:.7;}
+.workout-last-result{
+  margin-top:2px!important;
+  margin-bottom:14px!important;
+  border:1px solid var(--border);
+  padding:10px 11px!important;
+}
+.workout-last-value{font-size:15px!important;}
+.workout-exercise-kicker{margin-bottom:9px!important;}
+#exerciseStrip{gap:7px!important;padding-bottom:11px!important;}
+#exerciseStrip .exercise-dot{
+  min-height:46px!important;
+  padding:9px 12px!important;
+  border-radius:15px!important;
+  font-size:13px!important;
+  max-width:240px;
+}
+#exerciseStrip .exercise-dot.active{box-shadow:0 4px 14px rgba(52,199,89,.12)!important;}
+.workout-set-row{border:1px solid color-mix(in srgb,var(--border) 70%,transparent)!important;}
+.workout-actions{gap:9px!important;margin-top:15px!important;}
+.workout-actions button{border-radius:14px!important;font-weight:800!important;}
+@media(max-width:420px){
+  #workoutScreen .workout-exercise-card{padding:16px!important;border-radius:22px!important;}
+  .workout-exercise-heading .workout-exercise-title{font-size:25px!important;margin-bottom:11px!important;}
+  .workout-title-actions{grid-template-columns:1fr 1.25fr;}
+  .workout-title-actions button{min-height:43px!important;font-size:12.5px!important;}
+}
+</style>
+
+<style id="workout-ui-polish-v9">
+#workoutScreen .workout-exercise-card{position:relative;padding:18px 16px 16px!important;border:1px solid rgba(255,255,255,.07)!important;border-radius:26px!important;background:linear-gradient(180deg,rgba(42,42,45,.98),rgba(30,30,32,.98))!important;box-shadow:0 14px 34px rgba(0,0,0,.22);}
+#workoutScreen .workout-exercise-kicker{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 12px!important;font-size:12px!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:var(--subtext)!important;font-weight:800!important;}
+#workoutScreen .workout-exercise-heading{margin:0 0 14px!important;}
+#workoutScreen .workout-exercise-heading .workout-exercise-title{font-size:clamp(27px,7vw,34px)!important;line-height:1.02!important;letter-spacing:-.035em!important;margin:0 0 13px!important;}
+#workoutScreen .workout-title-actions{display:grid!important;grid-template-columns:auto 1fr!important;gap:8px!important;width:100%!important;}
+#workoutScreen .workout-title-actions button{min-height:40px!important;border-radius:13px!important;padding:9px 13px!important;font-size:13px!important;letter-spacing:-.01em!important;}
+#workoutScreen .workout-replace-btn{justify-content:center!important;border:1px solid rgba(255,255,255,.09)!important;background:rgba(255,255,255,.055)!important;color:#c5c5c9!important;}
+#workoutScreen .workout-title-actions .workout-analytics-link{justify-content:center!important;border:1px solid rgba(99,210,108,.30)!important;background:rgba(99,210,108,.11)!important;color:#68d274!important;}
+#workoutScreen .workout-last-result{display:grid!important;grid-template-columns:42px minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;margin:0 0 14px!important;padding:12px!important;border-radius:17px!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.06)!important;}
+#workoutScreen .workout-last-icon{width:42px!important;height:42px!important;border-radius:13px!important;display:flex!important;align-items:center!important;justify-content:center!important;background:rgba(255,255,255,.055)!important;font-size:20px!important;}
+#workoutScreen .workout-best-badge{color:#68d274!important;font-weight:800!important;font-size:13px!important;white-space:nowrap!important;cursor:pointer;}
+#workoutScreen #setsList{display:flex;flex-direction:column;gap:7px;margin-bottom:13px;}
+#workoutScreen .workout-set-row{display:grid!important;grid-template-columns:42px minmax(0,1fr) 54px 44px!important;align-items:center!important;gap:7px!important;padding:7px!important;border-radius:16px!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.055)!important;}
+#workoutScreen .workout-set-row input{min-width:0!important;height:48px!important;border-radius:12px!important;background:rgba(0,0,0,.20)!important;border:1px solid transparent!important;font-size:18px!important;font-weight:700!important;text-align:center!important;padding:0 8px!important;}
+#workoutScreen .set-num{width:42px!important;height:42px!important;border-radius:12px!important;display:flex!important;align-items:center!important;justify-content:center!important;background:rgba(255,255,255,.055)!important;color:#b8b8bc!important;font-weight:800!important;}
+#workoutScreen .set-done-btn,#workoutScreen .set-delete-btn{width:44px!important;height:44px!important;border-radius:12px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+#workoutScreen .set-done-btn{background:rgba(255,255,255,.06)!important;font-size:22px!important;}
+#workoutScreen .set-done-btn.done{background:#62d26d!important;color:#071008!important;}
+#workoutScreen .set-delete-btn{background:rgba(255,255,255,.045)!important;font-size:17px!important;}
+#workoutScreen .workout-actions{display:grid!important;grid-template-columns:1.2fr .8fr!important;gap:8px!important;margin-top:4px!important;}
+#workoutScreen .workout-actions button{min-height:52px!important;border-radius:16px!important;font-size:15px!important;font-weight:850!important;}
+#workoutScreen .workout-finish-wrap button{min-height:52px!important;border-radius:16px!important;margin-top:8px!important;}
+#workoutScreen #exerciseStrip{padding:2px 0 12px!important;gap:8px!important;}
+#workoutScreen #exerciseStrip .exercise-dot{min-height:48px!important;padding:9px 14px!important;border-radius:16px!important;border:1px solid rgba(255,255,255,.055)!important;background:#2b2b2e!important;font-size:15px!important;font-weight:800!important;}
+#workoutScreen #exerciseStrip .exercise-dot.active{background:rgba(99,210,108,.11)!important;border-color:#62d26d!important;color:#f3f3f3!important;}
+#workoutScreen #exerciseStrip .exercise-dot.done{opacity:.72;}
+@media(max-width:390px){#workoutScreen .workout-set-row{grid-template-columns:36px minmax(0,1fr) 48px 40px!important;gap:5px!important}.workout-set-row input{font-size:16px!important}.workout-title-actions{grid-template-columns:1fr 1.25fr!important}.workout-title-actions button{padding:9px 8px!important;font-size:12px!important}}
+</style>
 </head>
 <body>
 <div class="container" id="app">
@@ -836,6 +992,44 @@ button{min-height:44px;}
         <button onclick="document.getElementById('importFile').click(); closeThemeModal();" class="gray" style="margin-top:8px;">📥 Импортировать</button>
         <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
         <div id="lastExportInfo" style="color:var(--subtext); margin-top:12px; font-size:14px;"></div>
+    </div>
+</div>
+<div id="replaceExerciseModal" class="exercise-modal hidden" onclick="if(event.target === this) closeReplaceExerciseModal()">
+    <div class="exercise-modal-content replace-exercise-sheet">
+        <span class="modal-close-btn" onclick="closeReplaceExerciseModal()">&times;</span>
+        <div class="replace-sheet-head">
+            <div>
+                <div class="replace-sheet-title">Заменить упражнение</div>
+                <div id="replaceExerciseCurrent" class="replace-sheet-current"></div>
+            </div>
+        </div>
+
+        <div class="replace-search-wrap">
+            <span class="replace-search-icon">⌕</span>
+            <input id="replaceExerciseSearch" type="search" autocomplete="off" placeholder="Поиск упражнения" oninput="filterReplaceExerciseList(this.value)">
+            <button id="replaceSearchClear" type="button" class="replace-search-clear hidden" onclick="clearReplaceExerciseSearch()">×</button>
+        </div>
+
+        <div id="replaceExerciseList" class="replace-exercise-list"></div>
+
+        <button type="button" class="replace-create-btn" onclick="selectNewReplacement()">
+            <span class="replace-create-icon">＋</span>
+            <span><strong>Добавить новое</strong><small>Создать упражнение прямо сейчас</small></span>
+            <span class="replace-row-arrow">›</span>
+        </button>
+
+        <div id="replaceNewExerciseFields" class="replace-new-fields hidden">
+            <input id="replaceNewExerciseName" type="text" placeholder="Название нового упражнения" maxlength="80">
+            <select id="replaceNewExerciseType">
+                <option value="strength">Сила</option>
+                <option value="cardio">Кардио</option>
+                <option value="bodyweight">Повторы</option>
+            </select>
+        </div>
+
+        <div class="replace-sheet-note">Замена действует только в текущей тренировке. Программы сплитов не изменяются.</div>
+        <button type="button" class="replace-confirm-btn" onclick="confirmReplaceExercise()">Заменить упражнение</button>
+        <button type="button" class="gray" onclick="closeReplaceExerciseModal()">Отмена</button>
     </div>
 </div>
 <div id="exerciseModal" class="exercise-modal hidden" onclick="if(event.target === this) closeExerciseModal()">
@@ -1146,6 +1340,11 @@ let data = {
 };
 
 let currentProgram = null, currentExerciseIndex = 0, workoutSets = {}, workoutStartTime = null;
+let workoutExerciseSlots = [];
+// Exercises borrowed from another split exist only inside the current workout.
+// Negative slot references point into this transient array and are never saved to data.programs.
+let workoutTransientExercises = [];
+let replacementSlotIndex = null;
 let totalTimerInterval = null, restTimerInterval = null, restEndTime = null, lastResults = {};
 let pendingProgramIndex = null, openedExerciseName = null, editingHistoryIndex = null;
 let pendingDeleteType = null, pendingDeleteIndex = null, pendingDeleteDate = null;
@@ -1230,10 +1429,10 @@ function loadData() {
 }
 
 function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) { showToast('Ошибка сохранения'); } }
-function saveDraft() { if (currentProgram === null) return; localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime })); }
+function saveDraft() { if (currentProgram === null) return; localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime, exerciseSlots: workoutExerciseSlots, transientExercises: workoutTransientExercises })); }
 function clearDraft() { localStorage.removeItem(DRAFT_KEY); document.getElementById('draftBanner').classList.add('hidden'); }
 function checkDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (draft) { try { const p = JSON.parse(draft); if (p.programIndex !== undefined) document.getElementById('draftBanner').classList.remove('hidden'); } catch(e) {} } }
-function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); /* clearDraft(); УДАЛЕНО: не очищаем черновик при восстановлении */ } catch(e) { clearDraft(); } }
+function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutTransientExercises = Array.isArray(p.transientExercises) ? p.transientExercises : []; const savedSlots = Array.isArray(p.exerciseSlots) ? p.exerciseSlots : []; workoutExerciseSlots = savedSlots.length ? savedSlots.map(Number).filter(ref=>Number.isInteger(ref) && (ref>=0 ? !!data.programs[currentProgram]?.exercises?.[ref] : !!workoutTransientExercises[-ref-1])) : (data.programs[currentProgram]?.exercises||[]).map((_,i)=>i).filter(i=>data.programs[currentProgram].active?.[i]); workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); } catch(e) { clearDraft(); } }
 function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EXPORT_KEY); if (lastExport && (Date.now() - parseInt(lastExport)) > 7*24*60*60*1000) document.getElementById('exportReminder').classList.remove('hidden'); }
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
@@ -1632,11 +1831,202 @@ function renderSelectedExerciseProgress(name,history){
     }
 }
 
+function getWorkoutReplacementCandidates() {
+    const currentSlots = new Set(getActiveExerciseIndices());
+    const result = [];
+    const seenPerProgram = new Set();
+
+    (data.programs || []).forEach((p, pi) => {
+        const splitName = String(p?.name || `Сплит ${pi+1}`).replace(/^Сплит\s*\d+\s*:\s*/i,'').trim() || `Сплит ${pi+1}`;
+        (p.exercises || []).forEach((name, i) => {
+            const normalized = normalizeExerciseName(name);
+            if (!normalized) return;
+            const key = `${pi}:${normalized}`;
+            if (seenPerProgram.has(key)) return;
+            seenPerProgram.add(key);
+            const isCurrentProgram = pi === currentProgram;
+            const isCurrentExercise = isCurrentProgram && currentSlots.has(i);
+            // Активное упражнение текущей тренировки не предлагаем повторно.
+            if (isCurrentExercise) return;
+            result.push({
+                name: String(name).trim(),
+                type: p.types?.[i] || 'strength',
+                programIndex: pi,
+                exerciseIndex: i,
+                inCurrentProgram: isCurrentProgram,
+                currentIndex: isCurrentProgram ? i : -1,
+                splitName,
+                source:'program'
+            });
+        });
+    });
+
+    // В каталоге показываем только упражнения, которые принадлежат существующим сплитам.
+    // История тренировок не является отдельным источником упражнений и никогда не
+    // создаёт дополнительную группу «Из истории». Если упражнение когда-либо
+    // существовало, оно уже находится в одном из сплитов.
+    return result;
+}
+
+let replaceExerciseCandidates = [];
+let replaceExerciseSelectedKey = '__none__';
+let replaceExerciseSearchText = '';
+
+function replacementCandidateKey(c){
+    return `${c.source}:${c.programIndex}:${c.exerciseIndex}:${normalizeExerciseName(c.name)}`;
+}
+function selectReplacementCandidate(key){
+    const c=replaceExerciseCandidates.find(x=>replacementCandidateKey(x)===key);
+    if(!c) return;
+    replaceExerciseSelectedKey=key;
+    document.getElementById('replaceNewExerciseFields')?.classList.add('hidden');
+    renderReplaceExerciseList(replaceExerciseSearchText);
+}
+function selectNewReplacement(){
+    replaceExerciseSelectedKey='__new__';
+    document.getElementById('replaceNewExerciseFields')?.classList.remove('hidden');
+    document.getElementById('replaceNewExerciseName')?.focus();
+    renderReplaceExerciseList(replaceExerciseSearchText);
+}
+function filterReplaceExerciseList(value){
+    replaceExerciseSearchText=String(value||'').trim();
+    const clear=document.getElementById('replaceSearchClear');
+    if(clear) clear.classList.toggle('hidden',!replaceExerciseSearchText);
+    renderReplaceExerciseList(replaceExerciseSearchText);
+}
+function clearReplaceExerciseSearch(){
+    const input=document.getElementById('replaceExerciseSearch');
+    if(input) input.value='';
+    filterReplaceExerciseList('');
+    input?.focus();
+}
+function renderReplaceExerciseList(query=''){
+    const list=document.getElementById('replaceExerciseList');
+    if(!list) return;
+    const q=normalizeExerciseName(query);
+    const filtered=replaceExerciseCandidates.filter(c=>!q || normalizeExerciseName(c.name).includes(q));
+    const groups=[];
+    const groupMap=new Map();
+    filtered.forEach(c=>{
+        const key=`${c.source}:${c.programIndex}:${c.splitName}`;
+        if(!groupMap.has(key)){ const g={key,title:c.splitName,items:[]}; groupMap.set(key,g); groups.push(g); }
+        groupMap.get(key).items.push(c);
+    });
+    groups.forEach(g=>g.items.sort((a,b)=>a.name.localeCompare(b.name,'ru')));
+    if(!groups.length){
+        list.innerHTML='<div class="replace-empty">Ничего не найдено.<br>Попробуй другое название.</div>';
+        return;
+    }
+
+    // Не используем inline onclick: название упражнения может содержать кавычки,
+    // апострофы и другие символы, из-за которых обработчик в HTML-атрибуте ломается.
+    // Каждая строка получает data-replace-key, а клик назначается через JS после рендера.
+    list.innerHTML=groups.map(g=>`<div class="replace-split-group">
+        <div class="replace-split-title"><span class="replace-split-dot"></span>${escapeHtml(g.title)}</div>
+        ${g.items.map(c=>{
+            const key=replacementCandidateKey(c), selected=replaceExerciseSelectedKey===key;
+            const typeLabel=c.type==='strength'?'Сила':c.type==='cardio'?'Кардио':'Повторы';
+            return `<button type="button" class="replace-exercise-option ${selected?'selected':''}" data-replace-key="${escapeHtml(key)}" aria-label="Выбрать ${escapeHtml(c.name)}">
+                <span class="replace-option-name">${escapeHtml(c.name)}</span>
+                <span class="replace-option-type">${typeLabel}</span>
+                <span class="replace-option-check">${selected?'✓':'›'}</span>
+            </button>`;
+        }).join('')}
+    </div>`).join('');
+
+    list.querySelectorAll('[data-replace-key]').forEach(button=>{
+        button.addEventListener('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            selectReplacementCandidate(this.getAttribute('data-replace-key') || '');
+        }, {passive:false});
+    });
+}
+function openReplaceExerciseModal(slotIndex){
+    if(currentProgram===null || !data.programs[currentProgram]) return;
+    const slots=getActiveExerciseIndices();
+    if(slotIndex<0 || slotIndex>=slots.length) return;
+    replacementSlotIndex=slotIndex;
+    const currentIdx=slots[slotIndex], program=data.programs[currentProgram];
+    const currentName=getWorkoutExercise(currentIdx)?.name || program.exercises[currentIdx];
+    document.getElementById('replaceExerciseCurrent').textContent=`Сейчас: ${currentName}`;
+    replaceExerciseCandidates=getWorkoutReplacementCandidates().filter(c=>!(c.inCurrentProgram && c.currentIndex===currentIdx));
+    replaceExerciseSelectedKey=replaceExerciseCandidates.length ? replacementCandidateKey(replaceExerciseCandidates[0]) : '__new__';
+    replaceExerciseSearchText='';
+    const input=document.getElementById('replaceExerciseSearch');
+    if(input) input.value='';
+    document.getElementById('replaceSearchClear')?.classList.add('hidden');
+    document.getElementById('replaceNewExerciseFields')?.classList.toggle('hidden',replaceExerciseSelectedKey!=='__new__');
+    document.getElementById('replaceNewExerciseName').value='';
+    document.getElementById('replaceNewExerciseType').value='strength';
+    renderReplaceExerciseList('');
+    document.getElementById('replaceExerciseModal').classList.remove('hidden');
+}
+function handleReplaceSelectChange(){
+    // Совместимость со старыми вызовами, если они остались в DOM.
+    const select=document.getElementById('replaceExerciseSelect');
+    if(!select) return;
+    if(select.value==='__new__') selectNewReplacement();
+}
+function closeReplaceExerciseModal(){ document.getElementById('replaceExerciseModal')?.classList.add('hidden'); replacementSlotIndex=null; replaceExerciseSelectedKey='__none__'; }
+function confirmReplaceExercise(){
+    if(replacementSlotIndex===null || currentProgram===null) return;
+    const program=data.programs[currentProgram];
+    const slots=getActiveExerciseIndices();
+    const oldIdx=slots[replacementSlotIndex];
+    if(oldIdx===undefined) return;
+    let newIdx=null, replacementName='', replacementType='strength';
+    if(replaceExerciseSelectedKey==='__new__'){
+        const name=String(document.getElementById('replaceNewExerciseName').value||'').trim().replace(/\s+/g,' ');
+        const type=document.getElementById('replaceNewExerciseType').value || 'strength';
+        if(!name){ showToast('Введите название нового упражнения'); return; }
+        if(exerciseNameExists(currentProgram,name)){ showToast('Упражнение с таким названием уже есть в этом сплите'); return; }
+        program.exercises.push(name); program.active.push(true); program.types.push(type); newIdx=program.exercises.length-1;
+        replacementName=name; replacementType=type;
+        const previous=getPreviousExerciseResult(name,new Date().toISOString());
+        if(previous?.sets?.length){
+            const source=previous.sets[previous.sets.length-1], row={done:false};
+            if(type==='strength'){row.weight=source.weight??'';row.reps=source.reps??'';} else if(type==='cardio'){row.time=source.time??source.minutes??'';row.intensity=source.intensity??'';} else row.reps=source.reps??'';
+            workoutSets[newIdx]=[row];
+        }
+    } else {
+        const c=replaceExerciseCandidates.find(x=>replacementCandidateKey(x)===replaceExerciseSelectedKey);
+        if(!c){ showToast('Выбери упражнение'); return; }
+        replacementName=c.name; replacementType=c.type;
+        if(c.source==='program' && c.programIndex===currentProgram){
+            newIdx=c.exerciseIndex;
+        } else {
+            // Упражнение из другого сплита/истории только временно заимствуется в этой тренировке.
+            // Ни один сплит не изменяется и новое упражнение в него НЕ добавляется.
+            const transientIndex=workoutTransientExercises.length;
+            workoutTransientExercises.push({name:c.name,type:c.type,sourceProgram:c.programIndex,sourceExerciseIndex:c.exerciseIndex});
+            newIdx=-(transientIndex+1);
+        }
+        if(slots.some(i=>i===newIdx)){ showToast('Это упражнение уже используется в этой тренировке'); return; }
+        if(!workoutSets[newIdx]){
+            const previous=getPreviousExerciseResult(replacementName,new Date().toISOString());
+            if(previous?.sets?.length){
+                const source=previous.sets[previous.sets.length-1], row={done:false};
+                if(replacementType==='strength'){row.weight=source.weight??'';row.reps=source.reps??'';} else if(replacementType==='cardio'){row.time=source.time??source.minutes??'';row.intensity=source.intensity??'';} else row.reps=source.reps??'';
+                workoutSets[newIdx]=[row];
+            }
+        }
+    }
+    if(newIdx===oldIdx){ closeReplaceExerciseModal(); return; }
+    workoutExerciseSlots[replacementSlotIndex]=newIdx;
+    currentExerciseIndex=replacementSlotIndex;
+    saveDraft();
+    closeReplaceExerciseModal();
+    renderExerciseStrip(); renderExercise();
+    showToast(`Заменено на «${replacementName}»`);
+}
+
 function openExerciseModal(realIdx){
     if(currentProgram===null || !data.programs[currentProgram]) return;
-    const program=data.programs[currentProgram]; const name=program.exercises[realIdx]; if(!name)return;
+    const meta=getWorkoutExercise(realIdx); if(!meta) return;
+    const name=meta.name;
     openedExerciseName=name;
-    exerciseGraphMetric=getExerciseTypeByName(name)==='strength'?'weight':'reps';
+    exerciseGraphMetric=meta.type==='strength'?'weight':'reps';
     document.getElementById('exerciseModalTitle').textContent=name;
     document.getElementById('exerciseModal').classList.remove('hidden');
     switchExerciseModalTab('history');
@@ -2283,6 +2673,7 @@ function startConfirmed() {
     currentProgram=index;
     currentExerciseIndex=0;
     workoutSets={};
+    workoutExerciseSlots = data.programs[index].exercises.map((_,i)=>i).filter(i=>data.programs[index].active?.[i]);
     seedWorkoutSetsFromHistory();
     workoutStartTime=Date.now();
     startTotalTimer();
@@ -2296,13 +2687,27 @@ function startConfirmed() {
 function startTotalTimer() { clearInterval(totalTimerInterval); updateTotalTimer(); totalTimerInterval=setInterval(updateTotalTimer,1000); }
 function updateTotalTimer() { if (!workoutStartTime) return; const elapsed=Math.floor((Date.now()-workoutStartTime)/1000); document.getElementById('totalTimer').textContent=`${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`; }
 function stopTotalTimer() { clearInterval(totalTimerInterval); workoutStartTime=null; }
-function getActiveExercises() { const prog=data.programs[currentProgram]; return prog.exercises.filter((_,i)=>prog.active[i]); }
+function getActiveExerciseIndices() { return Array.isArray(workoutExerciseSlots) ? workoutExerciseSlots.slice() : []; }
+function getWorkoutExercise(ref) {
+    if (Number.isInteger(ref) && ref >= 0) {
+        const prog=data.programs[currentProgram];
+        if (!prog || !prog.exercises?.[ref]) return null;
+        return { name: prog.exercises[ref], type: prog.types?.[ref] || 'strength', programIndex: currentProgram, exerciseIndex: ref, transient: false };
+    }
+    if (Number.isInteger(ref) && ref < 0) {
+        const item=workoutTransientExercises[-ref-1];
+        return item ? { ...item, transient: true, programIndex: -1, exerciseIndex: -1 } : null;
+    }
+    return null;
+}
+function getActiveExercises() { return getActiveExerciseIndices().map(getWorkoutExercise).filter(Boolean).map(x=>x.name); }
 function renderExerciseStrip() {
     const activeEx=getActiveExercises();
     const strip=document.getElementById('exerciseStrip');
     if (!strip) return;
     strip.innerHTML=activeEx.map((ex,idx)=>{
-        const realIdx=data.programs[currentProgram].exercises.indexOf(ex);
+        const realIdx=getActiveExerciseIndices()[idx];
+        const exerciseMeta=getWorkoutExercise(realIdx);
         const sets=workoutSets[realIdx]||[];
         const hasDone=sets.some(s=>s.done);
         const active=idx===currentExerciseIndex?'active':'';
@@ -2316,12 +2721,9 @@ function renderExerciseStrip() {
     updateWorkoutProgressUI();
 }
 function updateWorkoutProgressUI(){
-    const activeEx=getActiveExercises();
-    const total=activeEx.length;
-    const completed=activeEx.reduce((n,ex)=>{
-        const idx=data.programs[currentProgram].exercises.indexOf(ex);
-        return n + ((workoutSets[idx]||[]).some(s=>s.done)?1:0);
-    },0);
+    const activeIndices=getActiveExerciseIndices();
+    const total=activeIndices.length;
+    const completed=activeIndices.reduce((n,idx)=> n + ((workoutSets[idx]||[]).some(s=>s.done)?1:0), 0);
     const totalSets=Object.values(workoutSets).reduce((n,sets)=>n+sets.filter(s=>s.done).length,0);
     const pct=total?Math.round((completed/total)*100):0;
     const bar=document.getElementById('workoutProgressBar');
@@ -2334,7 +2736,7 @@ function updateWorkoutProgressUI(){
     if(text) text.textContent=`Упражнение ${Math.min(currentExerciseIndex+1,total)} из ${total}`;
 }
 function switchExercise(idx) { stopRestTimer(); currentExerciseIndex=idx; renderExerciseStrip(); renderExercise(); saveDraft(); }
-function getRealExerciseIndex() { const activeEx = getActiveExercises(); const exName = activeEx[currentExerciseIndex]; return data.programs[currentProgram].exercises.indexOf(exName); }
+function getRealExerciseIndex() { return getActiveExerciseIndices()[currentExerciseIndex]; }
 
 function getPreviousExerciseResult(exerciseName, beforeDate){
     const history = (data.history || []).slice().sort((a,b)=>{
@@ -2420,8 +2822,10 @@ function seedWorkoutSetsFromHistory(){
 function renderExercise() {
     const program=data.programs[currentProgram]; const activeEx=getActiveExercises();
     if(currentExerciseIndex>=activeEx.length){ finishWorkout(); return; }
-    const exerciseName=activeEx[currentExerciseIndex]; const realIdx=program.exercises.indexOf(exerciseName);
-const type=program.types[realIdx]; const sets=workoutSets[realIdx]||[]; const last=lastResults[exerciseName];
+    const realIdx=getActiveExerciseIndices()[currentExerciseIndex];
+    const meta=getWorkoutExercise(realIdx);
+    if(!meta){ finishWorkout(); return; }
+    const exerciseName=meta.name; const type=meta.type; const sets=workoutSets[realIdx]||[]; const last=lastResults[exerciseName];
     const isLastExercise=currentExerciseIndex===activeEx.length-1;
     const completedSets=sets.filter(s=>s.done).length;
     let setsHTML='';
@@ -2432,11 +2836,17 @@ const type=program.types[realIdx]; const sets=workoutSets[realIdx]||[]; const la
         else inputFields=`<input type="text" inputmode="numeric" placeholder="Повторы" value="${s.reps||''}" onchange="updateSet(${realIdx},${i},'reps',this.value)">`;
         setsHTML+=`<div class="set-row workout-set-row"><span class="set-num">${i+1}</span>${inputFields}<div class="set-done-btn ${s.done?'done':''}" onclick="markSetDone(${realIdx},${i})" title="${s.done?'Подход выполнен':'Отметить выполненным'}">${s.done?'✓':'○'}</div><div class="set-delete-btn" onclick="deleteSet(${realIdx},${i})" title="Удалить подход">🗑️</div></div>`;
     });
-    const lastHtml=last?`<div class="workout-last-result"><div class="workout-last-icon">↺</div><div class="workout-last-copy"><div class="workout-last-label">ПРОШЛЫЙ РЕЗУЛЬТАТ</div><div class="workout-last-value">${escapeHtml(formatLastResult(last,type))}</div></div><div class="workout-best-badge" onclick="openExerciseModal(${realIdx})">Аналитика ›</div></div>`:'';
+    const lastHtml=last?`<div class="workout-last-result"><div class="workout-last-icon">↺</div><div class="workout-last-copy"><div class="workout-last-label">ПРОШЛЫЙ РЕЗУЛЬТАТ</div><div class="workout-last-value">${escapeHtml(formatLastResult(last,type))}</div></div></div>`:'';
     const container=document.getElementById('exerciseContainer');
     container.innerHTML=`<div class="card workout-exercise-card">
         <div class="workout-exercise-kicker"><span>${type==='strength'?'Силовое':type==='cardio'?'Кардио':'С собственным весом'}</span><span>${completedSets}/${sets.length||0} подходов</span></div>
-        <div class="workout-exercise-title" onclick="openExerciseModal(${realIdx})"><span>${escapeHtml(exerciseName)}</span><span class="workout-analytics-link">Аналитика <span class="analytics-arrow">›</span></span></div>
+        <div class="workout-exercise-heading">
+            <div class="workout-exercise-title" onclick="openExerciseModal(${realIdx})"><span class="workout-exercise-name">${escapeHtml(exerciseName)}</span></div>
+            <div class="workout-title-actions">
+                <button type="button" class="workout-replace-btn" onclick="event.stopPropagation();openReplaceExerciseModal(${currentExerciseIndex})" title="Заменить упражнение"><span class="replace-icon">↔</span><span>Заменить</span></button>
+                <button type="button" class="workout-analytics-link" onclick="event.stopPropagation();openExerciseModal(${realIdx})"><span>Аналитика</span><span class="analytics-arrow">›</span></button>
+            </div>
+        </div>
         ${lastHtml}
         <div id="setsList">${setsHTML}</div>
         <div id="restTimerContainer" class="rest-panel hidden">
@@ -2461,9 +2871,9 @@ function formatLastResult(last, type) {
     return `${last.reps || 0} повторов`;
 }
 function addSet() {
-    const realIdx = getRealExerciseIndex(); const type = data.programs[currentProgram].types[realIdx];
+    const realIdx = getRealExerciseIndex(); const meta = getWorkoutExercise(realIdx); if(!meta) return; const type = meta.type;
     if (!workoutSets[realIdx]) workoutSets[realIdx] = [];
-    const lastSet = workoutSets[realIdx].slice(-1)[0]; const exercise = data.programs[currentProgram].exercises[realIdx];
+    const lastSet = workoutSets[realIdx].slice(-1)[0]; const exercise = meta.name;
     const historyPrev = getPreviousExerciseResult(exercise, new Date().toISOString());
     const historySet = historyPrev?.sets?.[historyPrev.sets.length - 1] || {};
     const prev = lastResults[exercise] || historySet || {};
@@ -2575,7 +2985,7 @@ function formatTime(sec){ const m=Math.floor(sec/60); const s=sec%60; return `${
 function nextExercise() { stopRestTimer(); currentExerciseIndex++; renderExerciseStrip(); renderExercise(); saveDraft(); }
 function confirmExitWorkout() { document.getElementById('confirmExitModal').classList.remove('hidden'); }
 function closeConfirmExit() { document.getElementById('confirmExitModal').classList.add('hidden'); }
-function exitWorkoutWithoutSaving() { closeConfirmExit(); stopRestTimer(); stopTotalTimer(); clearDraft(); currentProgram = null; goHome(); }
+function exitWorkoutWithoutSaving() { closeConfirmExit(); stopRestTimer(); stopTotalTimer(); clearDraft(); workoutExerciseSlots=[]; workoutTransientExercises=[]; currentProgram = null; goHome(); }
 
 function finishWorkout() {
     try {
@@ -2583,20 +2993,28 @@ function finishWorkout() {
     closeConfirmExit(); stopRestTimer(); stopTotalTimer();
     if (currentProgram === null) return;
     const hasAnySets = Object.values(workoutSets).some(sets => sets.length > 0);
-    if (!hasAnySets) { currentProgram = null; clearDraft(); showToast('Нет выполненных подходов, тренировка не сохранена'); goHome(); return; }
+    if (!hasAnySets) { workoutExerciseSlots=[]; workoutTransientExercises=[]; currentProgram = null; clearDraft(); showToast('Нет выполненных подходов, тренировка не сохранена'); goHome(); return; }
     const program = data.programs[currentProgram];
-    program.exercises.forEach((ex, i) => { const sets = workoutSets[i]; if (sets && sets.length) { const last = sets[sets.length - 1]; lastResults[ex] = { ...last, done: undefined }; } });
+    const sessionIndices = getActiveExerciseIndices();
+    sessionIndices.forEach(realIdx => {
+        const meta=getWorkoutExercise(realIdx);
+        if(!meta) return;
+        const ex=meta.name;
+        const sets=workoutSets[realIdx];
+        if (sets && sets.length) { const last = sets[sets.length - 1]; lastResults[ex] = { ...last, done: undefined }; }
+    });
     localStorage.setItem('strong_last_results', JSON.stringify(lastResults));
     const durationSeconds = sessionDurationSeconds;
     const newHistoryEntry = {
         date: new Date().toISOString(), program: program.name, durationSeconds,
-        exercises: program.exercises.filter((_, i) => program.active[i]).map((ex, i) => {
-            const realIdx = program.exercises.indexOf(ex);
-            return { name: ex, sets: (workoutSets[realIdx] || []).map(s => { const { done, ...clean } = s; return clean; }) };
-        })
+        exercises: sessionIndices.map(realIdx => {
+            const meta=getWorkoutExercise(realIdx);
+            if(!meta) return null;
+            return { name: meta.name, sets: (workoutSets[realIdx] || []).map(s => { const { done, ...clean } = s; return clean; }) };
+        }).filter(x => x && x.sets.length)
     };
     data.history.push(newHistoryEntry);
-    saveData(); clearDraft(); currentProgram = null;
+    saveData(); clearDraft(); workoutTransientExercises=[]; currentProgram = null;
     showWorkoutSummary(newHistoryEntry);
 
     } catch(err) {
@@ -2604,6 +3022,8 @@ function finishWorkout() {
         stopRestTimer();
         stopTotalTimer();
         clearDraft();
+        workoutExerciseSlots=[];
+        workoutTransientExercises=[];
         currentProgram = null;
         goHome();
         showToast('Тренировка сохранена');
