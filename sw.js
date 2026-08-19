@@ -1,4 +1,4 @@
-const CACHE = 'ftracker-v1';
+const CACHE = 'ftracker-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', event => {
@@ -13,11 +13,33 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
+
+  if (isHTML) {
+    // Network-first для страницы: обновления приложения доходят сразу,
+    // офлайн — отдаём кэш.
+    event.respondWith(
+      fetch(req).then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE).then(cache => cache.put('./index.html', copy));
+        }
+        return response;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Статика (иконки, manifest): cache-first с дозаписью.
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(event.request, copy));
+    caches.match(req).then(cached => cached || fetch(req).then(response => {
+      if (response && response.ok && response.type === 'basic') {
+        const copy = response.clone();
+        caches.open(CACHE).then(cache => cache.put(req, copy));
+      }
       return response;
     }).catch(() => caches.match('./index.html')))
   );

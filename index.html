@@ -8,7 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FTracker">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="theme-color" content="#000000">
 <style>
 body { --bg: #000; --card-bg: #1c1c1e; --text: #fff; --subtext: #8e8e93; --input-bg: #2c2c2e; --button-green: #34c759; --button-gray: #3a3a3c; --border: #2c2c2e; --positive: #34c759; --negative: #ff3b30; --toast-bg: #34c759; --toast-text: #000; --modal-overlay: rgba(0,0,0,0.7); --accent-gradient: linear-gradient(135deg, #34c759, #30d158); padding-top: env(safe-area-inset-top, 20px); margin: 0; background: var(--bg); color: var(--text); overscroll-behavior: none; touch-action: manipulation; }
 body.light-mode { --bg: #f2f2f7; --card-bg: #ffffff; --text: #1c1c1e; --subtext: #6e6e73; --input-bg: #e5e5ea; --button-green: #2e7d32; --button-gray: #d1d1d6; --border: #d1d1d6; --positive: #2e7d32; --negative: #c62828; --toast-bg: #2e7d32; --toast-text: #fff; --modal-overlay: rgba(0,0,0,0.4); --accent-gradient: linear-gradient(135deg, #2e7d32, #4caf50); }
@@ -859,6 +860,108 @@ button{min-height:44px;}
 #workoutScreen #exerciseStrip .exercise-dot.done{opacity:.72;}
 @media(max-width:390px){#workoutScreen .workout-set-row{grid-template-columns:36px minmax(0,1fr) 48px 40px!important;gap:5px!important}.workout-set-row input{font-size:16px!important}.workout-title-actions{grid-template-columns:1fr 1.25fr!important}.workout-title-actions button{padding:9px 8px!important;font-size:12px!important}}
 </style>
+
+<style id="exercise-guide-v1">
+/* ===== Техника и мышцы v2: анимированные сцены ===== */
+.ex-guide{margin:0 0 14px;border:1px solid rgba(255,255,255,.07);border-radius:17px;background:rgba(255,255,255,.035);overflow:hidden;}
+body.light-mode .ex-guide{border-color:var(--border);background:var(--input-bg);}
+.ex-guide-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+.ex-guide-head-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--subtext);min-width:0;}
+.ex-guide-muscle-tag{font-size:12px;font-weight:700;color:var(--button-green);text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ex-guide-chevron{font-size:16px;color:var(--subtext);transition:transform .25s;flex:none;}
+.ex-guide.open .ex-guide-chevron{transform:rotate(180deg);}
+.ex-guide-body{display:none;padding:0 13px 13px;}
+.ex-guide.open .ex-guide-body{display:block;}
+/* Полноширинная сцена */
+.ex-guide-scene{width:100%;border-radius:14px;background:radial-gradient(120% 130% at 50% 0%,rgba(52,199,89,.07),rgba(0,0,0,.24));border:1px solid rgba(255,255,255,.06);margin-bottom:10px;overflow:hidden;}
+body.light-mode .ex-guide-scene{background:radial-gradient(120% 130% at 50% 0%,rgba(46,125,50,.06),#fff);border-color:var(--border);}
+.ex-guide-scene svg{display:block;width:100%;height:auto;}
+.gs-fig{stroke:var(--subtext);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.gs-fig-fill{fill:var(--subtext);}
+.gs-eq{stroke:color-mix(in srgb,var(--subtext) 55%,transparent);stroke-width:6;stroke-linecap:round;fill:none;}
+.gs-eq-fill{fill:color-mix(in srgb,var(--subtext) 45%,transparent);}
+.gs-move{stroke:var(--button-green);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.gs-move-fill{fill:var(--button-green);}
+.gs-mglow{fill:var(--button-green);opacity:.85;animation:exMusclePulse 1.6s ease-in-out infinite;}
+.gs-floor{stroke:color-mix(in srgb,var(--subtext) 35%,transparent);stroke-width:3;stroke-linecap:round;}
+/* Анимации сцен (2.2s, плавные) */
+.gsa-updown{animation:gsUpDown 2.2s ease-in-out infinite;}
+@keyframes gsUpDown{0%,100%{transform:translateY(7px);}50%{transform:translateY(-8px);}}
+.gsa-down{animation:gsDown 2.2s ease-in-out infinite;}
+@keyframes gsDown{0%,100%{transform:translateY(-9px);}50%{transform:translateY(9px);}}
+.gsa-body-up{animation:gsBodyUp 2.2s ease-in-out infinite;}
+@keyframes gsBodyUp{0%,100%{transform:translateY(10px);}50%{transform:translateY(-4px);}}
+.gsa-row{animation:gsRowX 2.2s ease-in-out infinite;}
+@keyframes gsRowX{0%,100%{transform:translateX(10px);}50%{transform:translateX(-8px);}}
+.gsa-curl{animation:gsCurl 2.2s ease-in-out infinite;}
+@keyframes gsCurl{0%,100%{transform:rotate(4deg);}50%{transform:rotate(-76deg);}}
+.gsa-pushdown{animation:gsPushdown 2.2s ease-in-out infinite;}
+@keyframes gsPushdown{0%,100%{transform:rotate(-42deg);}50%{transform:rotate(8deg);}}
+.gsa-legext{animation:gsLegext 2.2s ease-in-out infinite;}
+@keyframes gsLegext{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-72deg);}}
+.gsa-legcurl{animation:gsLegcurl 2.2s ease-in-out infinite;}
+@keyframes gsLegcurl{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-84deg);}}
+.gsa-hinge{animation:gsHinge 2.4s ease-in-out infinite;}
+@keyframes gsHinge{0%,100%{transform:rotate(52deg);}50%{transform:rotate(2deg);}}
+.gsa-crunch{animation:gsCrunch 2.2s ease-in-out infinite;}
+@keyframes gsCrunch{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-30deg);}}
+.gsa-arm-l{animation:gsArmL 2.2s ease-in-out infinite;}
+@keyframes gsArmL{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(-78deg);}}
+.gsa-arm-r{animation:gsArmR 2.2s ease-in-out infinite;}
+@keyframes gsArmR{0%,100%{transform:rotate(4deg);}50%{transform:rotate(78deg);}}
+.gsa-squat{animation:gsSquat 2.2s ease-in-out infinite;}
+@keyframes gsSquat{0%,100%{transform:translateY(12px);}50%{transform:translateY(0);}}
+.gsa-diag{animation:gsDiag 2.2s ease-in-out infinite;}
+@keyframes gsDiag{0%,100%{transform:translate(-8px,8px);}50%{transform:translate(7px,-7px);}}
+.gsa-calf{animation:gsCalf 1.8s ease-in-out infinite;}
+@keyframes gsCalf{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.gsa-shrug{animation:gsShrug 1.8s ease-in-out infinite;}
+@keyframes gsShrug{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+.gsa-run1{animation:gsRun1 .9s ease-in-out infinite;}
+@keyframes gsRun1{0%,100%{transform:rotate(28deg);}50%{transform:rotate(-30deg);}}
+.gsa-run2{animation:gsRun2 .9s ease-in-out infinite;animation-delay:-.45s;}
+@keyframes gsRun2{0%,100%{transform:rotate(28deg);}50%{transform:rotate(-30deg);}}
+.gsa-runarm1{animation:gsRunA1 .9s ease-in-out infinite;}
+@keyframes gsRunA1{0%,100%{transform:rotate(-24deg);}50%{transform:rotate(26deg);}}
+.gsa-runarm2{animation:gsRunA2 .9s ease-in-out infinite;animation-delay:-.45s;}
+@keyframes gsRunA2{0%,100%{transform:rotate(-24deg);}50%{transform:rotate(26deg);}}
+/* Нижний ряд: карта мышц + легенда */
+.ex-guide-lower{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;margin-bottom:6px;}
+.ex-guide-map{display:flex;gap:4px;}
+.ex-guide-map svg{height:112px;width:auto;}
+.ex-muscle{fill:rgba(142,142,147,.28);stroke:none;transition:fill .3s;}
+.ex-muscle.m-primary{fill:var(--button-green);animation:exMusclePulse 1.6s ease-in-out infinite;}
+.ex-muscle.m-secondary{fill:color-mix(in srgb,var(--button-green) 45%,rgba(142,142,147,.3));}
+.ex-body-base{fill:rgba(142,142,147,.13);}
+body.light-mode .ex-body-base{fill:rgba(110,110,115,.15);}
+@keyframes exMusclePulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.ex-guide-legend{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--subtext);min-width:0;}
+.ex-guide-legend b{color:var(--text);font-weight:700;}
+.ex-guide-legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:baseline;}
+.ex-guide-legend .dot.p{background:var(--button-green);}
+.ex-guide-legend .dot.s{background:color-mix(in srgb,var(--button-green) 45%,#8e8e93);}
+.ex-guide-section-title{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--subtext);margin:10px 0 5px;}
+.ex-guide-steps{margin:0;padding:0;list-style:none;counter-reset:gstep;}
+.ex-guide-steps li{position:relative;padding:3px 0 3px 26px;font-size:14px;line-height:1.35;counter-increment:gstep;}
+.ex-guide-steps li::before{content:counter(gstep);position:absolute;left:0;top:4px;width:18px;height:18px;border-radius:50%;background:rgba(52,199,89,.16);color:var(--button-green);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.ex-guide-mistakes{margin:0;padding:0;list-style:none;}
+.ex-guide-mistakes li{position:relative;padding:3px 0 3px 22px;font-size:13px;line-height:1.35;color:var(--subtext);}
+.ex-guide-mistakes li::before{content:'✕';position:absolute;left:2px;top:3px;color:var(--negative);font-size:11px;font-weight:900;}
+/* Светлая тема: воркаут-карточка была захардкожена тёмной и в light-mode текст становился нечитаемым */
+body.light-mode #workoutScreen .workout-exercise-card{background:var(--card-bg)!important;border-color:var(--border)!important;box-shadow:0 8px 20px rgba(0,0,0,.08)!important;}
+body.light-mode #workoutScreen .workout-set-row{background:var(--input-bg)!important;border-color:var(--border)!important;}
+body.light-mode #workoutScreen .workout-set-row input{background:#fff!important;color:var(--text)!important;}
+body.light-mode #workoutScreen .set-num{background:#fff!important;color:var(--subtext)!important;}
+body.light-mode #workoutScreen .set-done-btn{background:#e5e5ea!important;color:var(--text)!important;}
+body.light-mode #workoutScreen .set-done-btn.done{background:var(--button-green)!important;color:#fff!important;}
+body.light-mode #workoutScreen .set-delete-btn{background:transparent!important;}
+body.light-mode #workoutScreen .workout-last-result{background:var(--input-bg)!important;border-color:var(--border)!important;}
+body.light-mode #workoutScreen .workout-last-icon{background:#fff!important;}
+body.light-mode #workoutScreen .workout-replace-btn{background:var(--input-bg)!important;border-color:var(--border)!important;color:var(--subtext)!important;}
+body.light-mode #workoutScreen #exerciseStrip .exercise-dot{background:var(--input-bg)!important;border-color:var(--border)!important;color:var(--subtext)!important;}
+body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rgba(46,125,50,.12)!important;border-color:var(--button-green)!important;color:var(--text)!important;}
+</style>
+
 </head>
 <body>
 <div class="container" id="app">
@@ -1346,6 +1449,7 @@ let workoutExerciseSlots = [];
 let workoutTransientExercises = [];
 let replacementSlotIndex = null;
 let totalTimerInterval = null, restTimerInterval = null, restEndTime = null, lastResults = {};
+let lastRestDuration = (function(){ try { const v = parseInt(localStorage.getItem('ftracker_rest_duration')); return Number.isFinite(v) && v > 0 ? v : 120; } catch(e) { return 120; } })();
 let pendingProgramIndex = null, openedExerciseName = null, editingHistoryIndex = null;
 let pendingDeleteType = null, pendingDeleteIndex = null, pendingDeleteDate = null;
 let pendingImportData = null;
@@ -2735,7 +2839,7 @@ function updateWorkoutProgressUI(){
     const text=document.getElementById('workoutProgressText');
     if(text) text.textContent=`Упражнение ${Math.min(currentExerciseIndex+1,total)} из ${total}`;
 }
-function switchExercise(idx) { stopRestTimer(); currentExerciseIndex=idx; renderExerciseStrip(); renderExercise(); saveDraft(); }
+function switchExercise(idx) { stopRestTimer(); guideOpenExercise=null; currentExerciseIndex=idx; renderExerciseStrip(); renderExercise(); saveDraft(); }
 function getRealExerciseIndex() { return getActiveExerciseIndices()[currentExerciseIndex]; }
 
 function getPreviousExerciseResult(exerciseName, beforeDate){
@@ -2831,9 +2935,9 @@ function renderExercise() {
     let setsHTML='';
     sets.forEach((s,i)=>{
         let inputFields='';
-        if(type==='strength') inputFields=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0;"><input type="text" inputmode="decimal" placeholder="Вес, кг" value="${s.weight||''}" onchange="updateSet(${realIdx},${i},'weight',this.value)"><input type="text" inputmode="numeric" placeholder="Повторы" value="${s.reps||''}" onchange="updateSet(${realIdx},${i},'reps',this.value)"></div>`;
-        else if(type==='cardio') inputFields=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0;"><input type="text" inputmode="decimal" placeholder="Минуты" value="${s.time||''}" onchange="updateSet(${realIdx},${i},'time',this.value)"><input type="text" inputmode="decimal" placeholder="Инт. 1–10" value="${s.intensity||''}" onchange="updateSet(${realIdx},${i},'intensity',this.value)"></div>`;
-        else inputFields=`<input type="text" inputmode="numeric" placeholder="Повторы" value="${s.reps||''}" onchange="updateSet(${realIdx},${i},'reps',this.value)">`;
+        if(type==='strength') inputFields=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0;"><input type="text" inputmode="decimal" placeholder="Вес, кг" value="${escapeHtml(s.weight||'')}" onchange="updateSet(${realIdx},${i},'weight',this.value)"><input type="text" inputmode="numeric" placeholder="Повторы" value="${escapeHtml(s.reps||'')}" onchange="updateSet(${realIdx},${i},'reps',this.value)"></div>`;
+        else if(type==='cardio') inputFields=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0;"><input type="text" inputmode="decimal" placeholder="Минуты" value="${escapeHtml(s.time||'')}" onchange="updateSet(${realIdx},${i},'time',this.value)"><input type="text" inputmode="decimal" placeholder="Инт. 1–10" value="${escapeHtml(s.intensity||'')}" onchange="updateSet(${realIdx},${i},'intensity',this.value)"></div>`;
+        else inputFields=`<input type="text" inputmode="numeric" placeholder="Повторы" value="${escapeHtml(s.reps||'')}" onchange="updateSet(${realIdx},${i},'reps',this.value)">`;
         setsHTML+=`<div class="set-row workout-set-row"><span class="set-num">${i+1}</span>${inputFields}<div class="set-done-btn ${s.done?'done':''}" onclick="markSetDone(${realIdx},${i})" title="${s.done?'Подход выполнен':'Отметить выполненным'}">${s.done?'✓':'○'}</div><div class="set-delete-btn" onclick="deleteSet(${realIdx},${i})" title="Удалить подход">🗑️</div></div>`;
     });
     const lastHtml=last?`<div class="workout-last-result"><div class="workout-last-icon">↺</div><div class="workout-last-copy"><div class="workout-last-label">ПРОШЛЫЙ РЕЗУЛЬТАТ</div><div class="workout-last-value">${escapeHtml(formatLastResult(last,type))}</div></div></div>`:'';
@@ -2848,6 +2952,7 @@ function renderExercise() {
             </div>
         </div>
         ${lastHtml}
+        ${buildExerciseGuideHTML(exerciseName, type)}
         <div id="setsList">${setsHTML}</div>
         <div id="restTimerContainer" class="rest-panel hidden">
             <div class="rest-label">Время отдыха</div>
@@ -2863,6 +2968,11 @@ function renderExercise() {
         </div>
         ${isLastExercise?'<div class="workout-finish-wrap"><button onclick="confirmExitWorkout()">Завершить тренировку</button></div>':''}
     </div>`;
+    if (restEndTime && restEndTime > Date.now()) {
+        const rc = document.getElementById('restTimerContainer');
+        if (rc) rc.classList.remove('hidden');
+        updateRestTimerDisplay();
+    }
     updateTotalTimer(); updateWorkoutProgressUI();
 }
 function formatLastResult(last, type) {
@@ -2881,17 +2991,34 @@ function addSet() {
     if (type === 'strength') { newSet.weight = lastSet ? lastSet.weight : (prev.weight || ''); newSet.reps = lastSet ? lastSet.reps : (prev.reps || ''); }
     else if (type === 'cardio') { newSet.time = lastSet ? lastSet.time : (prev.time || ''); newSet.intensity = lastSet ? lastSet.intensity : (prev.intensity || ''); }
     else { newSet.reps = lastSet ? lastSet.reps : (prev.reps || ''); }
-    workoutSets[realIdx].push(newSet); saveData(); saveDraft(); renderExerciseStrip(); renderExercise();
+    workoutSets[realIdx].push(newSet); saveDraft(); renderExerciseStrip(); renderExercise();
 }
-function deleteSet(exIdx, setIdx) { if (!workoutSets[exIdx]) return; workoutSets[exIdx].splice(setIdx, 1); saveData(); saveDraft(); renderExerciseStrip(); renderExercise(); }
-function updateSet(exIdx, setIdx, field, value) { if (!workoutSets[exIdx] || !workoutSets[exIdx][setIdx]) return; workoutSets[exIdx][setIdx][field] = value; saveData(); saveDraft(); }
-function markSetDone(exIdx, setIdx) { workoutSets[exIdx][setIdx].done = true; checkPersonalRecord(exIdx, setIdx); saveData(); saveDraft(); renderExerciseStrip(); renderExercise(); startRestTimer(120); }
+function deleteSet(exIdx, setIdx) { if (!workoutSets[exIdx]) return; workoutSets[exIdx].splice(setIdx, 1); saveDraft(); renderExerciseStrip(); renderExercise(); }
+function updateSet(exIdx, setIdx, field, value) { if (!workoutSets[exIdx] || !workoutSets[exIdx][setIdx]) return; workoutSets[exIdx][setIdx][field] = value; saveDraft(); }
+function markSetDone(exIdx, setIdx) {
+    const set = workoutSets[exIdx]?.[setIdx];
+    if (!set) return;
+    if (set.done) {
+        // Повторный тап снимает отметку (ошибочный клик можно отменить).
+        set.done = false;
+        stopRestTimer();
+        saveDraft(); renderExerciseStrip(); renderExercise();
+        return;
+    }
+    set.done = true;
+    checkPersonalRecord(exIdx, setIdx);
+    saveDraft(); renderExerciseStrip(); renderExercise();
+    startRestTimer(lastRestDuration);
+}
 
 function checkPersonalRecord(exIdx, setIdx) {
-    const program = data.programs[currentProgram];
-    if (!program) return;
-    const exerciseName = program.exercises[exIdx];
-    const type = program.types[exIdx];
+    // Используем getWorkoutExercise: exIdx может быть отрицательным (заменённое
+    // упражнение из другого сплита), program.exercises[exIdx] в этом случае undefined
+    // и рекорды молча не фиксировались.
+    const meta = getWorkoutExercise(exIdx);
+    if (!meta) return;
+    const exerciseName = meta.name;
+    const type = meta.type;
     const set = workoutSets[exIdx]?.[setIdx];
     if (!set || !exerciseName) return;
 
@@ -2969,7 +3096,7 @@ function startRestTimer(seconds) {
     const container=document.getElementById('restTimerContainer'); if(container) container.classList.remove('hidden');
     restTimerInterval=setInterval(updateRestTimerDisplay,200);
 }
-function setRestDuration(seconds){ startRestTimer(seconds); }
+function setRestDuration(seconds){ lastRestDuration = seconds; try { localStorage.setItem('ftracker_rest_duration', String(seconds)); } catch(e) {} startRestTimer(seconds); }
 function updateRestTimerDisplay(){
     if(!restEndTime) return;
     const remaining=Math.max(0,Math.ceil((restEndTime-Date.now())/1000));
@@ -2982,7 +3109,7 @@ function updateRestTimerDisplay(){
 function addRestTime(){ if(restEndTime){ restEndTime+=30000; updateRestTimerDisplay(); } }
 function stopRestTimer(){ if(restTimerInterval) clearInterval(restTimerInterval); restTimerInterval=null; restEndTime=null; const container=document.getElementById('restTimerContainer'); if(container) container.classList.add('hidden'); }
 function formatTime(sec){ const m=Math.floor(sec/60); const s=sec%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
-function nextExercise() { stopRestTimer(); currentExerciseIndex++; renderExerciseStrip(); renderExercise(); saveDraft(); }
+function nextExercise() { stopRestTimer(); guideOpenExercise=null; currentExerciseIndex++; renderExerciseStrip(); renderExercise(); saveDraft(); }
 function confirmExitWorkout() { document.getElementById('confirmExitModal').classList.remove('hidden'); }
 function closeConfirmExit() { document.getElementById('confirmExitModal').classList.add('hidden'); }
 function exitWorkoutWithoutSaving() { closeConfirmExit(); stopRestTimer(); stopTotalTimer(); clearDraft(); workoutExerciseSlots=[]; workoutTransientExercises=[]; currentProgram = null; goHome(); }
@@ -3026,7 +3153,7 @@ function finishWorkout() {
         workoutTransientExercises=[];
         currentProgram = null;
         goHome();
-        showToast('Тренировка сохранена');
+        showToast('Ошибка: тренировка могла не сохраниться. Проверьте историю.');
     }
 }
 function showWorkoutSummary(entry) {
@@ -3106,7 +3233,7 @@ function closeAchievements() { document.getElementById('achievementsModal').clas
 
 function editHistoryDate(index) { editingHistoryIndex = index; const entry = data.history[index]; document.getElementById('newDateInput').value = new Date(entry.date).toISOString().slice(0,10); document.getElementById('dateModal').classList.remove('hidden'); }
 function closeDateModal() { document.getElementById('dateModal').classList.add('hidden'); editingHistoryIndex = null; }
-function saveDateChange() { if (editingHistoryIndex === null) return; const newDate = document.getElementById('newDateInput').value; if (newDate) { data.history[editingHistoryIndex].date = new Date(newDate).toISOString(); saveData(); showHistory(); showToast('Дата изменена'); } closeDateModal(); }
+function saveDateChange() { if (editingHistoryIndex === null) return; const newDate = document.getElementById('newDateInput').value; if (newDate) { data.history[editingHistoryIndex].date = new Date(newDate + 'T12:00:00').toISOString(); saveData(); showHistory(); showToast('Дата изменена'); } closeDateModal(); }
 
 function showSettings() { showScreen('settingsScreen'); renderSettings(); }
 function renderSettings() {
@@ -4532,6 +4659,376 @@ function saveExerciseOrder() {
     showToast('Порядок упражнений сохранён');
 }
 
+
+/* ===== Техника и мышцы v2: анимированные сцены упражнений ===== */
+const MUSCLE_LABELS = { chest:'Грудь', delts:'Дельты', delts_front:'Передние дельты', delts_side:'Средние дельты', delts_rear:'Задние дельты', biceps:'Бицепс', triceps:'Трицепс', forearms:'Предплечья', abs:'Пресс', obliques:'Косые', lats:'Широчайшие', upperback:'Верх спины', traps:'Трапеции', lowerback:'Поясница', glutes:'Ягодицы', quads:'Квадрицепсы', hamstrings:'Бицепс бедра', calves:'Икры', cardio:'Сердце и ноги' };
+
+const EXERCISE_GUIDES = [
+ { match:['кардио','бег','велотренаж','эллипс','дорожк','гребн'], anim:'run', primary:['cardio','quads'], secondary:['calves','hamstrings'],
+   steps:['Начни с 2–3 минут в лёгком темпе для разогрева.','Держи целевой пульс: разговорный темп для базы, интервалы — для интенсивности.','Последние 2 минуты — заминка в лёгком темпе.'],
+   mistakes:['Старт сразу на высокой интенсивности без разминки.','Держишься за поручни всем весом — снижает нагрузку.'] },
+ { match:['пресс','скручив','планк'], anim:'crunch', primary:['abs'], secondary:['obliques'],
+   steps:['Поясница прижата, подбородок не тянется к груди.','Скручивайся за счёт пресса, поднимая лопатки, а не всю спину.','На усилии — выдох, вниз опускайся подконтрольно.'],
+   mistakes:['Рывки руками за голову — нагружают шею, а не пресс.','Полный подъём корпуса — работу забирают сгибатели бедра.'] },
+ { match:['жим ногами'], anim:'legpress', primary:['quads'], secondary:['glutes','hamstrings'],
+   steps:['Стопы на ширине плеч по центру платформы, поясница прижата к спинке.','Опускай платформу до угла ~90° в коленях, колени по линии носков.','Выжимай пятками, не выпрямляя колени до замка.'],
+   mistakes:['Отрыв поясницы и таза внизу — риск для позвоночника.','Полное выпрямление коленей «в замок» под нагрузкой.'] },
+ { match:['разгибание ног'], anim:'legext', primary:['quads'], secondary:[],
+   steps:['Валик на нижней части голени, колени по оси вращения тренажёра.','Разгибай ноги подконтрольно до почти полного выпрямления.','В верхней точке — короткая пауза, вниз медленно (2–3 сек).'],
+   mistakes:['Рывок и «бросание» веса вниз.','Отрыв таза от сиденья на тяжёлых весах.'] },
+ { match:['сгибание ног'], anim:'legcurl', primary:['hamstrings'], secondary:['calves'],
+   steps:['Валик чуть выше пяток, бёдра прижаты к скамье.','Сгибай ноги, доводя валик к ягодицам.','Опускай медленно, не разгибая колени полностью.'],
+   mistakes:['Прогиб в пояснице и отрыв таза.','Слишком большой вес — амплитуда сокращается вдвое.'] },
+ { match:['присед'], anim:'squat', primary:['quads','glutes'], secondary:['hamstrings','lowerback'],
+   steps:['Стопы на ширине плеч, взгляд вперёд, спина нейтральная.','Садись назад и вниз до параллели бедра с полом.','Вставай через пятки, колени идут по линии носков.'],
+   mistakes:['Колени заваливаются внутрь.','Округление поясницы в нижней точке.'] },
+ { match:['выпад'], anim:'squat', primary:['quads','glutes'], secondary:['hamstrings'],
+   steps:['Шаг вперёд, корпус вертикально.','Опускайся до угла 90° в обоих коленях.','Возвращайся, отталкиваясь пяткой передней ноги.'],
+   mistakes:['Колено уходит за носок с заваливанием корпуса вперёд.','Слишком короткий шаг — вся нагрузка в колено.'] },
+ { match:['икр','голень'], anim:'calf', primary:['calves'], secondary:[],
+   steps:['Поднимайся на носки максимально высоко.','Пауза 1 сек в верхней точке.','Опускайся медленно, растягивая икры внизу.'],
+   mistakes:['Пружинящие короткие повторы без полной амплитуды.','Сгибание коленей — снимает нагрузку с икр.'] },
+ { match:['станов'], anim:'hinge', primary:['hamstrings','glutes','lowerback'], secondary:['traps','forearms','quads'],
+   steps:['Гриф над серединой стопы, спина нейтральная, лопатки над грифом.','Тяни за счёт ног, гриф скользит вдоль голеней.','Наверху — полное разгибание бёдер без переразгиба поясницы.'],
+   mistakes:['Округление спины при срыве.','Гриф уходит вперёд от тела.'] },
+ { match:['из-за головы'], anim:'ohp', primary:['triceps'], secondary:['delts'],
+   steps:['Гантель над головой, локти направлены вверх и не расходятся.','Опускай гантель за голову до растяжения трицепса.','Разгибай руки, двигая только предплечьями.'],
+   mistakes:['Локти разъезжаются в стороны.','Прогиб в пояснице при тяжёлом весе.'] },
+ { match:['французск'], anim:'pushdown', primary:['triceps'], secondary:['forearms'],
+   steps:['Лёжа, плечи вертикально и неподвижны.','Опускай гриф ко лбу, сгибая только локти.','Разгибай без рывка, не разводя локти.'],
+   mistakes:['Плечи «гуляют» вперёд-назад — работа уходит из трицепса.','Слишком большой вес и отбив от лба.'] },
+ { match:['трицепс'], anim:'pushdown', primary:['triceps'], secondary:['forearms'],
+   steps:['Локти прижаты к корпусу и неподвижны.','Разгибай руки до конца, в нижней точке — пауза.','Возвращай рукоять подконтрольно до угла 90°.'],
+   mistakes:['Локти отходят от корпуса — включаются спина и грудь.','Навал корпусом на рукоять.'] },
+ { match:['бицепс обратн','молот'], anim:'curl', primary:['forearms','biceps'], secondary:[],
+   steps:['Хват сверху (или нейтральный), локти у корпуса.','Сгибай руки, не забрасывая вес плечами.','Опускай медленно до полного разгибания.'],
+   mistakes:['Раскачка корпусом.','Кисти заламываются под весом — держи их жёстко.'] },
+ { match:['бицепс','подъём штанги на','сгибание рук'], anim:'curl', primary:['biceps'], secondary:['forearms'],
+   steps:['Локти зафиксированы у корпуса на всём повторе.','Поднимай вес сгибанием рук, без раскачки.','Опускай подконтрольно 2–3 секунды — это половина результата.'],
+   mistakes:['Читинг корпусом и заброс веса.','Локти уходят вперёд — включаются дельты.'] },
+ { match:['подтягив'], anim:'pullup', primary:['lats'], secondary:['biceps','upperback'],
+   steps:['Хват чуть шире плеч, в висе — лёгкое напряжение в лопатках.','Тяни грудь к перекладине, сводя лопатки вниз и назад.','Опускайся подконтрольно до почти полного выпрямления рук.'],
+   mistakes:['Рывки и раскачка ногами.','Половинная амплитуда сверху и снизу.'] },
+ { match:['вертикальная тяга','тяга сверху','верхнего блока'], anim:'pulldown', primary:['lats'], secondary:['biceps','upperback'],
+   steps:['Хват шире плеч, корпус слегка отклонён назад.','Тяни рукоять к верху груди, начиная движение лопатками.','Возвращай вверх медленно, растягивая широчайшие.'],
+   mistakes:['Тяга за голову или сильный завал корпуса назад.','Работа только руками без сведения лопаток.'] },
+ { match:['горизонтальная тяга','тяга к поясу','рычажная тяга','тяга нижнего блока'], anim:'row', primary:['upperback','lats'], secondary:['biceps','delts_rear'],
+   steps:['Спина нейтральная, лёгкий наклон корпуса допустим только в старте.','Тяни рукоять к низу живота, сводя лопатки.','Плечи не поднимаются к ушам; вперёд возвращай подконтрольно.'],
+   mistakes:['Раскачка корпусом на каждом повторе.','Круглая спина в растянутой позиции.'] },
+ { match:['кросс-тяга','тяга в наклоне','тяга штанги в наклоне','тяга гантели в наклоне'], anim:'row', primary:['lats','upperback'], secondary:['lowerback','biceps','delts_rear'],
+   steps:['Наклон корпуса 30–45°, спина жёсткая, колени слегка согнуты.','Тяни вес к поясу, локти идут вдоль корпуса.','Опускай подконтрольно, не роняя плечи вперёд.'],
+   mistakes:['Округление поясницы.','Тяга к груди с разведёнными локтями — уходит в трапеции.'] },
+ { match:['разведение гантелей в наклоне','разведение в наклоне','обратная бабочка','обратные разведения'], anim:'fly', primary:['delts_rear'], secondary:['upperback','traps'],
+   steps:['Наклон корпуса почти параллельно полу, спина ровная.','Разводи гантели в стороны с мягкими локтями.','Веди движение локтями, вверху — короткая пауза.'],
+   mistakes:['Слишком большой вес и подброс корпусом.','Сведение лопаток в кучу — работа уходит из задней дельты.'] },
+ { match:['в стороны','махи гантел'], anim:'fly', primary:['delts_side'], secondary:['traps'],
+   steps:['Гантели у бёдер, локти слегка согнуты.','Поднимай через стороны до уровня плеч, локоть выше кисти.','Опускай медленно, не бросая вес.'],
+   mistakes:['Подъём выше плеч с включением трапеций.','Раскачка и рывок в старте.'] },
+ { match:['перед собой'], anim:'fly', primary:['delts_front'], secondary:['chest'],
+   steps:['Поднимай гантели перед собой до уровня плеч.','Корпус неподвижен, локти слегка согнуты.','Опускай подконтрольно, не ниже лёгкого натяжения.'],
+   mistakes:['Отклонение корпуса назад для подброса.','Подъём выше уровня глаз без необходимости.'] },
+ { match:['жим гантелей сидя','жим сидя','армейск','жим стоя','жим вверх'], anim:'ohp', primary:['delts'], secondary:['triceps','traps'],
+   steps:['Гантели на уровне ушей, предплечья вертикальны.','Выжимай вверх по слегка сходящейся траектории.','Опускай до уровня подбородка–ушей, без отбива внизу.'],
+   mistakes:['Сильный прогиб в пояснице — жим превращается в наклонный.','Неполная амплитуда внизу.'] },
+ { match:['гиперэкстензи'], anim:'hinge', primary:['lowerback'], secondary:['glutes','hamstrings'],
+   steps:['Упор бёдрами на подушке, корпус опускается свободно.','Поднимайся до прямой линии корпус–ноги.','Без переразгиба вверху; движение плавное.'],
+   mistakes:['Переразгибание в верхней точке.','Рывковый темп с махом рук.'] },
+ { match:['шраги'], anim:'shrug', primary:['traps'], secondary:['forearms'],
+   steps:['Поднимай плечи строго вверх к ушам.','Пауза 1 сек в верхней точке.','Опускай медленно до полного растяжения.'],
+   mistakes:['Вращение плечами — бесполезно и травмоопасно.','Кивки головой в такт повторам.'] },
+ { match:['бабочка','сведение','разведение гантелей лёжа','разводка'], anim:'fly', primary:['chest'], secondary:['delts_front'],
+   steps:['Локти слегка согнуты и зафиксированы в одном угле.','Своди руки по дуге до лёгкого касания.','Разводи до растяжения груди, без боли в плечах.'],
+   mistakes:['Превращение разводки в жим со сгибанием локтей.','Слишком глубокое растяжение с большим весом.'] },
+ { match:['отжим'], anim:'bench', primary:['chest'], secondary:['triceps','delts_front','abs'],
+   steps:['Корпус — прямая линия от головы до пяток.','Опускайся до угла 90° в локтях, локти ~45° к корпусу.','Выжимайся, не проваливая поясницу.'],
+   mistakes:['Провисание таза.','Разведение локтей строго в стороны — нагрузка на плечи.'] },
+ { match:['жим лёжа','жим штанги лёж','жим гантелей лёж'], anim:'bench', primary:['chest'], secondary:['triceps','delts_front'],
+   steps:['Лопатки сведены и прижаты, стопы упираются в пол.','Опускай гриф к низу груди подконтрольно.','Жми вверх по слегка дуговой траектории, локти ~45–60° к корпусу.'],
+   mistakes:['Отбив грифа от груди.','Отрыв таза от скамьи на тяжёлых подходах.'] },
+ { match:['жим'], anim:'bench', primary:['chest'], secondary:['triceps','delts_front'],
+   steps:['Лопатки сведены, спина стабильна.','Опускай вес подконтрольно до комфортной глубины.','Выжимай без рывка, не выпрямляя локти «в замок».'],
+   mistakes:['Отбив веса в нижней точке.','Разведение локтей строго в стороны.'] },
+ { match:['тяга'], anim:'row', primary:['lats','upperback'], secondary:['biceps'],
+   steps:['Спина нейтральная на протяжении всего повтора.','Начинай движение сведением лопаток, затем тяни руками.','Возвращай вес подконтрольно, растягивая спину.'],
+   mistakes:['Работа только руками без лопаток.','Раскачка корпусом.'] }
+];
+
+function findExerciseGuide(name) {
+    const n = String(name || '').toLocaleLowerCase('ru');
+    for (const g of EXERCISE_GUIDES) {
+        if (g.match.some(kw => n.includes(kw))) return g;
+    }
+    return null;
+}
+
+/* Свёрнуто по умолчанию; открытое состояние живёт только пока пользователь на этом упражнении */
+let guideOpenExercise = null;
+function toggleExerciseGuide(el) {
+    const panel = el.closest('.ex-guide');
+    if (!panel) return;
+    const open = panel.classList.toggle('open');
+    guideOpenExercise = open ? (panel.dataset.ex || null) : null;
+}
+
+/* Анимированные сцены упражнений (viewBox 0 0 240 150) */
+function buildGuideAnimSVG(kind) {
+    const S = (inner) => `<svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;
+    const floor = `<line class="gs-floor" x1="30" y1="142" x2="210" y2="142"/>`;
+    switch (kind) {
+    case 'bench': return S(`
+        ${floor}
+        <rect class="gs-eq-fill" x="52" y="104" width="120" height="9" rx="4"/>
+        <rect class="gs-eq-fill" x="62" y="113" width="7" height="29" rx="3"/><rect class="gs-eq-fill" x="150" y="113" width="7" height="29" rx="3"/>
+        <circle class="gs-fig-fill" cx="158" cy="93" r="7"/>
+        <path class="gs-fig" d="M147 97 L96 100"/>
+        <path class="gs-fig" d="M96 100 L72 90 L62 140"/>
+        <ellipse class="gs-mglow" cx="134" cy="94" rx="11" ry="7"/>
+        <path class="gs-fig" d="M140 95 L124 74"/>
+        <g class="gsa-updown"><line class="gs-move" x1="92" y1="52" x2="176" y2="52"/><rect class="gs-move-fill" x="94" y="38" width="9" height="28" rx="4"/><rect class="gs-move-fill" x="161" y="38" width="9" height="28" rx="4"/><path class="gs-fig" d="M124 72 L121 57"/></g>`);
+    case 'ohp': return S(`
+        ${floor}
+        <rect class="gs-eq-fill" x="94" y="104" width="40" height="8" rx="3"/>
+        <rect class="gs-eq-fill" x="100" y="112" width="7" height="30" rx="3"/><rect class="gs-eq-fill" x="122" y="112" width="7" height="30" rx="3"/>
+        <path class="gs-eq" d="M130 104 L134 64"/>
+        <path class="gs-fig" d="M112 104 L112 64"/>
+        <circle class="gs-fig-fill" cx="112" cy="52" r="7"/>
+        <path class="gs-fig" d="M112 104 L136 106 L136 140"/>
+        <circle class="gs-mglow" cx="112" cy="65" r="8"/>
+        <path class="gs-fig" d="M112 64 L128 54"/>
+        <g class="gsa-updown"><line class="gs-move" x1="84" y1="30" x2="148" y2="30"/><rect class="gs-move-fill" x="86" y="19" width="8" height="22" rx="4"/><rect class="gs-move-fill" x="138" y="19" width="8" height="22" rx="4"/><path class="gs-fig" d="M128 52 L126 33"/></g>`);
+    case 'pullup': return S(`
+        <line class="gs-eq" x1="66" y1="26" x2="174" y2="26" style="stroke-width:8"/>
+        <line class="gs-eq" x1="74" y1="26" x2="74" y2="8"/><line class="gs-eq" x1="166" y1="26" x2="166" y2="8"/>
+        <g class="gsa-body-up">
+            <path class="gs-fig" d="M120 62 L94 32"/><path class="gs-fig" d="M120 62 L146 32"/>
+            <circle class="gs-move-fill" cx="92" cy="30" r="6"/><circle class="gs-move-fill" cx="148" cy="30" r="6"/>
+            <circle class="gs-fig-fill" cx="120" cy="52" r="7"/>
+            <path class="gs-fig" d="M120 60 L120 98"/>
+            <ellipse class="gs-mglow" cx="120" cy="78" rx="9" ry="11"/>
+            <path class="gs-fig" d="M120 98 L110 120 L124 134"/>
+        </g>`);
+    case 'pulldown': return S(`
+        ${floor}
+        <circle class="gs-eq-fill" cx="120" cy="14" r="6"/><line class="gs-eq" x1="120" y1="14" x2="120" y2="38" style="stroke-width:3"/>
+        <rect class="gs-eq-fill" x="90" y="104" width="44" height="8" rx="3"/>
+        <rect class="gs-eq-fill" x="96" y="112" width="7" height="30" rx="3"/><rect class="gs-eq-fill" x="122" y="112" width="7" height="30" rx="3"/>
+        <path class="gs-fig" d="M108 104 L114 64"/>
+        <circle class="gs-fig-fill" cx="115" cy="52" r="7"/>
+        <path class="gs-fig" d="M108 104 L136 106 L136 140"/>
+        <ellipse class="gs-mglow" cx="107" cy="82" rx="8" ry="10"/>
+        <g class="gsa-down"><line class="gs-move" x1="76" y1="44" x2="164" y2="44"/><path class="gs-fig" d="M86 46 L108 66"/><path class="gs-fig" d="M154 46 L122 66"/></g>`);
+    case 'row': return S(`
+        ${floor}
+        <rect class="gs-eq-fill" x="58" y="104" width="42" height="8" rx="3"/>
+        <rect class="gs-eq-fill" x="64" y="112" width="7" height="30" rx="3"/><rect class="gs-eq-fill" x="88" y="112" width="7" height="30" rx="3"/>
+        <line class="gs-eq" x1="146" y1="100" x2="146" y2="140"/>
+        <line class="gs-eq" x1="210" y1="80" x2="168" y2="80" style="stroke-width:3;stroke-dasharray:6 6"/>
+        <path class="gs-fig" d="M76 104 L86 64"/>
+        <circle class="gs-fig-fill" cx="88" cy="52" r="7"/>
+        <path class="gs-fig" d="M76 106 L124 112 L138 140"/>
+        <ellipse class="gs-mglow" cx="82" cy="76" rx="8" ry="10"/>
+        <g class="gsa-row"><line class="gs-move" x1="152" y1="68" x2="152" y2="92"/><path class="gs-fig" d="M152 80 L98 70"/></g>`);
+    case 'curl': return S(`
+        ${floor}
+        <path class="gs-fig" d="M110 140 L110 100"/><path class="gs-fig" d="M120 140 L112 100"/>
+        <path class="gs-fig" d="M111 100 L110 58"/>
+        <circle class="gs-fig-fill" cx="110" cy="47" r="7"/>
+        <ellipse class="gs-mglow" cx="114" cy="72" rx="6" ry="9"/>
+        <path class="gs-fig" d="M110 60 L115 88"/>
+        <g class="gsa-curl" style="transform-origin:115px 88px;">
+            <line class="gs-move" x1="115" y1="88" x2="146" y2="88"/>
+            <rect class="gs-move-fill" x="143" y="76" width="9" height="24" rx="4"/>
+        </g>`);
+    case 'pushdown': return S(`
+        ${floor}
+        <circle class="gs-eq-fill" cx="152" cy="12" r="6"/><line class="gs-eq" x1="152" y1="12" x2="152" y2="56" style="stroke-width:3;stroke-dasharray:6 6"/>
+        <path class="gs-fig" d="M112 140 L112 100"/><path class="gs-fig" d="M122 140 L114 100"/>
+        <path class="gs-fig" d="M113 100 L112 58"/>
+        <circle class="gs-fig-fill" cx="112" cy="47" r="7"/>
+        <ellipse class="gs-mglow" cx="108" cy="72" rx="6" ry="9"/>
+        <path class="gs-fig" d="M112 60 L119 88"/>
+        <g class="gsa-pushdown" style="transform-origin:119px 88px;">
+            <line class="gs-move" x1="119" y1="88" x2="152" y2="88"/>
+            <line class="gs-move" x1="152" y1="78" x2="152" y2="98"/>
+        </g>`);
+    case 'legext': return S(`
+        ${floor}
+        <rect class="gs-eq-fill" x="80" y="96" width="54" height="10" rx="4"/>
+        <path class="gs-eq" d="M86 96 L82 58"/>
+        <rect class="gs-eq-fill" x="96" y="106" width="8" height="36" rx="3"/><rect class="gs-eq-fill" x="118" y="106" width="8" height="36" rx="3"/>
+        <path class="gs-fig" d="M104 96 L92 58"/>
+        <circle class="gs-fig-fill" cx="90" cy="47" r="7"/>
+        <ellipse class="gs-mglow" cx="118" cy="96" rx="11" ry="6"/>
+        <path class="gs-fig" d="M104 98 L132 100"/>
+        <g class="gsa-legext" style="transform-origin:132px 100px;">
+            <path class="gs-move" d="M132 100 L137 132"/>
+            <circle class="gs-move-fill" cx="138" cy="130" r="7"/>
+        </g>`);
+    case 'legcurl': return S(`
+        ${floor}
+        <rect class="gs-eq-fill" x="56" y="96" width="116" height="9" rx="4"/>
+        <rect class="gs-eq-fill" x="66" y="105" width="7" height="37" rx="3"/><rect class="gs-eq-fill" x="152" y="105" width="7" height="37" rx="3"/>
+        <circle class="gs-fig-fill" cx="72" cy="88" r="7"/>
+        <path class="gs-fig" d="M82 92 L140 93"/>
+        <ellipse class="gs-mglow" cx="150" cy="90" rx="11" ry="6"/>
+        <path class="gs-fig" d="M140 93 L164 95"/>
+        <g class="gsa-legcurl" style="transform-origin:164px 95px;">
+            <path class="gs-move" d="M164 95 L196 108"/>
+            <circle class="gs-move-fill" cx="194" cy="107" r="7"/>
+        </g>`);
+    case 'legpress': return S(`
+        ${floor}
+        <line class="gs-eq" x1="118" y1="134" x2="198" y2="54" style="stroke-width:4"/>
+        <path class="gs-eq" d="M56 122 L94 84" style="stroke-width:12"/>
+        <circle class="gs-fig-fill" cx="64" cy="84" r="7"/>
+        <path class="gs-fig" d="M74 92 L106 112"/>
+        <ellipse class="gs-mglow" cx="122" cy="99" rx="10" ry="7"/>
+        <path class="gs-fig" d="M106 112 L134 92"/>
+        <g class="gsa-diag">
+            <path class="gs-fig" d="M134 92 L158 76"/>
+            <line class="gs-move" x1="150" y1="56" x2="180" y2="90" style="stroke-width:10"/>
+        </g>`);
+    case 'squat': return S(`
+        ${floor}
+        <path class="gs-fig" d="M94 140 L100 112"/><path class="gs-fig" d="M128 140 L120 112"/>
+        <g class="gsa-squat">
+            <path class="gs-fig" d="M110 108 L100 112"/><path class="gs-fig" d="M110 108 L120 112"/>
+            <ellipse class="gs-mglow" cx="110" cy="106" rx="9" ry="7"/>
+            <path class="gs-fig" d="M110 108 L114 66"/>
+            <circle class="gs-fig-fill" cx="115" cy="55" r="7"/>
+            <line class="gs-move" x1="80" y1="63" x2="150" y2="63"/>
+            <rect class="gs-move-fill" x="82" y="52" width="8" height="22" rx="4"/><rect class="gs-move-fill" x="140" y="52" width="8" height="22" rx="4"/>
+        </g>`);
+    case 'calf': return S(`
+        ${floor}
+        <rect class="gs-eq-fill" x="92" y="132" width="44" height="10" rx="3"/>
+        <g class="gsa-calf">
+            <path class="gs-fig" d="M110 132 L110 100"/><path class="gs-fig" d="M120 132 L114 100"/>
+            <ellipse class="gs-mglow" cx="112" cy="120" rx="6" ry="9"/>
+            <path class="gs-fig" d="M112 100 L112 58"/>
+            <circle class="gs-fig-fill" cx="112" cy="47" r="7"/>
+            <path class="gs-fig" d="M112 62 L104 94"/><path class="gs-fig" d="M112 62 L122 94"/>
+        </g>`);
+    case 'shrug': return S(`
+        ${floor}
+        <path class="gs-fig" d="M106 140 L108 96"/><path class="gs-fig" d="M120 140 L116 96"/>
+        <path class="gs-fig" d="M112 96 L112 66"/>
+        <g class="gsa-shrug">
+            <circle class="gs-fig-fill" cx="112" cy="46" r="7"/>
+            <ellipse class="gs-mglow" cx="112" cy="58" rx="10" ry="5"/>
+            <path class="gs-fig" d="M98 62 L126 62"/>
+            <path class="gs-fig" d="M98 62 L94 96"/><path class="gs-fig" d="M126 62 L130 96"/>
+            <rect class="gs-move-fill" x="88" y="94" width="11" height="16" rx="4"/><rect class="gs-move-fill" x="125" y="94" width="11" height="16" rx="4"/>
+        </g>`);
+    case 'hinge': return S(`
+        ${floor}
+        <path class="gs-fig" d="M104 140 L104 100"/><path class="gs-fig" d="M114 140 L108 100"/>
+        <g class="gsa-hinge" style="transform-origin:106px 100px;">
+            <path class="gs-fig" d="M106 100 L106 58"/>
+            <circle class="gs-fig-fill" cx="106" cy="47" r="7"/>
+            <ellipse class="gs-mglow" cx="106" cy="88" rx="7" ry="9"/>
+            <path class="gs-fig" d="M106 64 L96 96"/>
+            <line class="gs-move" x1="76" y1="98" x2="116" y2="98"/>
+            <rect class="gs-move-fill" x="78" y="88" width="8" height="20" rx="4"/>
+        </g>`);
+    case 'fly': return S(`
+        ${floor}
+        <path class="gs-fig" d="M120 50 L120 104"/>
+        <circle class="gs-fig-fill" cx="120" cy="40" r="7"/>
+        <path class="gs-fig" d="M120 104 L104 140"/><path class="gs-fig" d="M120 104 L136 140"/>
+        <circle class="gs-mglow" cx="104" cy="58" r="7"/><circle class="gs-mglow" cx="136" cy="58" r="7"/>
+        <g class="gsa-arm-l" style="transform-origin:104px 58px;">
+            <path class="gs-move" d="M104 58 L97 94"/>
+            <circle class="gs-move-fill" cx="96" cy="99" r="7"/>
+        </g>
+        <g class="gsa-arm-r" style="transform-origin:136px 58px;">
+            <path class="gs-move" d="M136 58 L143 94"/>
+            <circle class="gs-move-fill" cx="144" cy="99" r="7"/>
+        </g>`);
+    case 'crunch': return S(`
+        <line class="gs-eq" x1="52" y1="122" x2="196" y2="122" style="stroke-width:7"/>
+        <path class="gs-fig" d="M126 116 L108 90 L94 116"/>
+        <g class="gsa-crunch" style="transform-origin:128px 116px;">
+            <path class="gs-fig" d="M128 116 L172 113"/>
+            <ellipse class="gs-mglow" cx="144" cy="112" rx="10" ry="6"/>
+            <circle class="gs-fig-fill" cx="180" cy="110" r="7"/>
+        </g>`);
+    case 'run': return S(`
+        <line class="gs-eq" x1="56" y1="134" x2="196" y2="134" style="stroke-width:8"/>
+        <line class="gs-floor" x1="66" y1="70" x2="82" y2="70"/><line class="gs-floor" x1="58" y1="90" x2="78" y2="90"/><line class="gs-floor" x1="64" y1="110" x2="80" y2="110"/>
+        <circle class="gs-fig-fill" cx="118" cy="52" r="7"/>
+        <path class="gs-fig" d="M120 62 L128 102"/>
+        <circle class="gs-mglow" cx="122" cy="74" r="7"/>
+        <g class="gsa-runarm1" style="transform-origin:121px 66px;"><path class="gs-fig" d="M121 66 L113 84 L124 92"/></g>
+        <g class="gsa-runarm2" style="transform-origin:121px 66px;"><path class="gs-fig" d="M121 66 L113 84 L124 92"/></g>
+        <g class="gsa-run1" style="transform-origin:128px 102px;"><path class="gs-move" d="M128 102 L138 118 L132 132"/></g>
+        <g class="gsa-run2" style="transform-origin:128px 102px;"><path class="gs-move" d="M128 102 L138 118 L132 132"/></g>`);
+    default: return S(`
+        ${floor}
+        <g class="gsa-updown"><line class="gs-move" x1="80" y1="70" x2="160" y2="70"/><rect class="gs-move-fill" x="82" y="56" width="9" height="28" rx="4"/><rect class="gs-move-fill" x="149" y="56" width="9" height="28" rx="4"/></g>`);
+    }
+}
+
+function buildMuscleMapSVG(primary, secondary) {
+    const cls = key => {
+        if (primary.includes(key)) return 'ex-muscle m-primary';
+        if (secondary.includes(key)) return 'ex-muscle m-secondary';
+        return 'ex-muscle';
+    };
+    const has = (list, ...keys) => keys.some(k => list.includes(k));
+    const deltFrontCls = (has(primary,'delts','delts_front','delts_side')) ? 'ex-muscle m-primary' : (has(secondary,'delts','delts_front','delts_side')) ? 'ex-muscle m-secondary' : 'ex-muscle';
+    const deltRearCls = (has(primary,'delts','delts_rear')) ? 'ex-muscle m-primary' : (has(secondary,'delts','delts_rear')) ? 'ex-muscle m-secondary' : 'ex-muscle';
+    const front = `<svg viewBox="0 0 90 190" aria-label="Вид спереди">
+      <g class="ex-body-base"><circle cx="45" cy="15" r="10"/><path d="M31 30 Q45 25 59 30 L62 78 Q45 86 28 78 Z"/><path d="M27 32 Q20 36 18 52 L15 84 Q19 87 23 85 L28 55 Z"/><path d="M63 32 Q70 36 72 52 L75 84 Q71 87 67 85 L62 55 Z"/><path d="M30 88 L28 132 Q31 136 38 135 L42 92 Z"/><path d="M60 88 L62 132 Q59 136 52 135 L48 92 Z"/><path d="M36 136 L34 176 Q38 180 42 178 L44 138 Z"/><path d="M54 136 L56 176 Q52 180 48 178 L46 138 Z"/></g>
+      <ellipse class="${deltFrontCls}" cx="27" cy="37" rx="6.5" ry="8"/><ellipse class="${deltFrontCls}" cx="63" cy="37" rx="6.5" ry="8"/>
+      <path class="${cls('chest')}" d="M33 36 Q45 33 45 33 L45 55 Q36 56 32 50 Z"/><path class="${cls('chest')}" d="M57 36 Q45 33 45 33 L45 55 Q54 56 58 50 Z"/>
+      <ellipse class="${cls('biceps')}" cx="22" cy="56" rx="5" ry="10"/><ellipse class="${cls('biceps')}" cx="68" cy="56" rx="5" ry="10"/>
+      <ellipse class="${cls('forearms')}" cx="18" cy="76" rx="4" ry="9"/><ellipse class="${cls('forearms')}" cx="72" cy="76" rx="4" ry="9"/>
+      <rect class="${cls('abs')}" x="38" y="58" width="14" height="24" rx="5"/>
+      <path class="${cls('obliques')}" d="M31 58 L36 58 L36 80 L30 77 Z"/><path class="${cls('obliques')}" d="M59 58 L54 58 L54 80 L60 77 Z"/>
+      <ellipse class="${cls('quads')}" cx="35" cy="110" rx="7" ry="20"/><ellipse class="${cls('quads')}" cx="55" cy="110" rx="7" ry="20"/>
+      <ellipse class="${cls('calves')}" cx="39" cy="156" rx="4.5" ry="14"/><ellipse class="${cls('calves')}" cx="51" cy="156" rx="4.5" ry="14"/>
+    </svg>`;
+    const back = `<svg viewBox="0 0 90 190" aria-label="Вид сзади">
+      <g class="ex-body-base"><circle cx="45" cy="15" r="10"/><path d="M31 30 Q45 25 59 30 L62 78 Q45 86 28 78 Z"/><path d="M27 32 Q20 36 18 52 L15 84 Q19 87 23 85 L28 55 Z"/><path d="M63 32 Q70 36 72 52 L75 84 Q71 87 67 85 L62 55 Z"/><path d="M30 88 L28 132 Q31 136 38 135 L42 92 Z"/><path d="M60 88 L62 132 Q59 136 52 135 L48 92 Z"/><path d="M36 136 L34 176 Q38 180 42 178 L44 138 Z"/><path d="M54 136 L56 176 Q52 180 48 178 L46 138 Z"/></g>
+      <path class="${cls('traps')}" d="M38 28 Q45 26 52 28 L50 42 Q45 44 40 42 Z"/>
+      <ellipse class="${deltRearCls}" cx="27" cy="37" rx="6.5" ry="8"/><ellipse class="${deltRearCls}" cx="63" cy="37" rx="6.5" ry="8"/>
+      <path class="${cls('upperback')}" d="M34 34 L44 40 L44 50 L34 47 Z"/><path class="${cls('upperback')}" d="M56 34 L46 40 L46 50 L56 47 Z"/>
+      <path class="${cls('lats')}" d="M32 48 L43 52 L43 68 L34 62 Z"/><path class="${cls('lats')}" d="M58 48 L47 52 L47 68 L56 62 Z"/>
+      <ellipse class="${cls('triceps')}" cx="22" cy="55" rx="5" ry="10"/><ellipse class="${cls('triceps')}" cx="68" cy="55" rx="5" ry="10"/>
+      <ellipse class="${cls('forearms')}" cx="18" cy="76" rx="4" ry="9"/><ellipse class="${cls('forearms')}" cx="72" cy="76" rx="4" ry="9"/>
+      <rect class="${cls('lowerback')}" x="39" y="64" width="12" height="14" rx="4"/>
+      <ellipse class="${cls('glutes')}" cx="38" cy="90" rx="8" ry="8"/><ellipse class="${cls('glutes')}" cx="52" cy="90" rx="8" ry="8"/>
+      <ellipse class="${cls('hamstrings')}" cx="35" cy="115" rx="7" ry="18"/><ellipse class="${cls('hamstrings')}" cx="55" cy="115" rx="7" ry="18"/>
+      <ellipse class="${cls('calves')}" cx="39" cy="156" rx="4.5" ry="14"/><ellipse class="${cls('calves')}" cx="51" cy="156" rx="4.5" ry="14"/>
+    </svg>`;
+    return front + back;
+}
+
+function buildExerciseGuideHTML(exerciseName, type) {
+    const guide = findExerciseGuide(exerciseName);
+    if (!guide) return '';
+    const open = guideOpenExercise === exerciseName ? 'open' : '';
+    const primaryLabels = guide.primary.map(k => MUSCLE_LABELS[k]).filter(Boolean).join(' · ');
+    const secondaryLabels = guide.secondary.map(k => MUSCLE_LABELS[k]).filter(Boolean).join(' · ');
+    return `<div class="ex-guide ${open}" data-ex="${escapeHtml(exerciseName)}">
+        <div class="ex-guide-head" onclick="toggleExerciseGuide(this)">
+            <div class="ex-guide-head-label"><span>💪 Техника и мышцы</span><span class="ex-guide-muscle-tag">${escapeHtml(primaryLabels)}</span></div>
+            <span class="ex-guide-chevron">⌄</span>
+        </div>
+        <div class="ex-guide-body">
+            <div class="ex-guide-scene">${buildGuideAnimSVG(guide.anim)}</div>
+            <div class="ex-guide-lower">
+                <div class="ex-guide-map">${buildMuscleMapSVG(guide.primary, guide.secondary)}</div>
+                <div class="ex-guide-legend"><span><span class="dot p"></span>Основные: <b>${escapeHtml(primaryLabels)}</b></span>${secondaryLabels ? `<span><span class="dot s"></span>Доп.: <b>${escapeHtml(secondaryLabels)}</b></span>` : ''}</div>
+            </div>
+            <div class="ex-guide-section-title">Техника</div>
+            <ol class="ex-guide-steps">${guide.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
+            <div class="ex-guide-section-title">Частые ошибки</div>
+            <ul class="ex-guide-mistakes">${guide.mistakes.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>
+        </div>
+    </div>`;
+}
 loadData();
 </script>
 
