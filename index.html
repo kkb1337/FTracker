@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>FTracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1882,6 +1882,50 @@ body.light-mode{
     background:var(--input-bg) !important;
 }
 </style>
+
+<style id="v56-scroll-zoom-gear-fix">
+/* v56: iOS/PWA viewport and nested screen scrolling cleanup */
+html, body {
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  overscroll-behavior:none;
+  touch-action:manipulation;
+  -webkit-text-size-adjust:100%;
+}
+body {
+  position:relative;
+}
+.container {
+  overflow-x:hidden;
+}
+/* Prevent accidental browser zoom gestures in PWA */
+* {
+  -webkit-user-select:none;
+}
+input, textarea, select {
+  -webkit-user-select:text;
+}
+/* Screen headers should not leave an old section title hanging above nested pages */
+.screen-header {
+  position:relative!important;
+  top:auto!important;
+  box-shadow:none!important;
+}
+/* Theme gear: fixed safe position on home screen */
+.theme-toggle-btn {
+  top:calc(env(safe-area-inset-top, 0px) + 12px)!important;
+  right:16px!important;
+  z-index:50!important;
+}
+/* Nutrition chart opens as a clean independent scroll area */
+#chartModal .chart-modal-content {
+  position:relative!important;
+  max-height:calc(100vh - 40px)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+}
+</style>
 </head>
 <body>
 <div class="container" id="app">
@@ -2671,6 +2715,10 @@ function closeExportReminder() { document.getElementById('exportReminder').class
 function resetAppViewport(screenId){
   const root=document.getElementById('app');
   const screen=screenId ? document.getElementById(screenId) : null;
+  // Reset every possible scroll container so nested pages open from the top.
+  document.querySelectorAll('.hidden, .screen-header, .catalog-modal-content, .chart-modal-content').forEach(el=>{
+    if(el) el.scrollTop=0;
+  });
   try{ window.scrollTo({top:0,left:0,behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
   document.documentElement.scrollTop=0;
   document.body.scrollTop=0;
@@ -5747,6 +5795,7 @@ function openChartModal() {
     });
 }
 function closeChartModal(){document.getElementById('chartModal')?.classList.add('hidden');}
+
 function setChartPeriod(period,options={}){
     chartPeriod=period;
     document.querySelectorAll('#chartModal .period-selector button').forEach(b=>{const active=b.dataset.period===period;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');});
