@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FTracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
 <style>
 body { --bg: #000; --card-bg: #1c1c1e; --text: #fff; --subtext: #8e8e93; --input-bg: #2c2c2e; --button-green: #34c759; --button-gray: #3a3a3c; --border: #2c2c2e; --positive: #34c759; --negative: #ff3b30; --toast-bg: #34c759; --toast-text: #000; --modal-overlay: rgba(0,0,0,0.7); --accent-gradient: linear-gradient(135deg, #34c759, #30d158); --accent: var(--button-green); --surface-2: var(--card-bg); padding: 0; margin: 0; background: var(--bg); color: var(--text); overscroll-behavior: none; touch-action: manipulation; }
 body.light-mode { --bg: #f2f2f7; --card-bg: #ffffff; --text: #1c1c1e; --subtext: #6e6e73; --input-bg: #e5e5ea; --button-green: #2e7d32; --button-gray: #d1d1d6; --border: #d1d1d6; --positive: #2e7d32; --negative: #c62828; --toast-bg: #2e7d32; --toast-text: #fff; --modal-overlay: rgba(0,0,0,0.4); --accent-gradient: linear-gradient(135deg, #2e7d32, #4caf50); }
-* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 .container { width:100%; max-width:600px; margin:0 auto; padding:16px; position:relative; box-sizing:border-box; }
 .card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
 .card:active { transform: scale(0.98); }
@@ -89,6 +89,9 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .exercise-click-hint { font-size: 14px; color: var(--subtext); margin-left: 4px; cursor: pointer; }
 .split-title { font-size: 24px; font-weight: 700; color: var(--text); }
 .split-subtitle { font-size: 18px; color: var(--subtext); }
+.screen-header { position: sticky; top: 0; z-index: 100; background: var(--bg); padding: 8px 0; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.screen-header .title { margin-bottom: 0; font-size: 28px; }
+.screen-header button.gray { width: auto; padding: 10px 16px; margin: 0; }
 .food-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .food-item:last-child { border-bottom: none; }
 .food-preset-list { position: absolute; top: 100%; left: 0; width: 100%; max-height: 200px; overflow-y: auto; background: var(--card-bg); border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; margin-top: 4px; }
@@ -150,7 +153,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .custom-date-range .apply-period-btn { grid-column:1/-1; margin:0; padding:10px; font-size:14px; }
 .data-type-selector { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:0; }
 .data-type-selector button { min-width:0; margin:0; padding:11px 10px; border-radius:13px; background:var(--input-bg); color:var(--subtext); border:1px solid transparent; font-size:14px; font-weight:700; text-align:left; position:relative; }
-.data-type-selector button::before { content:""; width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:7px; background:currentColor; opacity:.85; }
+.data-type-selector button::before { content:''; width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:7px; background:currentColor; opacity:.85; }
 .data-type-selector button[data-type="all"]::before { background:linear-gradient(135deg,#34c759,#4fa86a,#8fae52,#55a65f); }
 .data-type-selector button.active { color:var(--text); box-shadow:inset 0 0 0 1px currentColor, 0 3px 10px rgba(0,0,0,.14); }
 .data-type-selector button[data-type="calories"].active { color:#34c759; background:rgba(52,199,89,.13); }
@@ -372,7 +375,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 
 
 /* Clean window system owns sticky positioning; carousel only scrolls horizontally. */
-
+.screen-header .exercise-strip,.screen-header .exercise-strip-container,.screen-header .exercise-carousel,#workoutScreen #exerciseStrip{position:relative!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;}
 </style>
 
 <style id="measurement-v27-style">
@@ -386,7 +389,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 <style id="workout-ui-v2">
 /* Workout UX refresh — preserves existing application logic */
 #workoutScreen{padding:0;}
-
+#workoutScreen .workout-topbar{background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:6px 0 12px;margin-bottom:8px;}
 .workout-head{display:grid;grid-template-columns:44px 1fr 70px;align-items:center;gap:10px;}
 .workout-close{width:42px!important;height:42px!important;margin:0!important;padding:0!important;border-radius:14px!important;background:var(--input-bg)!important;color:var(--text)!important;box-shadow:none!important;font-size:18px!important;}
 .workout-title-wrap{min-width:0;text-align:center;}
@@ -402,7 +405,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 #exerciseStrip .exercise-dot.active{background:var(--card-bg);color:var(--text);border-color:var(--button-green);box-shadow:0 3px 12px rgba(0,0,0,.16);}
 #exerciseStrip .exercise-dot.done:not(.active){background:rgba(52,199,89,.13);color:var(--positive);}
 #exerciseStrip .exercise-dot::before{content:attr(data-step);width:21px;height:21px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:11px;flex:0 0 auto;}
-#exerciseStrip .exercise-dot.done::before{content:"✓";background:rgba(52,199,89,.18);color:var(--positive);}
+#exerciseStrip .exercise-dot.done::before{content:'✓';background:rgba(52,199,89,.18);color:var(--positive);}
 #exerciseStrip .exercise-dot.active::before{background:var(--button-green);color:#fff;}
 .workout-exercise-card{padding:17px!important;margin-bottom:12px!important;border-radius:22px!important;}
 .workout-exercise-kicker{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;color:var(--subtext);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;}
@@ -572,8 +575,8 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .progress-history-section .progress-ex-history{margin-top:11px!important}
 /* Consistent screen language for Nutrition / Measurements / Programs */
 #foodScreen,#bodyScreen,#settingsScreen{padding-bottom:20px}
-
-
+#foodScreen .screen-header,#bodyScreen .screen-header,#settingsScreen .screen-header{margin-bottom:14px}
+#foodScreen .screen-header .title,#bodyScreen .screen-header .title,#settingsScreen .screen-header .title{font-size:24px;font-weight:900;letter-spacing:-.4px}
 #foodScreen>.tabs{display:flex;gap:5px;padding:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow-x:auto}
 #foodScreen>.tabs .tab{flex:1;min-width:0;padding:10px 9px;border-radius:12px;text-align:center;font-weight:750;font-size:13px;color:var(--subtext);background:transparent;white-space:nowrap}
 #foodScreen>.tabs .tab.active{background:var(--card-bg);color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,.12)}
@@ -918,7 +921,7 @@ body.light-mode .ex-body-base{fill:rgba(110,110,115,.15);}
 .ex-guide-steps li::before{content:counter(gstep);position:absolute;left:0;top:5px;width:18px;height:18px;border-radius:50%;background:rgba(52,199,89,.16);color:var(--button-green);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
 .ex-guide-mistakes{margin:0;padding:0;list-style:none;}
 .ex-guide-mistakes li{position:relative;padding:4px 0 4px 22px;font-size:13.5px;line-height:1.4;color:var(--subtext);}
-.ex-guide-mistakes li::before{content:"✕";position:absolute;left:2px;top:4px;color:var(--negative);font-size:11px;font-weight:900;}
+.ex-guide-mistakes li::before{content:'✕';position:absolute;left:2px;top:4px;color:var(--negative);font-size:11px;font-weight:900;}
 .tech-tip{margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);font-size:13.5px;line-height:1.4;}
 /* Светлая тема: воркаут-карточка была захардкожена тёмной и в light-mode текст становился нечитаемым */
 body.light-mode #workoutScreen .workout-exercise-card{background:var(--card-bg)!important;border-color:var(--border)!important;box-shadow:0 8px 20px rgba(0,0,0,.08)!important;}
@@ -971,7 +974,7 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 .tech-phase-label{display:none!important;}
 .tech-phase img{margin-top:0!important;max-height:54vh;object-fit:contain;background:transparent;}
 .tech-phase{padding:0!important;}
-
+#exerciseDirectoryScreen .screen-header .title{min-width:0;}
 @media(max-width:430px){.program-v5-actions{grid-template-columns:1fr;}.program-v5-ex{gap:6px;}.program-v5-ex-name{font-size:15px;}.directory-item-name{font-size:15px;}}
 </style>
 
@@ -1013,7 +1016,7 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 
 <style id="v40-current-workout-style">
 /* v40 — one current workout visual layer. */
-
+#workoutScreen .workout-topbar{padding:8px 0 10px!important;}
 #workoutScreen .workout-head{grid-template-columns:44px minmax(0,1fr) auto!important;align-items:center!important;}
 #workoutScreen .workout-title-wrap{text-align:center!important;min-width:0!important;}
 #workoutScreen #workoutTitle{font-size:clamp(18px,5vw,22px)!important;font-weight:850!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
@@ -1208,9 +1211,9 @@ button,.tab,.stats-tab{touch-action:manipulation;-webkit-tap-highlight-color:tra
 button.gray{background:var(--button-gray)!important;color:var(--text)!important;border:1px solid var(--border)!important;}
 button.outline{background:transparent!important;color:var(--button-green)!important;border:1px solid color-mix(in srgb,var(--button-green) 55%,var(--border))!important;}
 input,select{border:1px solid var(--border)!important;background:var(--input-bg)!important;color:var(--text)!important;min-width:0;}
-
-
-
+.screen-header{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;position:sticky!important;top:0!important;padding:8px 0 12px!important;background:color-mix(in srgb,var(--bg) 92%,transparent)!important;backdrop-filter:blur(14px);}
+.screen-header .title{font-size:24px!important;line-height:1.1!important;margin:0!important;text-align:center!important;min-width:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.screen-header>button{width:auto!important;margin:0!important;min-height:40px!important;padding:9px 12px!important;border-radius:12px!important;}
 .tabs,.stats-tabs,.directory-tabs{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px!important;}
 .tabs .tab,.stats-tab,.directory-tab{min-width:0!important;margin:0!important;padding:11px 8px!important;border-radius:12px!important;background:var(--input-bg)!important;color:var(--subtext)!important;}
 .tabs .tab.active,.stats-tab.active,.directory-tab.active{background:var(--accent-gradient)!important;color:#fff!important;}
@@ -1242,7 +1245,7 @@ input,select{border:1px solid var(--border)!important;background:var(--input-bg)
 #settingsScreen button{max-width:100%!important;}
 /* Workout — single clean geometry */
 #workoutScreen{width:100%;}
-
+#workoutScreen .workout-topbar{padding:4px 0 8px!important;background:var(--bg)!important;}
 #workoutScreen .workout-head{display:grid!important;grid-template-columns:42px minmax(0,1fr) 54px!important;align-items:center!important;gap:8px!important;}
 #workoutScreen .workout-close{width:42px!important;height:42px!important;min-width:42px!important;margin:0!important;padding:0!important;border-radius:13px!important;background:transparent!important;color:var(--button-green)!important;font-size:38px!important;font-weight:300!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important;}
 #workoutScreen .workout-title-wrap{text-align:center!important;min-width:0!important;}
@@ -1344,7 +1347,7 @@ input,select{border:1px solid var(--border)!important;background:var(--input-bg)
   #workoutScreen .set-done-btn,#workoutScreen .set-delete-btn{width:38px!important;height:38px!important;min-width:38px!important;}
   #workoutScreen .workout-set-inputs.horizontal{gap:5px!important;}
   #workoutScreen .workout-set-inputs input{height:42px!important;font-size:14px!important;padding:0 5px!important;}
-  
+  .screen-header .title{font-size:22px!important;}
 }
 </style>
 
@@ -1473,9 +1476,9 @@ body.light-mode{
 </style>
 <style id="v53-cosmetic-calibration">
 /* Unified section headers: same naming rhythm, icon slot and geometry on every screen. */
-
+.screen-header .section-title{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:0!important;}
 .section-title-icon{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);font-size:14px;font-weight:900;color:var(--accent);line-height:1;}
-
+.screen-header-spacer{width:96px;height:40px;display:block;visibility:hidden;pointer-events:none;flex:0 0 96px;}
 /* Calories: one compact value line, visually equal to macro cards. */
 #foodScreen .food-calorie-main{min-width:0!important;width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;text-align:left!important;padding:13px 14px!important;line-height:1!important;}
 #foodScreen .food-calorie-main .food-calorie-label{display:inline!important;margin:0!important;font-size:13px!important;flex:0 0 auto!important;}
@@ -1508,9 +1511,9 @@ body.light-mode{
 #foodScreen .food-calorie-main>span:last-child{font-size:11px!important;color:var(--subtext)!important;white-space:nowrap!important;}
 @media(max-width:520px){#foodScreen .food-day-head{grid-template-columns:1fr!important;gap:8px!important;}#foodScreen .food-calorie-main{justify-content:space-between!important;min-width:0!important;width:100%!important;grid-template-columns:auto 1fr auto!important;}#foodScreen .food-calorie-main strong{text-align:center!important;}}
 /* A fixed header keeps the title centered without an oversized visible spacer. */
-
-
-
+.screen-header{grid-template-columns:auto minmax(0,1fr) auto!important;min-height:56px!important;}
+.screen-header-spacer{width:44px!important;height:40px!important;flex:0 0 44px!important;}
+.screen-header .title.section-title{min-width:0!important;width:100%!important;}
 /* All large sheets start near the safe top and scroll inside their own content. */
 .technique-modal,.exercise-modal,.catalog-modal,.food-modal,.confirm-modal,.date-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal{align-items:flex-start!important;padding-top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;}
 .technique-modal-content,.exercise-modal-content,.catalog-modal-content,.food-modal-content,.confirm-modal-content,.date-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{margin-top:0!important;}
@@ -1541,10 +1544,58 @@ body.light-mode{
 <style id="v55-final-inspection-fix">
 /* v55: final cascade cleanup — deliberately last so legacy CSS cannot override it. */
 /* Compact, consistent screen header. The old 88/96px phantom columns made the bar unnecessarily tall/wide. */
-
-
-
-
+.screen-header{
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr) 48px!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-height:48px!important;
+  height:48px!important;
+  padding:4px 0!important;
+  margin:0 0 10px!important;
+  box-sizing:border-box!important;
+}
+.screen-header>button.gray{
+  width:44px!important;
+  min-width:44px!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:7px 8px!important;
+  margin:0!important;
+  border-radius:11px!important;
+  justify-self:start!important;
+  font-size:13px!important;
+}
+.screen-header>.title.section-title{
+  grid-column:2!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  width:100%!important;
+  min-width:0!important;
+  height:40px!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:22px!important;
+  line-height:1!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  background:none!important;
+  -webkit-background-clip:border-box!important;
+  -webkit-text-fill-color:var(--text)!important;
+  color:var(--text)!important;
+}
+.screen-header::after{
+  content:""!important;
+  display:block!important;
+  width:44px!important;
+  height:40px!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
 /* The old .title applies transparent gradient text to children; explicitly restore icon paint. */
 .section-title-icon{
   width:28px!important;
@@ -1564,10 +1615,10 @@ body.light-mode{
   line-height:1!important;
 }
 @media(max-width:430px){
-  
-  
-  
-  
+  .screen-header{grid-template-columns:46px minmax(0,1fr) 46px!important;height:46px!important;min-height:46px!important;padding:3px 0!important;}
+  .screen-header>button.gray{width:42px!important;min-width:42px!important;height:38px!important;min-height:38px!important;padding:6px 7px!important;font-size:12px!important;}
+  .screen-header>.title.section-title{height:38px!important;font-size:20px!important;}
+  .screen-header::after{width:42px!important;height:38px!important;}
   .section-title-icon{width:26px!important;height:26px!important;min-width:26px!important;font-size:14px!important;}
 }
 
@@ -1806,6 +1857,15 @@ body.light-mode{
 
 
 <style id="final-workout-settings-ui-fix">
+/* Compact the gap between the sticky workout topbar and the first content block. */
+#workoutScreen .workout-topbar{
+    padding-bottom:4px !important;
+    margin-bottom:2px !important;
+}
+#workoutScreen #exerciseStrip{
+    padding-bottom:6px !important;
+    margin-bottom:0 !important;
+}
 
 /* Settings / theme sheet: one consistent neutral button style.
    Overrides the old green/gradient inline styles without touching behavior. */
@@ -1832,59 +1892,59 @@ body.light-mode{
 
 
 
-
-
-
-
-<style id="ftracker-ios-top-canonical-clean">
-/* FTracker — one and only iOS/PWA top geometry.
-   Reference: Home screen. Workout keeps its own single sticky row containing
-   the workout title/progress and horizontal exercise carousel. */
+<style id="ftracker-canonical-viewport">
+/* FTracker canonical viewport: one geometry model for Safari and standalone PWA.
+   No standalone-only repositioning, no fixed body, no transform on #app,
+   no forced 59px safe-area, and no JS-driven viewport height. */
 html,body{
+  width:100%!important;
+  height:100%!important;
+  min-height:100%!important;
   margin:0!important;
   padding:0!important;
-  width:100%!important;
-  min-height:100%!important;
-  height:auto!important;
-  overflow-x:hidden!important;
-  overflow-y:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior-y:auto!important;
+  overflow:hidden!important;
   background:var(--bg,#000)!important;
-  -webkit-text-size-adjust:100%!important;
 }
+body{box-sizing:border-box!important;}
 #app,#app.container{
   position:relative!important;
   width:100%!important;
   max-width:600px!important;
-  min-height:100%!important;
-  height:auto!important;
+  
   margin:0 auto!important;
   padding:0!important;
-  overflow:visible!important;
-  display:block!important;
   box-sizing:border-box!important;
+  overflow:hidden!important;
+  background:var(--bg,#000)!important;
 }
-#app>div:not(.hidden){
-  position:relative!important;
-  inset:auto!important;
+#app>div{
+  position:absolute!important;
+  inset:0!important;
   width:100%!important;
-  height:auto!important;
+  height:100%!important;
   min-height:0!important;
   max-height:none!important;
   margin:0!important;
-  overflow:visible!important;
-  box-sizing:border-box!important;
   padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  box-sizing:border-box!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
 }
 #app>div.hidden{display:none!important;}
-
-/* HOME: this is the reference geometry. The transparent top area belongs
-   to the screen itself and is consumed exactly once. */
+/* Home: only the content itself receives the top safe area. */
 #homeScreen{
-  position:relative!important;
-  overflow:visible!important;
-  padding:env(safe-area-inset-top,0px) 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  position:absolute!important;
+  overflow:hidden!important;
+  padding-top:env(safe-area-inset-top,0px)!important;
+}
+#homeScreen>.title{
+  margin:0 0 14px!important;
+  padding:4px 0 0!important;
+  text-align:center!important;
+  line-height:1.05!important;
+  width:100%!important;
 }
 #homeScreen .theme-toggle-btn{
   top:calc(env(safe-area-inset-top,0px) + 6px)!important;
@@ -1893,39 +1953,38 @@ html,body{
   height:44px!important;
   z-index:100!important;
 }
-
-/* ALL NORMAL SCREENS: the sticky header owns the safe-area inset. */
-#app>div:not(.hidden)>.screen-header{
+/* Ordinary sections: header is the only element that consumes top safe-area. */
+#app>div>.screen-header{
   position:sticky!important;
   top:0!important;
   z-index:5000!important;
-  width:calc(100% + 32px)!important;
+  width:100%!important;
   min-width:0!important;
-  min-height:58px!important;
-  margin:0 -16px 12px!important;
-  padding:env(safe-area-inset-top,0px) 16px 8px!important;
+  min-height:56px!important;
+  margin:0 0 10px!important;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 0 8px!important;
   box-sizing:border-box!important;
   display:grid!important;
   grid-template-columns:minmax(92px,auto) minmax(0,1fr) 44px!important;
   align-items:center!important;
   gap:8px!important;
-  background:color-mix(in srgb,var(--bg,#000) 94%,transparent)!important;
+  background:var(--bg,#000)!important;
   border:0!important;
   box-shadow:none!important;
   isolation:isolate!important;
-  backdrop-filter:blur(12px)!important;
-  -webkit-backdrop-filter:blur(12px)!important;
 }
-#app>div:not(.hidden)>.screen-header>button.gray{
+#app>div>.screen-header>button.gray{
   width:max-content!important;
   min-width:92px!important;
   min-height:40px!important;
   margin:0!important;
   padding:9px 12px!important;
   white-space:nowrap!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
 }
-#app>div:not(.hidden)>.screen-header>.title,
-#app>div:not(.hidden)>.screen-header>.title.section-title{
+#app>div>.screen-header>.title,
+#app>div>.screen-header>.title.section-title{
   min-width:0!important;
   width:100%!important;
   margin:0!important;
@@ -1935,74 +1994,18 @@ html,body{
   justify-content:center!important;
   gap:8px!important;
   text-align:center!important;
-  line-height:1.08!important;
+  line-height:1.1!important;
   white-space:normal!important;
   overflow:visible!important;
 }
-#app>div:not(.hidden)>.screen-header>.screen-header-spacer{
+#app>div>.screen-header>.screen-header-spacer{
   width:44px!important;
   min-width:44px!important;
   height:40px!important;
   flex:0 0 44px!important;
   visibility:hidden!important;
-  pointer-events:none!important;
 }
-
-/* WORKOUT: one fixed/sticky top row. It contains the sport/workout title,
-   timer/progress and the horizontal exercise carousel — nothing is split
-   into a second top layer. */
-#app>#workoutScreen{
-  position:relative!important;
-  padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
-  overflow:visible!important;
-}
-#app>#workoutScreen>.workout-topbar{
-  position:sticky!important;
-  top:0!important;
-  z-index:6000!important;
-  width:calc(100% + 32px)!important;
-  min-width:0!important;
-  margin:0 -16px!important;
-  padding:env(safe-area-inset-top,0px) 16px 8px!important;
-  box-sizing:border-box!important;
-  background:color-mix(in srgb,var(--bg,#000) 94%,transparent)!important;
-  border:0!important;
-  box-shadow:none!important;
-  isolation:isolate!important;
-  backdrop-filter:blur(12px)!important;
-  -webkit-backdrop-filter:blur(12px)!important;
-}
-#app>#workoutScreen>.workout-topbar .workout-head{position:relative!important;z-index:1!important;}
-#app>#workoutScreen>.workout-topbar #exerciseStrip{
-  position:relative!important;
-  z-index:1!important;
-  overflow-x:auto!important;
-  overflow-y:hidden!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-x!important;
-}
-
-/* The safe-area background is visual only. It never adds another inset. */
-#app>div:not(.hidden)>.screen-header::before,
-#app>#workoutScreen>.workout-topbar::before{
-  content:""!important;
-  position:absolute!important;
-  z-index:-1!important;
-  left:0!important;
-  right:0!important;
-  top:0!important;
-  height:env(safe-area-inset-top,0px)!important;
-  pointer-events:none!important;
-  background:transparent!important;
-}
-
-/* PWA standalone uses the same coordinate system — no standalone patch. */
-@media (display-mode:standalone){
-  html,body,#app,#app.container{height:auto!important;min-height:100%!important;}
-}
-
-/* Modals are intentionally separate viewport overlays; their safe-area
-   handling is not part of the normal screen top geometry. */
+/* Modals share one viewport shell; their content is the scroll container. */
 #app [id$="Modal"]:not(.hidden),
 #app .theme-modal:not(.hidden),#app .exercise-modal:not(.hidden),
 #app .date-modal:not(.hidden),#app .confirm-modal:not(.hidden),
@@ -2011,8 +2014,86 @@ html,body{
 #app .catalog-modal:not(.hidden),#app .technique-modal:not(.hidden){
   position:fixed!important;
   inset:0!important;
+  width:100%!important;
+  
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(10px + env(safe-area-inset-bottom,0px))!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  z-index:2147483000!important;
+}
+/* Workout uses the same origin; only its own topbar is special. */
+#app>#workoutScreen{
+  padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  overflow-y:auto!important;
+}
+#app>#workoutScreen>.workout-topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:6000!important;
+  width:100%!important;
+  margin:0!important;
+  padding:calc(env(safe-area-inset-top,0px) + 6px) 0 8px!important;
+  box-sizing:border-box!important;
+  background:var(--bg,#000)!important;
+}
+#app>#workoutScreen .workout-bottom-actions{
+  position:relative!important;
+  margin:14px 0 0!important;
+  padding:0 0 2px!important;
+}
+button,.btn,.action-copy,.nav-label,.title,.screen-header *{
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  hyphens:none!important;
+}
+/* Standalone deliberately does not get a second geometry model. */
+
+</style>
+
+
+<style id="v55-centered-modal-system">
+/* Final modal geometry: every true modal is centered in the visible PWA viewport.
+   The modal itself remains the full-screen overlay; only its content is centered. */
+#app [id$="Modal"]:not(.hidden),
+#app .theme-modal:not(.hidden),
+#app .exercise-modal:not(.hidden),
+#app .date-modal:not(.hidden),
+#app .confirm-modal:not(.hidden),
+#app .workout-detail-modal:not(.hidden),
+#app .manual-workout-modal:not(.hidden),
+#app .achievements-modal:not(.hidden),
+#app .food-modal:not(.hidden),
+#app .catalog-modal:not(.hidden),
+#app .technique-modal:not(.hidden){
+  align-items:center!important;
+  justify-content:center!important;
+  padding-top:calc(env(safe-area-inset-top,0px) + 12px)!important;
+  padding-right:12px!important;
+  padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;
+  padding-left:12px!important;
+  box-sizing:border-box!important;
+}
+
+#app [id$="Modal"]:not(.hidden) > *:not(.modal-overlay),
+#app .theme-modal:not(.hidden) > .theme-modal-content,
+#app .exercise-modal:not(.hidden) > .exercise-modal-content,
+#app .date-modal:not(.hidden) > .date-modal-content,
+#app .confirm-modal:not(.hidden) > .confirm-modal-content,
+#app .workout-detail-modal:not(.hidden) > .workout-detail-content,
+#app .manual-workout-modal:not(.hidden) > .manual-workout-content,
+#app .achievements-modal:not(.hidden) > .achievements-content,
+#app .food-modal:not(.hidden) > .food-modal-content,
+#app .catalog-modal:not(.hidden) > .catalog-modal-content,
+#app .technique-modal:not(.hidden) > .technique-modal-content{
+  margin-top:0!important;
+  margin-bottom:0!important;
 }
 </style>
+
 </head>
 <body>
 <div class="container" id="app">
@@ -8155,10 +8236,34 @@ function adjustRestTime(delta){
   transform:none!important;
 }
 /* One header geometry across all normal sections. */
-
-
-
-
+.screen-header{
+  display:grid!important;
+  grid-template-columns:96px minmax(0,1fr) 96px!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+.screen-header>button.gray{
+  width:96px!important;
+  min-width:96px!important;
+  box-sizing:border-box!important;
+  justify-self:start!important;
+}
+.screen-header>.title{
+  grid-column:2!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  text-align:center!important;
+  justify-self:stretch!important;
+}
+.screen-header::after{
+  content:"";
+  display:block;
+  width:96px;
+  height:40px;
+  visibility:hidden;
+  pointer-events:none;
+}
 /* Nutrition: calories are a proper metric card, visually matching macros. */
 #foodScreen .food-calorie-main{
   min-width:104px!important;
@@ -8221,8 +8326,8 @@ function adjustRestTime(delta){
   color:var(--negative)!important;
 }
 @media(max-width:430px){
-  
-  
+  .screen-header{grid-template-columns:88px minmax(0,1fr) 88px!important;}
+  .screen-header>button.gray,.screen-header::after{width:88px!important;min-width:88px!important;}
   #foodScreen .food-calorie-main{min-width:98px!important;padding:10px 9px!important;}
 }
 </style>
@@ -8591,7 +8696,7 @@ function adjustRestTime(delta){
 #exerciseDirectoryContent .directory-delete{grid-column:auto!important;grid-row:1!important;}
 #progressScreen .progress-selected-exercise{display:flex!important;align-items:center!important;gap:10px!important;}
 #progressScreen .progress-selected-exercise .progress-list-indicator{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;position:relative;color:var(--button-green);font-weight:900;}
-#progressScreen .progress-list-indicator::before,#progressScreen .progress-list-indicator::after{content:"✓";position:absolute;font-size:10px;line-height:1;}
+#progressScreen .progress-list-indicator::before,#progressScreen .progress-list-indicator::after{content:'✓';position:absolute;font-size:10px;line-height:1;}
 #progressScreen .progress-list-indicator::before{transform:translate(-6px,-4px);}
 #progressScreen .progress-list-indicator::after{transform:translate(5px,5px);opacity:.7;}
 #progressScreen .progress-selected-exercise-tap{flex:1!important;}
@@ -8724,7 +8829,7 @@ function adjustRestTime(delta){
 
 <style id="v58-final-repair">
 /* v58: final interaction/layout repair */
-
+#foodScreen .screen-header{margin-bottom:12px!important;}
 
 /* Progress picker: workout count belongs ONLY to the dropdown list. */
 #progressExercisePickerModal .progress-picker-row-main small{display:none!important;}
@@ -8745,7 +8850,14 @@ function adjustRestTime(delta){
 #exerciseDirectoryContent .directory-item-main{z-index:5!important;pointer-events:auto!important;}
 
 /* Section icons: do not inherit transparent gradient text from .title. */
-
+.screen-header .section-title-icon{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-style:normal!important;font-weight:900!important;
+  color:var(--button-green)!important;
+  -webkit-text-fill-color:var(--button-green)!important;
+  background:var(--input-bg)!important;
+  -webkit-background-clip:border-box!important;
+}
 
 /* Exercise rows are real touch targets; do not let decorative children eat taps. */
 .directory-item-main,.progress-picker-row,.replace-exercise-option,.program-v5-ex,.workout-exercise-name-large{
@@ -11303,7 +11415,32 @@ window.markManualRows=function(){};
 })();
 </script>
 
-
+<script id="v101-screen-runtime">
+(function(){
+  function sync(screen){
+    if(!screen) return;
+    const h=screen.querySelector('.screen-header');
+    if(!h) return;
+    const rect=h.getBoundingClientRect();
+    const height=Math.ceil(rect.height);
+    document.documentElement.style.setProperty('--current-screen-header-height',height+'px');
+    screen.style.setProperty('--screen-header-height',height+'px');
+  }
+  window.__syncScreenHeader=sync;
+  window.addEventListener('resize',()=>{
+    const active=[...document.querySelectorAll('#app > div:not(.hidden)')][0];
+    sync(active);
+  });
+  window.addEventListener('orientationchange',()=>setTimeout(()=>{
+    const active=[...document.querySelectorAll('#app > div:not(.hidden)')][0];
+    sync(active);
+  },120));
+  requestAnimationFrame(()=>{
+    const active=[...document.querySelectorAll('#app > div:not(.hidden)')][0];
+    sync(active);
+  });
+})();
+</script>
 
 <script id="ftracker-iphone-ux-v2">
 (function(){
@@ -11388,6 +11525,7 @@ new MutationObserver(()=>bindAutosize(document)).observe(document.body,{childLis
 </style>
 
 <style id="ftracker-v109-final-ui">
+#foodScreen>.food-main-tabs,#foodScreen>.tab-content{scroll-margin-top:calc(58px + env(safe-area-inset-top,0px))!important;}
 .exercise-edit-btn{display:none!important;}
 </style>
 <script id="ftracker-v109-duplicate-cleanup">
@@ -11793,7 +11931,7 @@ const foodList=$('foodPresetList');if(foodList&&!foodList.dataset.v66Bound){food
 #exerciseDirectoryContent .directory-item .universal-directory-edit{grid-column:2!important;font-size:16px!important;}
 #exerciseDirectoryContent .directory-item .directory-edit{grid-column:3!important;font-size:13px!important;}
 #exerciseDirectoryContent .directory-item .directory-delete{grid-column:4!important;font-size:17px!important;}
-#techniqueModal .manual-media-note::after{content:" Новые материалы добавляются к уже существующим, а не заменяют их.";color:var(--text)!important;font-weight:700!important;}
+#techniqueModal .manual-media-note::after{content:' Новые материалы добавляются к уже существующим, а не заменяют их.';color:var(--text)!important;font-weight:700!important;}
 </style>
 <!-- V83 FINAL: hard-remove carousel truncation after every render -->
 <style id="v83-final-style">#workoutScreen #exerciseStrip .exercise-dot-label span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere!important;text-align:center!important;}</style>
@@ -13075,7 +13213,185 @@ window.closeImportConfirm=function(){
   word-break:normal!important;
 }
 
+/* FTracker PWA VIEWPORT CLEAN 03
+   Canonical scrolling model:
+   - document/body is the ONLY scroll owner for normal application screens;
+   - normal screens stay in normal document flow;
+   - modals are the only separate scroll contexts;
+   - no fixed/absolute viewport shell for ordinary screens.
+   This avoids the iOS Safari/PWA conflict where a nested full-height
+   scroll container can accept taps but refuse vertical pan gestures.
+*/
+html,
+body{
+  margin:0!important;
+  padding:0!important;
+  width:100%!important;
+  min-height:100%!important;
+  height:auto!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:auto!important;
+  touch-action:pan-y pinch-zoom!important;
+  -webkit-text-size-adjust:100%!important;
+  background:var(--bg,#000)!important;
+}
 
+#app,
+#app.container{
+  position:relative!important;
+  width:100%!important;
+  max-width:600px!important;
+  min-height:100dvh!important;
+  height:auto!important;
+  margin:0 auto!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+  display:block!important;
+  background:var(--bg,#000)!important;
+}
+
+#app>div:not(.hidden){
+  position:relative!important;
+  inset:auto!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+}
+
+#app>div.hidden{
+  display:none!important;
+}
+
+/* Home is a normal document-flow screen too. */
+#homeScreen{
+  position:relative!important;
+  overflow:visible!important;
+  padding:env(safe-area-inset-top,0px) 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  box-sizing:border-box!important;
+}
+
+/* Ordinary screens: header sticks to the document viewport, content scrolls
+   naturally with the body. */
+#app>div>.screen-header{
+  position:sticky!important;
+  top:0!important;
+  z-index:5000!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:56px!important;
+  margin:0 0 10px!important;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 0 8px!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:minmax(92px,auto) minmax(0,1fr) 44px!important;
+  align-items:center!important;
+  gap:8px!important;
+  background:var(--bg,#000)!important;
+  border:0!important;
+  box-shadow:none!important;
+  isolation:isolate!important;
+}
+
+#app>div>.screen-header>button.gray{
+  width:max-content!important;
+  min-width:92px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:9px 12px!important;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+}
+
+#app>div>.screen-header>.title,
+#app>div>.screen-header>.title.section-title{
+  min-width:0!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  text-align:center!important;
+  line-height:1.1!important;
+  white-space:normal!important;
+  overflow:visible!important;
+}
+
+#app>div>.screen-header>.screen-header-spacer{
+  width:44px!important;
+  min-width:44px!important;
+  height:40px!important;
+  flex:0 0 44px!important;
+  visibility:hidden!important;
+}
+
+/* Modals remain independent: their backdrop is fixed, and the modal sheet
+   itself owns scrolling. */
+#app [id$="Modal"]:not(.hidden),
+#app .theme-modal:not(.hidden),
+#app .exercise-modal:not(.hidden),
+#app .date-modal:not(.hidden),
+#app .confirm-modal:not(.hidden),
+#app .workout-detail-modal:not(.hidden),
+#app .manual-workout-modal:not(.hidden),
+#app .achievements-modal:not(.hidden),
+#app .food-modal:not(.hidden),
+#app .catalog-modal:not(.hidden),
+#app .technique-modal:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  width:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(10px + env(safe-area-inset-bottom,0px))!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  z-index:2147483000!important;
+}
+
+/* Workout follows exactly the same document scrolling model. */
+#app>#workoutScreen{
+  position:relative!important;
+  padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  overflow:visible!important;
+}
+
+#app>#workoutScreen>.workout-topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:6000!important;
+  width:100%!important;
+  margin:0!important;
+  padding:calc(env(safe-area-inset-top,0px) + 6px) 0 8px!important;
+  box-sizing:border-box!important;
+  background:var(--bg,#000)!important;
+}
+
+#app>#workoutScreen .workout-bottom-actions{
+  position:relative!important;
+  margin:14px 0 0!important;
+  padding:0 0 2px!important;
+}
+
+button,.btn,.action-copy,.nav-label,.title,.screen-header *{
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  hyphens:none!important;
+}
 
 /* Keep dynamically created modal shells at viewport size. */
 #app [id$="Modal"]:not(.hidden),
@@ -13170,7 +13486,6 @@ window.closeImportConfirm=function(){
   },0);
 })();
 </script>
-
 
 
 
