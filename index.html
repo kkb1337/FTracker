@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>FTracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1485,7 +1485,7 @@ body.light-mode{
 #foodScreen .food-calorie-main strong{font-size:20px!important;white-space:nowrap!important;margin-left:auto!important;}
 #foodScreen .food-calorie-main>span:last-child{display:inline!important;margin:0!important;font-size:12px!important;white-space:nowrap!important;flex:0 0 auto!important;}
 /* Large exercise/detail modals start from the top so long content is readable without awkward centering. */
-
+#techniqueModal.technique-modal,#exerciseModal.exercise-modal,#catalogModal.catalog-modal,#chartModal.catalog-modal{align-items:flex-start!important;justify-content:center!important;padding-top:calc(env(safe-area-inset-top,0px) + 12px)!important;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;box-sizing:border-box!important;}
 #techniqueModal .technique-modal-content,#exerciseModal .exercise-modal-content,#catalogModal .catalog-modal-content,#chartModal .chart-modal-content{margin-top:0!important;}
 /* Compact structured editor rows: 1. [text], with textarea growing only as needed. */
 #techniqueModal .manual-field-card{padding:9px 10px!important;border-radius:14px!important;}
@@ -1510,7 +1510,12 @@ body.light-mode{
 #foodScreen .food-calorie-main strong{font-size:19px!important;line-height:1!important;margin:0!important;color:var(--text)!important;white-space:nowrap!important;}
 #foodScreen .food-calorie-main>span:last-child{font-size:11px!important;color:var(--subtext)!important;white-space:nowrap!important;}
 @media(max-width:520px){#foodScreen .food-day-head{grid-template-columns:1fr!important;gap:8px!important;}#foodScreen .food-calorie-main{justify-content:space-between!important;min-width:0!important;width:100%!important;grid-template-columns:auto 1fr auto!important;}#foodScreen .food-calorie-main strong{text-align:center!important;}}
-
+/* A fixed header keeps the title centered without an oversized visible spacer. */
+.screen-header{grid-template-columns:auto minmax(0,1fr) auto!important;min-height:56px!important;}
+.screen-header-spacer{width:44px!important;height:40px!important;flex:0 0 44px!important;}
+.screen-header .title.section-title{min-width:0!important;width:100%!important;}
+/* All large sheets start near the safe top and scroll inside their own content. */
+.technique-modal,.exercise-modal,.catalog-modal,.food-modal,.confirm-modal,.date-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal{align-items:flex-start!important;padding-top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;}
 .technique-modal-content,.exercise-modal-content,.catalog-modal-content,.food-modal-content,.confirm-modal-content,.date-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{margin-top:0!important;}
 /* Compact, elegant confirmation/event sheets. */
 .confirm-modal-content{width:min(92%,360px)!important;max-width:360px!important;padding:18px!important;border-radius:18px!important;}
@@ -1877,197 +1882,6 @@ body.light-mode{
     background:var(--input-bg) !important;
 }
 </style>
-
-<style id="ftracker-v130-canonical-pwa-ui">
-/* v130 — single final interaction/geometry layer for the iPhone PWA. */
-html,body{
-  width:100%;
-  min-width:0;
-  overflow-x:hidden!important;
-  -webkit-text-size-adjust:100%!important;
-  touch-action:manipulation;
-}
-body.ft-modal-open{
-  overflow:hidden!important;
-  overscroll-behavior:none!important;
-  touch-action:none!important;
-}
-
-/* Home: the gear belongs to the header area and can never overlap the first program card. */
-#homeScreen{position:relative!important;}
-.container{padding-top:10px!important;}
-#homeScreen>.theme-toggle-btn{
-  position:absolute!important;
-  top:4px!important;
-  right:8px!important;
-  width:38px!important;
-  height:38px!important;
-  min-width:38px!important;
-  min-height:38px!important;
-  margin:0!important;
-  padding:0!important;
-  border-radius:12px!important;
-  font-size:20px!important;
-  z-index:20!important;
-}
-#homeScreen>.title{
-  min-height:42px!important;
-  margin:0 0 10px!important;
-  padding-right:50px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-}
-
-/* All modal layers sit above every sticky header. */
-[id$="Modal"]:not(.hidden),
-.theme-modal:not(.hidden),
-.exercise-modal:not(.hidden),
-.date-modal:not(.hidden),
-.confirm-modal:not(.hidden),
-.workout-detail-modal:not(.hidden),
-.manual-workout-modal:not(.hidden),
-.achievements-modal:not(.hidden),
-.food-modal:not(.hidden),
-.catalog-modal:not(.hidden),
-.technique-modal:not(.hidden){
-  position:fixed!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  max-height:none!important;
-  box-sizing:border-box!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  padding:max(10px,env(safe-area-inset-top,0px)) 12px max(10px,env(safe-area-inset-bottom,0px))!important;
-  overflow:hidden!important;
-  overscroll-behavior:contain!important;
-  touch-action:none!important;
-  z-index:10000!important;
-  isolation:isolate!important;
-}
-[id$="Modal"].hidden,
-.theme-modal.hidden,
-.exercise-modal.hidden,
-.date-modal.hidden,
-.confirm-modal.hidden,
-.workout-detail-modal.hidden,
-.manual-workout-modal.hidden,
-.achievements-modal.hidden,
-.food-modal.hidden,
-.catalog-modal.hidden,
-.technique-modal.hidden{display:none!important;}
-
-/* Nested/long modal content is the ONLY vertical scroll owner while a modal is open. */
-[id$="Modal"]:not(.hidden)>:first-child,
-.theme-modal:not(.hidden)>:first-child,
-.exercise-modal:not(.hidden)>:first-child,
-.date-modal:not(.hidden)>:first-child,
-.confirm-modal:not(.hidden)>:first-child,
-.workout-detail-modal:not(.hidden)>:first-child,
-.manual-workout-modal:not(.hidden)>:first-child,
-.achievements-modal:not(.hidden)>:first-child,
-.food-modal:not(.hidden)>:first-child,
-.catalog-modal:not(.hidden)>:first-child,
-.technique-modal:not(.hidden)>:first-child{
-  position:relative!important;
-  box-sizing:border-box!important;
-  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 20px)!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-y!important;
-  transform:none!important;
-}
-/* The editor already has its own intended content sizing; don't flatten it. */
-#techniqueModal .technique-modal-content.exercise-editor-unified{
-  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 20px)!important;
-  overflow-y:auto!important;
-  overscroll-behavior:contain!important;
-  touch-action:pan-y!important;
-}
-
-/* Every search clear button is centered inside its own input box. */
-.ft-search-wrap,
-.directory-search-wrap,
-#foodNameSearchWrap{position:relative!important;min-width:0!important;}
-.ft-search-wrap input,
-.directory-search-wrap input,
-#foodNameSearchWrap input{padding-right:50px!important;box-sizing:border-box!important;}
-.ft-search-wrap .v65-search-clear,
-.ft-search-wrap .v66-search-clear,
-.ft-search-wrap .v67-search-clear,
-.ft-search-wrap [id*="SearchClear"],
-.ft-search-wrap [id*="ProgramClear"],
-.ft-search-wrap [id*="ProgressClear"],
-.directory-search-wrap .directory-search-clear,
-#foodNameSearchWrap .v66-search-clear{
-  position:absolute!important;
-  top:50%!important;
-  right:7px!important;
-  transform:translateY(-50%)!important;
-  width:32px!important;
-  height:32px!important;
-  min-width:32px!important;
-  min-height:32px!important;
-  margin:0!important;
-  padding:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  box-sizing:border-box!important;
-  border-radius:9px!important;
-  font-size:20px!important;
-  line-height:1!important;
-  z-index:20!important;
-}
-
-/* Do not let the underlying screen header participate in modal stacking. */
-#app>div>.screen-header{z-index:500!important;}
-
-@media(max-width:430px){
-  .container{padding-top:8px!important;}
-  #homeScreen>.theme-toggle-btn{top:3px!important;right:6px!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;font-size:19px!important;}
-  #homeScreen>.title{padding-right:46px!important;}
-}
-</style>
-<script id="ftracker-v130-modal-lock">
-(function(){
-  'use strict';
-  function init(){
-  const body=document.body;
-  if(!body) return;
-  let savedY=0;
-  function visibleModal(){return !!document.querySelector('[id$="Modal"]:not(.hidden),.theme-modal:not(.hidden),.exercise-modal:not(.hidden),.date-modal:not(.hidden),.confirm-modal:not(.hidden),.workout-detail-modal:not(.hidden),.manual-workout-modal:not(.hidden),.achievements-modal:not(.hidden),.food-modal:not(.hidden),.catalog-modal:not(.hidden),.technique-modal:not(.hidden)');}
-  function syncLock(){
-    const on=visibleModal();
-    if(on && !body.classList.contains('ft-modal-open')){
-      savedY=window.scrollY||window.pageYOffset||0;
-      body.classList.add('ft-modal-open');
-      body.style.position='fixed';
-      body.style.left='0'; body.style.right='0'; body.style.top=(-savedY)+'px';
-      body.style.width='100%';
-    }else if(!on && body.classList.contains('ft-modal-open')){
-      body.classList.remove('ft-modal-open');
-      body.style.position=''; body.style.left=''; body.style.right=''; body.style.top=''; body.style.width='';
-      window.scrollTo(0,savedY);
-    }
-  }
-  const mo=new MutationObserver(syncLock);
-  mo.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class','style']});
-  syncLock();
-  document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
-  document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});
-  document.addEventListener('gestureend',e=>e.preventDefault(),{passive:false});
-  document.addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault();},{passive:false});
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
-})();
-</script>
-
 </head>
 <body>
 <div class="container" id="app">
@@ -4974,12 +4788,10 @@ function renderSettings() {
                         <button type="button" class="program-tech-btn program-v5-tech" onclick="openTechniqueModal(data.programs[${idx}].exercises[${exIdx}], data.programs[${idx}].types[${exIdx}])" title="Техника">💪</button>
                         <button type="button" class="small-btn gray program-v5-delete" onclick="deleteExercise(${idx}, ${exIdx})" title="Убрать из сплита" style="color:var(--negative);">✕</button>
                     </div>`).join('')}
-                <div class="program-v5-actions">
-                    <button type="button" class="program-add-btn program-v5-add" onclick="addExercise(${idx})">＋ Добавить упражнение</button>
-                    <button type="button" class="gray program-v5-add" onclick="openExerciseOrderModal(${idx})">☰ Изменить порядок</button>
-                </div>
-                <div class="program-delete-row">
-                    <button type="button" class="program-delete-btn" onclick="deleteProgram(${idx})">🗑️ Удалить сплит</button>
+                <div class="program-v5-actions program-v130-actions">
+                    <button type="button" class="program-add-btn program-v5-add program-v130-action program-v130-add" onclick="addExercise(${idx})">＋ Добавить упражнение</button>
+                    <button type="button" class="gray program-v5-add program-v130-action program-v130-order" onclick="openExerciseOrderModal(${idx})">☰ Изменить порядок</button>
+                    <button type="button" class="program-delete-btn program-v130-action program-v130-delete" onclick="deleteProgram(${idx})">🗑️ Удалить сплит</button>
                 </div>
             </div>
         </div>`;
@@ -8209,6 +8021,35 @@ function adjustRestTime(delta){
   max-height:calc(100dvh - clamp(102px,11vh,170px))!important;
   transform:none!important;
 }
+/* One header geometry across all normal sections. */
+.screen-header{
+  display:grid!important;
+  grid-template-columns:96px minmax(0,1fr) 96px!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+.screen-header>button.gray{
+  width:96px!important;
+  min-width:96px!important;
+  box-sizing:border-box!important;
+  justify-self:start!important;
+}
+.screen-header>.title{
+  grid-column:2!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  text-align:center!important;
+  justify-self:stretch!important;
+}
+.screen-header::after{
+  content:"";
+  display:block;
+  width:96px;
+  height:40px;
+  visibility:hidden;
+  pointer-events:none;
+}
 /* Nutrition: calories are a proper metric card, visually matching macros. */
 #foodScreen .food-calorie-main{
   min-width:104px!important;
@@ -8271,6 +8112,8 @@ function adjustRestTime(delta){
   color:var(--negative)!important;
 }
 @media(max-width:430px){
+  .screen-header{grid-template-columns:88px minmax(0,1fr) 88px!important;}
+  .screen-header>button.gray,.screen-header::after{width:88px!important;min-width:88px!important;}
   #foodScreen .food-calorie-main{min-width:98px!important;padding:10px 9px!important;}
 }
 </style>
@@ -13195,17 +13038,17 @@ body {
   z-index:5000 !important;
   background:var(--bg,#000) !important;
 }
-[id$="Modal"]:not(.hidden),
-.theme-modal:not(.hidden),
-.exercise-modal:not(.hidden),
-.date-modal:not(.hidden),
-.confirm-modal:not(.hidden),
-.workout-detail-modal:not(.hidden),
-.manual-workout-modal:not(.hidden),
-.achievements-modal:not(.hidden),
-.food-modal:not(.hidden),
-.catalog-modal:not(.hidden),
-.technique-modal:not(.hidden) {
+#app [id$="Modal"]:not(.hidden),
+#app .theme-modal:not(.hidden),
+#app .exercise-modal:not(.hidden),
+#app .date-modal:not(.hidden),
+#app .confirm-modal:not(.hidden),
+#app .workout-detail-modal:not(.hidden),
+#app .manual-workout-modal:not(.hidden),
+#app .achievements-modal:not(.hidden),
+#app .food-modal:not(.hidden),
+#app .catalog-modal:not(.hidden),
+#app .technique-modal:not(.hidden) {
   height:100% !important;
   max-height:100% !important;
   box-sizing:border-box !important;
@@ -13291,6 +13134,220 @@ body {
 
 
 
+
+
+<style id="ftracker-v130-pwa-final-ui">
+/* =============================================================
+   v130 FINAL PWA GEOMETRY
+   One final authority for safe-area, screen headers, program actions
+   and every visible close/clear/delete control.
+   ============================================================= */
+
+/* ---------- iPhone Dynamic Island / safe-area ---------- */
+html, body{width:100%;min-height:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+#app{padding-top:0!important;}
+#app>div>.screen-header{
+  position:sticky!important;
+  top:env(safe-area-inset-top,0px)!important;
+  z-index:5000!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-height:56px!important;
+  margin-top:0!important;
+}
+/* The first screen-header must always begin below the hardware cutout. */
+@supports (padding-top: env(safe-area-inset-top)){
+  #app>div>.screen-header{padding-top:max(3px,env(safe-area-inset-top,0px))!important;}
+}
+
+/* ---------- All normal screen headers: one geometry ---------- */
+.screen-header{
+  display:grid!important;
+  grid-template-columns:82px minmax(0,1fr) 82px!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-height:56px!important;
+  padding-left:8px!important;
+  padding-right:8px!important;
+}
+.screen-header>button.gray{
+  width:82px!important;
+  min-width:82px!important;
+  height:40px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:6px 8px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  justify-self:start!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:clip!important;
+}
+.screen-header>.title.section-title,
+.screen-header>.title{
+  grid-column:2!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  text-align:center!important;
+  justify-self:stretch!important;
+}
+.screen-header::after{
+  content:""!important;
+  display:block!important;
+  width:82px!important;
+  height:40px!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* ---------- Programs: three equal actions, same component / different colors ---------- */
+#settingsScreen .program-v130-actions{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+  width:100%!important;
+  margin:12px 0 0!important;
+  padding:0!important;
+  border:0!important;
+  box-sizing:border-box!important;
+  align-items:stretch!important;
+}
+#settingsScreen .program-v130-action{
+  width:100%!important;
+  min-width:0!important;
+  height:52px!important;
+  min-height:52px!important;
+  margin:0!important;
+  padding:6px 5px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  border-radius:12px!important;
+  border:1px solid var(--border)!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  line-height:1.12!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  background:var(--input-bg)!important;
+}
+#settingsScreen .program-v130-add{
+  background:rgba(52,199,89,.12)!important;
+  border-color:rgba(52,199,89,.34)!important;
+  color:var(--button-green)!important;
+}
+#settingsScreen .program-v130-order{
+  background:rgba(10,132,255,.12)!important;
+  border-color:rgba(10,132,255,.34)!important;
+  color:#0a84ff!important;
+}
+#settingsScreen .program-v130-delete{
+  background:rgba(255,59,48,.10)!important;
+  border-color:rgba(255,59,48,.30)!important;
+  color:var(--negative)!important;
+}
+@media(max-width:390px){
+  #settingsScreen .program-v130-actions{gap:6px!important;}
+  #settingsScreen .program-v130-action{font-size:11px!important;padding-left:3px!important;padding-right:3px!important;}
+}
+
+/* ---------- Every close/clear/delete control is a real square ---------- */
+.close-btn,
+.modal-close-btn,
+.exercise-dup-close,
+.v65-search-clear,
+.v66-search-clear,
+.v67-search-clear,
+.replace-search-clear,
+.directory-search-clear,
+.program-v5-delete,
+.directory-delete,
+.history-delete-btn,
+.exercise-editor-remove,
+.exercise-editor-built-delete,
+.manual-media-action.delete,
+[data-delete],
+[id*="SearchClear"],
+[id*="ProgramClear"],
+[id*="ProgressClear"],
+[id*="ReplaceClear"]{
+  width:34px!important;
+  min-width:34px!important;
+  max-width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  vertical-align:middle!important;
+  line-height:1!important;
+  text-align:center!important;
+  flex:0 0 34px!important;
+  font-size:18px!important;
+  overflow:hidden!important;
+}
+/* Close buttons get the same optical center without changing their parent layout. */
+.close-btn,.modal-close-btn,.exercise-dup-close{
+  border-radius:10px!important;
+  line-height:34px!important;
+  font-weight:700!important;
+}
+/* Search clear controls stay inside the input's own box. */
+.ft-search-wrap>.v65-search-clear,
+.ft-search-wrap>.v66-search-clear,
+.ft-search-wrap>.v67-search-clear,
+.ft-search-wrap>[id*="SearchClear"],
+.ft-search-wrap>[id*="ProgramClear"],
+.ft-search-wrap>[id*="ProgressClear"],
+.ft-search-wrap>[id*="ReplaceClear"]{
+  position:absolute!important;
+  right:7px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+/* Legacy search wrappers that have not yet been normalized. */
+.directory-search-wrap,
+.replace-search-wrap,
+#foodNameSearchWrap,
+#exercisePickerSearchWrap,
+#progressExercisePickerSearchWrap{
+  position:relative!important;
+}
+.directory-search-wrap>.directory-search-clear,
+.replace-search-wrap>.replace-search-clear,
+#foodNameSearchWrap>.v66-search-clear,
+#exercisePickerSearchWrap>.v66-search-clear,
+#progressExercisePickerSearchWrap>.v66-search-clear{
+  position:absolute!important;
+  right:7px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+
+/* ---------- Remove page-level zoom / Safari gesture scaling ---------- */
+html,body,#app{-webkit-user-select:none;}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text;}
+</style>
+<script id="ftracker-v130-pwa-final-js">
+(function(){
+  'use strict';
+  /* Do not allow iOS Safari gesture zoom to resize the application surface. */
+  ['gesturestart','gesturechange','gestureend'].forEach(function(type){
+    document.addEventListener(type,function(e){e.preventDefault();},{passive:false});
+  });
+})();
+</script>
 
 </body>
 </html>
