@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v49-true-scroll-recovery';
+const CACHE_VERSION = 'ftracker-v59-pwa-scroll-fixed';
 const APP_SHELL = [
   './',
   './index.html',

@@ -1,0 +1,12 @@
+{
+  "name": "FTracker",
+  "short_name": "FTracker",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "_build": "ftracker-v59-pwa-scroll-fixed",
+  "id": "./",
+  "scope": "./",
+  "orientation": "portrait"
+}
