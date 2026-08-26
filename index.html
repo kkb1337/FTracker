@@ -2054,77 +2054,6 @@ button,.btn,.action-copy,.nav-label,.title,.screen-header *{
 
 </style>
 
-
-<style id="ftracker-v51-scroll-all">
-/* =========================================================
-   V51: PRESERVE ORIGINAL SCROLL ARCHITECTURE.
-   Every application screen remains an independent scroll container.
-   ========================================================= */
-
-/* All screens, including the home screen, can scroll vertically. */
-#app > div{
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  -webkit-overflow-scrolling:touch !important;
-  overscroll-behavior-y:auto !important;
-  touch-action:pan-y !important;
-  box-sizing:border-box !important;
-}
-
-/* Same safe-area baseline for every screen. */
-#app > div{
-  padding-top:env(safe-area-inset-top,0px) !important;
-  padding-bottom:max(16px,env(safe-area-inset-bottom,0px)) !important;
-}
-
-/* Home also scrolls. */
-#homeScreen{
-  overflow-y:auto !important;
-}
-
-/* Section headers stay visible while THEIR SCREEN scrolls. */
-#app > div > .screen-header{
-  position:-webkit-sticky !important;
-  position:sticky !important;
-  top:0 !important;
-  z-index:100 !important;
-  background:var(--bg,#000) !important;
-}
-
-/* Workout navigation/top controls remain visible, but the workout content
-   itself is not frozen: the surrounding screen remains scrollable. */
-#app .workout-topbar{
-  position:-webkit-sticky !important;
-  position:sticky !important;
-  top:0 !important;
-  z-index:120 !important;
-  background:var(--bg,#000) !important;
-}
-
-/* If an exercise navigation strip exists, keep it below the top bar and sticky. */
-#app .exercise-strip{
-  position:-webkit-sticky !important;
-  position:sticky !important;
-  top:56px !important;
-  z-index:110 !important;
-  background:var(--bg,#000) !important;
-}
-
-/* Global modal layer above every app layer. */
-#app-modal-root{
-  position:fixed !important;
-  inset:0 !important;
-  z-index:2147483000 !important;
-  pointer-events:none !important;
-}
-#app-modal-root > *{
-  pointer-events:auto !important;
-}
-#app-modal-root .hidden{
-  display:none !important;
-}
-</style>
-
 </head>
 <body>
 <div class="container" id="app">
@@ -2930,7 +2859,6 @@ function resetAppViewport(screenId){
   }
 }
 function showScreen(id) {
-  if (typeof window.__mountModalLayer === 'function') window.__mountModalLayer();
   // Close transient overlays before changing app screens.
   if (typeof closeBackupExportPrompt === 'function') closeBackupExportPrompt();
   document.querySelectorAll('#app > div').forEach(el => el.classList.add('hidden'));
@@ -13380,42 +13308,6 @@ body {
 
 
 
-
-
-<script>
-/* V51 global modal portal without changing screen DOM or scroll containers. */
-(function(){
-  const SELECTOR=[
-    '.modal','.theme-modal','.catalog-modal','.exercise-modal','.date-modal',
-    '.confirm-modal','.workout-detail-modal','.achievements-modal',
-    '.manual-workout-modal','.food-modal','[role="dialog"]','[aria-modal="true"]'
-  ].join(',');
-
-  function mount(){
-    let root=document.getElementById('app-modal-root');
-    if(!root){
-      root=document.createElement('div');
-      root.id='app-modal-root';
-      document.body.appendChild(root);
-    }
-    document.querySelectorAll(SELECTOR).forEach(node=>{
-      if(node===root || root.contains(node)) return;
-      // Do not move modal descendants independently.
-      const ancestor=node.parentElement && node.parentElement.closest(SELECTOR);
-      if(ancestor) return;
-      root.appendChild(node);
-    });
-  }
-
-  function start(){
-    mount();
-    new MutationObserver(mount).observe(document.body,{childList:true,subtree:true});
-    window.__mountModalLayer=mount;
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
-  else start();
-})();
-</script>
 
 </body>
 </html>

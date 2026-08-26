@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v51-all-scroll-sticky';
+const CACHE_VERSION = 'ftracker-v47';
 const APP_SHELL = [
   './',
   './index.html',
