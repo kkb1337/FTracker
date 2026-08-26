@@ -1,4 +1,5 @@
-const CACHE_VERSION = 'ftracker-v49-sticky-header';
+/* Build: ftracker-v50-canonical-screens-modal-safearea */
+const CACHE_VERSION = 'ftracker-v50-canonical-screens-modal-safearea';
 const APP_SHELL = [
   './',
   './index.html',
