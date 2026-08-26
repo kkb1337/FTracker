@@ -1917,106 +1917,160 @@ body{box-sizing:border-box!important;}
   overflow:hidden!important;
   background:var(--bg,#000)!important;
 }
-</style>
-
-
-<style id="ftracker-screen-architecture">
-/* FTRACKER CANONICAL SCREEN ARCHITECTURE — 2026-08-26 */
-
-:root{
-  --app-control-z:100;
-  --app-overlay-z:2147483000;
-  --app-modal-z:2147483500;
-}
-
-html,body{
-  width:100%;
-  height:100%;
-  min-height:100%;
-  margin:0;
-  overflow:hidden!important;
-}
-
-#app{
-  position:fixed!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  min-height:0!important;
-  overflow:hidden!important;
-  isolation:isolate;
-}
-
-/* One and only one layout contract for every application screen. */
 #app>div{
   position:absolute!important;
   inset:0!important;
   width:100%!important;
   height:100%!important;
   min-height:0!important;
+  max-height:none!important;
   margin:0!important;
-  padding:env(safe-area-inset-top,0px) 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
   box-sizing:border-box!important;
   overflow-x:hidden!important;
   overflow-y:auto!important;
   -webkit-overflow-scrolling:touch!important;
   overscroll-behavior-y:contain!important;
-  transform:none!important;
-  filter:none!important;
-  z-index:1!important;
 }
-
-#app>div.hidden{display:none!important}
-#homeScreen{overflow:hidden!important}
-
-/* All section headers use normal document flow, identical top baseline. */
-#app>div>.screen-header{
-  position:relative!important;
-  top:auto!important;
-  right:auto!important;
-  bottom:auto!important;
-  left:auto!important;
-  z-index:auto!important;
-  width:100%!important;
-  min-width:0!important;
-  min-height:44px!important;
+#app>div.hidden{display:none!important;}
+/* Home: only the content itself receives the top safe area. */
+#homeScreen{
+  position:absolute!important;
+  overflow:hidden!important;
+  padding-top:env(safe-area-inset-top,0px)!important;
+}
+#homeScreen>.title{
   margin:0 0 14px!important;
   padding:4px 0 0!important;
+  text-align:center!important;
+  line-height:1.05!important;
+  width:100%!important;
+}
+#homeScreen .theme-toggle-btn{
+  top:calc(env(safe-area-inset-top,0px) + 6px)!important;
+  right:10px!important;
+  width:44px!important;
+  height:44px!important;
+  z-index:100!important;
+}
+/* Ordinary sections: header is the only element that consumes top safe-area. */
+#app>div>.screen-header{
+  position:sticky!important;
+  top:0!important;
+  z-index:5000!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:56px!important;
+  margin:0 0 10px!important;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 0 8px!important;
   box-sizing:border-box!important;
   display:grid!important;
   grid-template-columns:minmax(92px,auto) minmax(0,1fr) 44px!important;
   align-items:center!important;
   gap:8px!important;
-  background:transparent!important;
+  background:var(--bg,#000)!important;
   border:0!important;
   box-shadow:none!important;
+  isolation:isolate!important;
 }
-
-/* Local controls may float inside a screen, but never over the modal root. */
-#app .theme-toggle-btn,
-#app .workout-topbar,
-#app .exercise-strip,
-#app .floating-action,
-#app .fab,
-#app [style*="z-index"]{
-  z-index:var(--app-control-z)!important;
+#app>div>.screen-header>button.gray{
+  width:max-content!important;
+  min-width:92px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:9px 12px!important;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
 }
+#app>div>.screen-header>.title,
+#app>div>.screen-header>.title.section-title{
+  min-width:0!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  text-align:center!important;
+  line-height:1.1!important;
+  white-space:normal!important;
+  overflow:visible!important;
+}
+#app>div>.screen-header>.screen-header-spacer{
+  width:44px!important;
+  min-width:44px!important;
+  height:40px!important;
+  flex:0 0 44px!important;
+  visibility:hidden!important;
+}
+/* Modals share one viewport shell; their content is the scroll container. */
+#app [id$="Modal"]:not(.hidden),
+#app .theme-modal:not(.hidden),#app .exercise-modal:not(.hidden),
+#app .date-modal:not(.hidden),#app .confirm-modal:not(.hidden),
+#app .workout-detail-modal:not(.hidden),#app .manual-workout-modal:not(.hidden),
+#app .achievements-modal:not(.hidden),#app .food-modal:not(.hidden),
+#app .catalog-modal:not(.hidden),#app .technique-modal:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  width:100%!important;
+  
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(10px + env(safe-area-inset-bottom,0px))!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  z-index:2147483000!important;
+}
+/* Workout uses the same origin; only its own topbar is special. */
+#app>#workoutScreen{
+  padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  overflow-y:auto!important;
+}
+#app>#workoutScreen>.workout-topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:6000!important;
+  width:100%!important;
+  margin:0!important;
+  padding:calc(env(safe-area-inset-top,0px) + 6px) 0 8px!important;
+  box-sizing:border-box!important;
+  background:var(--bg,#000)!important;
+}
+#app>#workoutScreen .workout-bottom-actions{
+  position:relative!important;
+  margin:14px 0 0!important;
+  padding:0 0 2px!important;
+}
+button,.btn,.action-copy,.nav-label,.title,.screen-header *{
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  hyphens:none!important;
+}
+/* Standalone deliberately does not get a second geometry model. */
 
-/* Global overlay portal. */
+</style>
+
+
+<style id="ftracker-modal-layer-fix">
+/* MODAL STACKING FIX ONLY — existing screen scrolling/layout is untouched. */
 #app-modal-root{
   position:fixed!important;
   inset:0!important;
-  width:100vw!important;
-  height:100dvh!important;
-  overflow:visible!important;
-  isolation:isolate;
-  z-index:var(--app-overlay-z)!important;
-  pointer-events:none;
+  z-index:2147483000!important;
+  pointer-events:none!important;
+  isolation:isolate!important;
 }
-
-#app-modal-root>*{pointer-events:auto}
-#app-modal-root>.hidden{display:none!important}
-
+#app-modal-root>*{
+  pointer-events:auto!important;
+}
+#app-modal-root>.hidden{
+  display:none!important;
+}
+/* Keep modal's own internal layout; only raise its stacking level. */
 #app-modal-root .modal,
 #app-modal-root .theme-modal,
 #app-modal-root .catalog-modal,
@@ -2029,46 +2083,19 @@ html,body{
 #app-modal-root .food-modal,
 #app-modal-root [role="dialog"],
 #app-modal-root [aria-modal="true"]{
-  position:fixed!important;
-  inset:0!important;
-  z-index:var(--app-modal-z)!important;
-  max-height:none!important;
+  z-index:2147483500!important;
 }
 </style>
 
 
-<style id="ftracker-scroll-restoration">
-/* SCROLL RESTORATION — keep every application screen independently scrollable. */
-html,body{
-  overflow:hidden !important;
-}
-
-#app{
-  position:fixed !important;
-  inset:0 !important;
-  overflow:hidden !important;
-}
-
-/* Every section, including home, owns its own vertical scroll container. */
-#app>div,
-#homeScreen{
-  height:100% !important;
-  min-height:100% !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  overscroll-behavior-y:auto !important;
-  touch-action:pan-y !important;
-  padding-bottom:max(16px,env(safe-area-inset-bottom,0px)) !important;
-}
-
-/* The home title/content remains in normal flow; the gear is viewport anchored. */
-#homeScreen .theme-toggle-btn{
-  position:fixed !important;
-  top:calc(env(safe-area-inset-top,0px) + 6px) !important;
-  right:10px !important;
-  z-index:100 !important;
-  touch-action:manipulation !important;
+<style id="ftracker-sticky-header-fix">
+/* STICKY SECTION HEADER — keeps the existing independent screen scroll intact. */
+#app > div > .screen-header{
+  position:-webkit-sticky !important;
+  position:sticky !important;
+  top:0 !important;
+  z-index:5000 !important;
+  background:var(--bg,#000) !important;
 }
 </style>
 
@@ -2878,7 +2905,7 @@ function resetAppViewport(screenId){
 }
 function showScreen(id) {
   if (typeof window.__mountModalLayer === 'function') window.__mountModalLayer();
-// Close transient overlays before changing app screens.
+  // Close transient overlays before changing app screens.
   if (typeof closeBackupExportPrompt === 'function') closeBackupExportPrompt();
   document.querySelectorAll('#app > div').forEach(el => el.classList.add('hidden'));
   const screen=document.getElementById(id);
@@ -13249,8 +13276,6 @@ body {
 @media (display-mode:standalone){
   html, body, #app { height:auto !important; min-height:100% !important; }
 }
-
-
 </style>
 <script id="ftracker-v128-final-qa-js">
 (function(){
@@ -13331,14 +13356,9 @@ body {
 
 
 
-
-
-
-
-
-
 <script>
-/* FTRACKER GLOBAL MODAL PORTAL */
+/* Move only recognized modal/overlay roots above #app.
+   No screen container is moved or restyled. */
 (function(){
   const SELECTOR=[
     '.modal','.theme-modal','.catalog-modal','.exercise-modal','.date-modal',
@@ -13346,33 +13366,30 @@ body {
     '.manual-workout-modal','.food-modal','[role="dialog"]','[aria-modal="true"]'
   ].join(',');
 
-  function getRoot(){
+  function mountModals(){
     let root=document.getElementById('app-modal-root');
     if(!root){
       root=document.createElement('div');
       root.id='app-modal-root';
       document.body.appendChild(root);
     }
-    return root;
-  }
-
-  function mount(){
-    const root=getRoot();
     document.querySelectorAll(SELECTOR).forEach(node=>{
       if(node===root || root.contains(node)) return;
       root.appendChild(node);
     });
   }
 
-  function start(){
-    mount();
-    new MutationObserver(mount).observe(document.body,{childList:true,subtree:true});
-    window.__mountModalLayer=mount;
+  function boot(){
+    mountModals();
+    new MutationObserver(mountModals).observe(document.body,{childList:true,subtree:true});
+    window.__mountModalLayer=mountModals;
   }
 
-  document.readyState==='loading'
-    ? document.addEventListener('DOMContentLoaded',start,{once:true})
-    : start();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',boot,{once:true});
+  }else{
+    boot();
+  }
 })();
 </script>
 

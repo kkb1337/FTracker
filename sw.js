@@ -1,5 +1,4 @@
-/* Build: ftracker-pwa-v20260826-scrollfix-01 */
-const CACHE_VERSION = 'ftracker-pwa-v20260826-scrollfix-01';
+const CACHE_VERSION = 'ftracker-v49-sticky-header';
 const APP_SHELL = [
   './',
   './index.html',
