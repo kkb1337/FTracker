@@ -1883,54 +1883,40 @@ body.light-mode{
 }
 </style>
 
-<style id="ftracker-clean-window-system">
-/* FTracker — one canonical window/viewport system. No stacked viewport patches. */
-html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg,#000);}
-body{box-sizing:border-box;}
-#app,#app.container{position:relative;width:100%;max-width:600px;height:100dvh;min-height:100dvh;margin:0 auto;padding:0;box-sizing:border-box;overflow:hidden;background:var(--bg,#000);}
-#app>div{position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;margin:0;padding:0 16px;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:auto;background:var(--bg,#000);}
-#app>div.hidden{display:none!important;}
-/* iPhone top safe area is applied only to the top element that actually touches it. */
-#homeScreen{padding-top:env(safe-area-inset-top,0px)!important;}
-#app>div>.screen-header{position:sticky;top:0;z-index:1500;width:100%;min-width:0;box-sizing:border-box;margin:0 0 8px;padding:calc(8px + env(safe-area-inset-top,0px)) 0 8px;background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
-#app>#workoutScreen{padding:0 16px!important;}
-#app>#workoutScreen>.workout-topbar{position:sticky;top:0;z-index:2000;width:100%;box-sizing:border-box;margin:0;padding:calc(6px + env(safe-area-inset-top,0px)) 0 8px;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
-#workoutScreen #exerciseStrip{position:relative;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}
-/* No artificial bottom safe-area reservation. */
-#app>div,#workoutScreen{padding-bottom:0!important;}
-#app .bottom-actions,#app .bottom-nav,#app .fixed-bottom,#app .workout-bottom-actions{padding-bottom:0!important;}
-/* Full-screen sheets use the real viewport and only respect the top safe area. */
-#app>div[id$="Modal"],#app>div.confirm-modal,#app>div.date-modal{position:fixed;inset:0;width:100%;height:100dvh;max-width:none;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 10px) 10px 0;overflow-y:auto;overflow-x:hidden;z-index:10000;}
-</style>
 
-<style id="ftracker-final-iphone-viewport-fix">
-/* FINAL iPhone viewport fix: one source of truth for the app viewport.
-   The older v2 iPhone patch added safe-area padding to BODY and extra top
-   padding to #app, while the canonical viewport system already handles the
-   safe area inside each screen header. That double offset can put sticky
-   headers under/against the Dynamic Island and make the back button untappable. */
-html, body{
+
+
+<!-- Removed: conflicting visualViewport app-height runtime. -->
+
+
+
+
+
+<style id="ftracker-canonical-viewport">
+/* FTracker canonical viewport: one geometry model for Safari and standalone PWA.
+   No standalone-only repositioning, no fixed body, no transform on #app,
+   no forced 59px safe-area, and no JS-driven viewport height. */
+html,body{
   width:100%!important;
   height:100%!important;
   min-height:100%!important;
   margin:0!important;
   padding:0!important;
   overflow:hidden!important;
-  box-sizing:border-box!important;
   background:var(--bg,#000)!important;
 }
-body{overflow-x:hidden!important;}
+body{box-sizing:border-box!important;}
 #app,#app.container{
   position:relative!important;
   width:100%!important;
   max-width:600px!important;
   height:100dvh!important;
   min-height:100dvh!important;
-  max-height:100dvh!important;
   margin:0 auto!important;
   padding:0!important;
   box-sizing:border-box!important;
   overflow:hidden!important;
+  background:var(--bg,#000)!important;
 }
 #app>div{
   position:absolute!important;
@@ -1940,65 +1926,136 @@ body{overflow-x:hidden!important;}
   min-height:0!important;
   max-height:none!important;
   margin:0!important;
+  padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
   box-sizing:border-box!important;
-  padding:0 16px!important;
   overflow-x:hidden!important;
   overflow-y:auto!important;
   -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
 }
 #app>div.hidden{display:none!important;}
-/* Safe area belongs to the top bar, not BODY/#app. */
+/* Home: only the content itself receives the top safe area. */
+#homeScreen{
+  position:absolute!important;
+  overflow:hidden!important;
+  padding-top:env(safe-area-inset-top,0px)!important;
+}
+#homeScreen>.title{
+  margin:0 0 14px!important;
+  padding:4px 0 0!important;
+  text-align:center!important;
+  line-height:1.05!important;
+  width:100%!important;
+}
+#homeScreen .theme-toggle-btn{
+  top:calc(env(safe-area-inset-top,0px) + 6px)!important;
+  right:10px!important;
+  width:44px!important;
+  height:44px!important;
+  z-index:100!important;
+}
+/* Ordinary sections: header is the only element that consumes top safe-area. */
 #app>div>.screen-header{
   position:sticky!important;
   top:0!important;
   z-index:5000!important;
-  box-sizing:border-box!important;
   width:100%!important;
+  min-width:0!important;
   min-height:56px!important;
-  margin:0 0 8px!important;
+  margin:0 0 10px!important;
   padding:calc(env(safe-area-inset-top,0px) + 8px) 0 8px!important;
-  background:var(--bg)!important;
-  color:var(--text)!important;
-  border-bottom:1px solid var(--border)!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:minmax(92px,auto) minmax(0,1fr) 44px!important;
+  align-items:center!important;
+  gap:8px!important;
+  background:var(--bg,#000)!important;
+  border:0!important;
+  box-shadow:none!important;
   isolation:isolate!important;
 }
+#app>div>.screen-header>button.gray{
+  width:max-content!important;
+  min-width:92px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:9px 12px!important;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+}
+#app>div>.screen-header>.title,
+#app>div>.screen-header>.title.section-title{
+  min-width:0!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  text-align:center!important;
+  line-height:1.1!important;
+  white-space:normal!important;
+  overflow:visible!important;
+}
+#app>div>.screen-header>.screen-header-spacer{
+  width:44px!important;
+  min-width:44px!important;
+  height:40px!important;
+  flex:0 0 44px!important;
+  visibility:hidden!important;
+}
+/* Modals share one viewport shell; their content is the scroll container. */
+#app [id$="Modal"]:not(.hidden),
+#app .theme-modal:not(.hidden),#app .exercise-modal:not(.hidden),
+#app .date-modal:not(.hidden),#app .confirm-modal:not(.hidden),
+#app .workout-detail-modal:not(.hidden),#app .manual-workout-modal:not(.hidden),
+#app .achievements-modal:not(.hidden),#app .food-modal:not(.hidden),
+#app .catalog-modal:not(.hidden),#app .technique-modal:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  width:100%!important;
+  height:100dvh!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(10px + env(safe-area-inset-bottom,0px))!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  z-index:2147483000!important;
+}
+/* Workout uses the same origin; only its own topbar is special. */
 #app>#workoutScreen{
-  padding:0 16px!important;
+  padding:0 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+  overflow-y:auto!important;
 }
 #app>#workoutScreen>.workout-topbar{
   position:sticky!important;
   top:0!important;
   z-index:6000!important;
   width:100%!important;
-  box-sizing:border-box!important;
   margin:0!important;
   padding:calc(env(safe-area-inset-top,0px) + 6px) 0 8px!important;
-  background:var(--bg)!important;
-  isolation:isolate!important;
+  box-sizing:border-box!important;
+  background:var(--bg,#000)!important;
 }
-#homeScreen{
-  position:absolute!important;
-  padding-top:0!important;
+#app>#workoutScreen .workout-bottom-actions{
+  position:relative!important;
+  margin:14px 0 0!important;
+  padding:0 0 2px!important;
 }
-#homeScreen>.title{
-  padding-top:4px!important;
+button,.btn,.action-copy,.nav-label,.title,.screen-header *{
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  hyphens:none!important;
 }
-/* Keep the home settings button inside the safe area. */
-#homeScreen .theme-toggle-btn{
-  top:calc(env(safe-area-inset-top,0px) + 6px)!important;
-}
-/* Never let the final bottom content sit under the iPhone home indicator. */
-#app>div:not(#workoutScreen){
-  padding-bottom:max(16px,env(safe-area-inset-bottom,0px))!important;
-}
-#app>#workoutScreen{
-  padding-bottom:max(16px,env(safe-area-inset-bottom,0px))!important;
+/* Standalone deliberately does not get a second geometry model. */
+@media (display-mode:standalone){
+  html,body,#app{height:100dvh!important;min-height:100dvh!important;}
 }
 </style>
-<!-- Removed: conflicting visualViewport app-height runtime. -->
-
-
-
 
 </head>
 <body>
@@ -13190,272 +13247,12 @@ window.closeImportConfirm=function(){
 })();
 </script>
 
-<!-- FTracker v129: iPhone fullscreen / overlay isolation -->
-
-
-<!-- FTracker v130: canonical iPhone PWA viewport contract -->
 
 
 
 
-<style id="ftracker-final-viewport-repair">
-/* FINAL viewport repair: one viewport, no double safe-area offset. */
-html, body {
-  width:100%;
-  min-height:100%;
-  margin:0 !important;
-  padding:0 !important;
-  overflow-x:hidden !important;
-  overflow-y:hidden !important;
-  background:var(--bg,#000);
-}
 
-#app, #app.container {
-  position:relative !important;
-  width:100% !important;
-  max-width:600px !important;
-  height:100dvh !important;
-  min-height:100dvh !important;
-  margin:0 auto !important;
-  padding:0 !important;
-  box-sizing:border-box !important;
-  overflow:hidden !important;
-}
 
-/* Each real screen owns its vertical scroll. Keep the bottom reachable. */
-#app > div {
-  position:absolute !important;
-  inset:0 !important;
-  width:100% !important;
-  height:100% !important;
-  min-height:0 !important;
-  box-sizing:border-box !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  overscroll-behavior-y:auto !important;
-  padding-bottom:calc(32px + env(safe-area-inset-bottom, 0px)) !important;
-}
 
-#app > div.hidden { display:none !important; }
-
-/* The home screen already receives the top safe area itself. */
-#homeScreen { padding-top:env(safe-area-inset-top, 0px) !important; }
-
-/* Workout topbar/header must remain attached to the real viewport top. */
-#app > #workoutScreen { padding-left:16px !important; padding-right:16px !important; }
-
-/* Do not let a child content block create a second page-sized scroll trap. */
-#app > div > .screen-header {
-  max-width:100%;
-}
-</style>
-
-<style id="ftracker-unified-pwa-layout-v2">
-/* FTracker — unified layout contract for Safari + installed PWA.
-   All ordinary screens share one viewport model. Workout has its own header,
-   but uses the same root viewport and bottom reservation. */
-:root{
-  --ftracker-top-safe: env(safe-area-inset-top, 0px);
-  --ftracker-bottom-safe: 2px;
-  --ftracker-screen-x: 16px;
-  --ftracker-header-height: 58px;
-}
-html,body{
-  width:100%!important;
-  height:100%!important;
-  min-height:100%!important;
-  margin:0!important;
-  padding:0!important;
-  overflow:hidden!important;
-  overscroll-behavior:none!important;
-  background:var(--bg,#000)!important;
-}
-body{
-  position:fixed!important;
-  inset:0!important;
-  -webkit-text-size-adjust:100%;
-}
-#app,#app.container{
-  position:fixed!important;
-  top:0!important;
-  left:50%!important;
-  transform:translateX(-50%)!important;
-  width:min(100%,600px)!important;
-  max-width:600px!important;
-  height:100dvh!important;
-  min-height:100dvh!important;
-  max-height:100dvh!important;
-  margin:0!important;
-  padding:0!important;
-  box-sizing:border-box!important;
-  overflow:hidden!important;
-  isolation:isolate!important;
-}
-/* Every app screen is an independent scroll layer. */
-#app>div{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  min-height:0!important;
-  max-height:none!important;
-  margin:0!important;
-  padding:0 var(--ftracker-screen-x) var(--ftracker-bottom-safe)!important;
-  box-sizing:border-box!important;
-  overflow-x:hidden!important;
-  overflow-y:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior-y:contain!important;
-  scrollbar-width:none;
-}
-#app>div::-webkit-scrollbar{display:none!important;}
-#app>div.hidden{display:none!important;pointer-events:none!important;visibility:hidden!important;}
-/* Home is deliberately a static canvas; its content fits without page scrolling. */
-#homeScreen{
-  overflow:hidden!important;
-  padding-top:var(--ftracker-top-safe)!important;
-  padding-bottom:var(--ftracker-bottom-safe)!important;
-}
-/* One shared header geometry for Progress/Measurements/Programs/Directory/
-   History/Food and any future screen using .screen-header. */
-#app>div>.screen-header{
-  position:sticky!important;
-  top:0!important;
-  z-index:5000!important;
-  width:100%!important;
-  min-width:0!important;
-  min-height:56px!important;
-  margin:0 0 10px!important;
-  padding:calc(var(--ftracker-top-safe) + 8px) 0 8px!important;
-  box-sizing:border-box!important;
-  display:grid!important;
-  grid-template-columns:minmax(92px,auto) minmax(0,1fr) minmax(44px,auto)!important;
-  align-items:center!important;
-  gap:10px!important;
-  background:color-mix(in srgb,var(--bg,#000) 96%,transparent)!important;
-  backdrop-filter:blur(18px)!important;
-  -webkit-backdrop-filter:blur(18px)!important;
-  box-shadow:none!important;
-  border:0!important;
-  isolation:isolate!important;
-}
-#app>div>.screen-header>button.gray{
-  width:max-content!important;
-  max-width:100%!important;
-  min-width:92px!important;
-  min-height:40px!important;
-  margin:0!important;
-  padding:9px 12px!important;
-  box-sizing:border-box!important;
-  white-space:nowrap!important;
-  word-break:normal!important;
-  overflow-wrap:normal!important;
-}
-#app>div>.screen-header>.title.section-title,
-#app>div>.screen-header>.title{
-  min-width:0!important;
-  width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:8px!important;
-  text-align:center!important;
-  line-height:1.1!important;
-  white-space:normal!important;
-  overflow:visible!important;
-  text-overflow:clip!important;
-}
-#app>div>.screen-header>.title.section-title>span:last-child{
-  min-width:0!important;
-  overflow-wrap:normal!important;
-  word-break:normal!important;
-  hyphens:none!important;
-}
-#app>div>.screen-header>.screen-header-spacer{
-  width:44px!important;
-  min-width:44px!important;
-  height:40px!important;
-  flex:0 0 44px!important;
-  visibility:hidden!important;
-}
-/* Food tabs are part of normal document flow and therefore can never slide
-   underneath the shared header. */
-#foodScreen>.food-main-tabs,
-#foodScreen>.tabs.food-main-tabs{
-  position:relative!important;
-  z-index:1!important;
-  margin-top:0!important;
-  scroll-margin-top:0!important;
-}
-/* Modal shells use the same real viewport; only their content scrolls. */
-#app .theme-modal,#app .exercise-modal,#app .date-modal,#app .confirm-modal,
-#app .workout-detail-modal,#app .manual-workout-modal,#app .achievements-modal,
-#app .food-modal,#app .catalog-modal,#app .technique-modal,
-#app [id$="Modal"]{
-  box-sizing:border-box!important;
-}
-#app [id$="Modal"]:not(.hidden),
-#app .theme-modal:not(.hidden),#app .exercise-modal:not(.hidden),
-#app .date-modal:not(.hidden),#app .confirm-modal:not(.hidden),
-#app .workout-detail-modal:not(.hidden),#app .manual-workout-modal:not(.hidden),
-#app .achievements-modal:not(.hidden),#app .food-modal:not(.hidden),
-#app .catalog-modal:not(.hidden),#app .technique-modal:not(.hidden){
-  position:fixed!important;
-  inset:0!important;
-  width:100%!important;
-  height:100dvh!important;
-  max-height:100dvh!important;
-  padding:calc(var(--ftracker-top-safe) + 10px) 10px var(--ftracker-bottom-safe)!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  box-sizing:border-box!important;
-  overscroll-behavior:contain!important;
-}
-/* Never break words inside action controls. Break only at spaces. */
-button,.btn,.action-copy,.nav-label,.title,.screen-header *{
-  word-break:normal!important;
-  overflow-wrap:normal!important;
-  hyphens:none!important;
-}
-/* Workout: same viewport contract, with a very small 2px bottom reservation. */
-#app>#workoutScreen{
-  padding:0 var(--ftracker-screen-x) var(--ftracker-bottom-safe)!important;
-  overflow-y:auto!important;
-}
-#app>#workoutScreen>.workout-topbar{
-  position:sticky!important;
-  top:0!important;
-  z-index:6000!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  margin:0!important;
-  padding:calc(var(--ftracker-top-safe) + 6px) 0 8px!important;
-  background:color-mix(in srgb,var(--bg,#000) 96%,transparent)!important;
-  backdrop-filter:blur(18px)!important;
-  -webkit-backdrop-filter:blur(18px)!important;
-}
-#app>#workoutScreen .workout-bottom-actions{
-  padding-bottom:2px!important;
-  margin-bottom:0!important;
-}
-/* PWA and Safari deliberately use the same CSS contract. */
-@media (display-mode:standalone){
-  :root{--ftracker-top-safe:max(env(safe-area-inset-top,0px),59px)!important;}
-  html,body,#app{height:100dvh!important;min-height:100dvh!important;}
-}
-@supports not (height:100dvh){
-  #app,#app.container{height:100vh!important;min-height:100vh!important;max-height:100vh!important;}
-  #app>div{height:100%!important;}
-}
-@media (max-width:430px){
-  #app>div{padding-left:10px!important;padding-right:10px!important;}
-  #app>#workoutScreen{padding-left:10px!important;padding-right:10px!important;}
-  #app>div>.screen-header{grid-template-columns:minmax(92px,auto) minmax(0,1fr) 44px!important;gap:8px!important;}
-  #app>div>.screen-header>.title.section-title{font-size:20px!important;}
-}
-</style>
 </body>
 </html>
