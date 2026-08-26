@@ -2055,91 +2055,73 @@ button,.btn,.action-copy,.nav-label,.title,.screen-header *{
 </style>
 
 
-
-<style id="ftracker-canonical-ui-20260826">
+<style id="ftracker-v51-scroll-all">
 /* =========================================================
-   FTRACKER CANONICAL UI LAYER
-   One screen contract, preserved native screen scrolling,
-   global modal stacking, unified safe-area.
+   V51: PRESERVE ORIGINAL SCROLL ARCHITECTURE.
+   Every application screen remains an independent scroll container.
    ========================================================= */
 
-/* Every application screen owns its own vertical scroll area. */
+/* All screens, including the home screen, can scroll vertically. */
 #app > div{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:auto !important;
+  touch-action:pan-y !important;
   box-sizing:border-box !important;
-  padding-top:env(safe-area-inset-top, 0px) !important;
-  padding-right:16px !important;
-  padding-bottom:max(16px, env(safe-area-inset-bottom, 0px)) !important;
-  padding-left:16px !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  overscroll-behavior-y:contain !important;
-  touch-action:pan-y !important;
 }
 
-/* Home uses the same safe-area contract and is scrollable too. */
+/* Same safe-area baseline for every screen. */
+#app > div{
+  padding-top:env(safe-area-inset-top,0px) !important;
+  padding-bottom:max(16px,env(safe-area-inset-bottom,0px)) !important;
+}
+
+/* Home also scrolls. */
 #homeScreen{
-  padding-top:env(safe-area-inset-top, 0px) !important;
-  overflow-x:hidden !important;
   overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  touch-action:pan-y !important;
 }
 
-/* Header stays at the top of its own screen scroll container.
-   Safe-area is consumed by the screen itself, not duplicated here. */
+/* Section headers stay visible while THEIR SCREEN scrolls. */
 #app > div > .screen-header{
   position:-webkit-sticky !important;
   position:sticky !important;
   top:0 !important;
-  z-index:1000 !important;
-  margin-top:0 !important;
-  padding-top:8px !important;
-  padding-bottom:8px !important;
-  background:var(--bg, #000) !important;
-  box-sizing:border-box !important;
+  z-index:100 !important;
+  background:var(--bg,#000) !important;
 }
 
-/* Keep the home gear aligned to the home viewport safe-area. */
-#homeScreen .theme-toggle-btn{
-  position:fixed !important;
-  top:calc(env(safe-area-inset-top, 0px) + 6px) !important;
-  right:10px !important;
-  z-index:1100 !important;
+/* Workout navigation/top controls remain visible, but the workout content
+   itself is not frozen: the surrounding screen remains scrollable. */
+#app .workout-topbar{
+  position:-webkit-sticky !important;
+  position:sticky !important;
+  top:0 !important;
+  z-index:120 !important;
+  background:var(--bg,#000) !important;
 }
 
-/* Global modal layer: only stacking is centralized.
-   Existing modal dimensions/layout remain controlled by original CSS. */
+/* If an exercise navigation strip exists, keep it below the top bar and sticky. */
+#app .exercise-strip{
+  position:-webkit-sticky !important;
+  position:sticky !important;
+  top:56px !important;
+  z-index:110 !important;
+  background:var(--bg,#000) !important;
+}
+
+/* Global modal layer above every app layer. */
 #app-modal-root{
   position:fixed !important;
   inset:0 !important;
   z-index:2147483000 !important;
   pointer-events:none !important;
-  isolation:isolate !important;
 }
-
 #app-modal-root > *{
   pointer-events:auto !important;
 }
-
-#app-modal-root > .hidden{
+#app-modal-root .hidden{
   display:none !important;
-}
-
-/* Any modal moved to the portal is always above screens and sticky headers. */
-#app-modal-root .modal,
-#app-modal-root .theme-modal,
-#app-modal-root .catalog-modal,
-#app-modal-root .exercise-modal,
-#app-modal-root .date-modal,
-#app-modal-root .confirm-modal,
-#app-modal-root .workout-detail-modal,
-#app-modal-root .achievements-modal,
-#app-modal-root .manual-workout-modal,
-#app-modal-root .food-modal,
-#app-modal-root [role="dialog"],
-#app-modal-root [aria-modal="true"]{
-  z-index:2147483500 !important;
 }
 </style>
 
@@ -2949,7 +2931,7 @@ function resetAppViewport(screenId){
 }
 function showScreen(id) {
   if (typeof window.__mountModalLayer === 'function') window.__mountModalLayer();
-// Close transient overlays before changing app screens.
+  // Close transient overlays before changing app screens.
   if (typeof closeBackupExportPrompt === 'function') closeBackupExportPrompt();
   document.querySelectorAll('#app > div').forEach(el => el.classList.add('hidden'));
   const screen=document.getElementById(id);
@@ -13400,9 +13382,8 @@ body {
 
 
 
-
 <script>
-/* FTRACKER GLOBAL MODAL PORTAL 20260826 */
+/* V51 global modal portal without changing screen DOM or scroll containers. */
 (function(){
   const SELECTOR=[
     '.modal','.theme-modal','.catalog-modal','.exercise-modal','.date-modal',
@@ -13410,44 +13391,29 @@ body {
     '.manual-workout-modal','.food-modal','[role="dialog"]','[aria-modal="true"]'
   ].join(',');
 
-  function getRoot(){
+  function mount(){
     let root=document.getElementById('app-modal-root');
     if(!root){
       root=document.createElement('div');
       root.id='app-modal-root';
       document.body.appendChild(root);
     }
-    return root;
-  }
-
-  function isNestedModal(node){
-    const parent=node.parentElement;
-    return !!(parent && parent.closest(SELECTOR));
-  }
-
-  function mountModals(){
-    const root=getRoot();
     document.querySelectorAll(SELECTOR).forEach(node=>{
       if(node===root || root.contains(node)) return;
-      if(isNestedModal(node)) return;
+      // Do not move modal descendants independently.
+      const ancestor=node.parentElement && node.parentElement.closest(SELECTOR);
+      if(ancestor) return;
       root.appendChild(node);
     });
   }
 
   function start(){
-    mountModals();
-    const observer=new MutationObserver(()=>{
-      mountModals();
-    });
-    observer.observe(document.body,{childList:true,subtree:true});
-    window.__mountModalLayer=mountModals;
+    mount();
+    new MutationObserver(mount).observe(document.body,{childList:true,subtree:true});
+    window.__mountModalLayer=mount;
   }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',start,{once:true});
-  }else{
-    start();
-  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
 })();
 </script>
 
