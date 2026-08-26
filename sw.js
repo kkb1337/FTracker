@@ -1,5 +1,4 @@
-/* FTRACKER BUILD: ftracker-v48-full-sync-20260826 */
-const CACHE_VERSION = 'ftracker-v48-full-sync-20260826';
+const CACHE_VERSION = 'ftracker-v49-true-scroll-recovery';
 const APP_SHELL = [
   './',
   './index.html',
