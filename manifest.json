@@ -4,5 +4,6 @@
   "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#000000"
+  "theme_color": "#000000",
+  "_build": "ftracker-v48-full-sync-20260826"
 }
