@@ -1,4 +1,5 @@
-const CACHE_VERSION = 'ftracker-v49';
+/* Build: ftracker-pwa-v20260826-physical-clean-01 */
+const CACHE_VERSION = 'ftracker-pwa-v20260826-physical-clean-01';
 const APP_SHELL = [
   './',
   './index.html',
