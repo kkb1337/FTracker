@@ -8,5 +8,5 @@
   "id": "./",
   "scope": "./",
   "orientation": "portrait",
-  "_build": "ftracker-v64-window-manager-audit"
+  "_build": "ftracker-v66-safearea-screens-only-cache"
 }
