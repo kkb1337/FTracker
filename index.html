@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=auto">
 <title>FTracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -377,8 +377,25 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 /* Clean window system owns sticky positioning; carousel only scrolls horizontally. */
 .screen-header .exercise-strip,.screen-header .exercise-strip-container,.screen-header .exercise-carousel,#workoutScreen #exerciseStrip{position:relative!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;}
 
-/* v59 PWA fixes */
-html,body{touch-action:pan-y;overscroll-behavior:none;} body{overflow-x:hidden;} .screen-header{position:relative!important;top:auto!important;} button,input,textarea,select{touch-action:manipulation;}
+/* FTracker v60 PWA safe-area/header correction */
+html,body{
+  touch-action: pan-x pan-y;
+  overscroll-behavior:none;
+}
+.theme-toggle-btn{
+  position:absolute!important;
+  top:8px!important;
+  right:0!important;
+  transform:none!important;
+  margin:0!important;
+  z-index:20!important;
+}
+#homeScreen{
+  position:relative;
+}
+.screen-header{
+  padding-top:8px!important;
+}
 </style>
 
 <style id="measurement-v27-style">
@@ -4794,7 +4811,9 @@ function renderSettings() {
                 <div class="program-v5-actions">
                     <button type="button" class="program-add-btn program-v5-add" onclick="addExercise(${idx})">＋ Добавить упражнение</button>
                     <button type="button" class="gray program-v5-add" onclick="openExerciseOrderModal(${idx})">☰ Изменить порядок</button>
-                    <button type="button" class="program-delete-btn program-v5-add" onclick="deleteProgram(${idx})">🗑️ Удалить сплит</button>
+                </div>
+                <div class="program-delete-row">
+                    <button type="button" class="program-delete-btn" onclick="deleteProgram(${idx})">🗑️ Удалить сплит</button>
                 </div>
             </div>
         </div>`;
@@ -6422,7 +6441,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=59', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=47', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -13138,9 +13157,5 @@ body {
 
 
 
-
-<script>
-(function(){function fixScroll(){const a=document.querySelector('.screen.active,.screen:not(.hidden),.tab-content.active');if(a&&a.scrollTop)a.scrollTop=0;document.querySelectorAll('.screen').forEach(e=>{if(e!==a)e.scrollTop=0;});}window.addEventListener('load',fixScroll);document.addEventListener('click',e=>{if(e.target.closest('button,.nav-item'))setTimeout(fixScroll,50);});})();
-</script>
 </body>
 </html>
