@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v67-header-alignment-cache';
+const CACHE_VERSION = 'ftracker-v68-safearea-cleanup';
 const APP_SHELL = [
   './',
   './index.html',
