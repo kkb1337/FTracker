@@ -5650,6 +5650,13 @@ body{
 .modal-open,.layer-locked{overflow:hidden!important}
 
 body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
+
+/* FTracker v1.0.4 — targeted navigation/header/modal polish */
+#homeScreen .theme-toggle-btn{top:50%!important;transform:translateY(-50%)!important;}
+#app>[id$="Screen"]:not(#homeScreen){margin-top:-6px!important;}
+.theme-modal,.exercise-modal,.date-modal,.confirm-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.food-modal,.catalog-modal,.technique-modal{padding-top:calc(var(--safe-top) + 8px)!important;padding-bottom:calc(var(--safe-bottom) + 8px)!important;}
+.toast{top:auto!important;bottom:calc(var(--safe-bottom) + 18px)!important;left:50%!important;width:min(calc(100vw - 28px),360px)!important;max-width:360px!important;transform:translateX(-50%)!important;z-index:6000!important;}
+.modal-universal-close{position:absolute!important;top:8px!important;right:10px!important;width:38px!important;height:38px!important;min-width:38px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:12px!important;background:transparent!important;color:var(--subtext)!important;font-size:26px!important;line-height:1!important;}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5775,6 +5782,7 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
         <div id="measurementForm"></div>
     </div>
     <div id="confirmScreen" class="hidden">
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▶</span><span>Подтверждение</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div class="card centered-card">
             <div style="font-size:22px; font-weight:600; margin-bottom:12px;" id="confirmTitle"></div>
             <div style="color:#8e8e93; margin-bottom:20px;">Начать тренировку?</div>
@@ -5980,7 +5988,9 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
     </div>
 </div>
 <div id="deleteConfirmModal" class="confirm-modal hidden" onclick="if(event.target === this) closeDeleteConfirm()">
-    <div class="confirm-modal-content" id="deleteConfirmContent"></div>
+    <div class="confirm-modal-content" id="deleteConfirmContent">
+        <button type="button" class="close-btn modal-universal-close" onclick="closeDeleteConfirm()" aria-label="Закрыть">&times;</button>
+    </div>
 </div>
 <div id="importConfirmModal" class="confirm-modal hidden" onclick="if(event.target === this) closeImportConfirm()">
     <div class="confirm-modal-content">
@@ -9736,9 +9746,10 @@ let chartCustomStart = '';
 let chartCustomEnd = '';
 
 let __lastModalTrigger = null;
-function __openModal(id){ const m=document.getElementById(id); if(!m)return null; __lastModalTrigger=document.activeElement; m.classList.remove('hidden'); document.body.classList.add('modal-open'); m.setAttribute('aria-modal','true'); requestAnimationFrame(()=>m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus()); return m; }
-function __closeModal(id){ const m=document.getElementById(id); if(!m)return; m.classList.add('hidden'); if(!document.querySelector('.theme-modal:not(.hidden),.confirm-modal:not(.hidden),.exercise-modal:not(.hidden),.catalog-modal:not(.hidden),.technique-modal:not(.hidden)')) document.body.classList.remove('modal-open'); __lastModalTrigger?.focus?.(); __lastModalTrigger=null; }
-document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return; const m=[...document.querySelectorAll('.theme-modal,.confirm-modal,.exercise-modal,.catalog-modal,.technique-modal')].find(x=>!x.classList.contains('hidden')); if(m){ e.preventDefault(); const b=m.querySelector('.close-btn,[aria-label*=Закрыть],[data-close-modal]'); b?.click?.(); if(!b) __closeModal(m.id); }});
+const __modalSelector = '.theme-modal,.confirm-modal,.exercise-modal,.date-modal,.catalog-modal,.technique-modal,.food-modal,.manual-workout-modal,.achievements-modal,.workout-detail-modal';
+function __openModal(id){ const m=document.getElementById(id); if(!m)return null; __lastModalTrigger=document.activeElement; m.classList.remove('hidden'); document.body.classList.add('modal-open'); m.setAttribute('aria-modal','true'); m.setAttribute('role','dialog'); requestAnimationFrame(()=>m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus()); return m; }
+function __closeModal(id){ const m=document.getElementById(id); if(!m)return; m.classList.add('hidden'); if(!document.querySelector(__modalSelector.split(',').map(x=>x.trim()+':not(.hidden)').join(','))) document.body.classList.remove('modal-open'); __lastModalTrigger?.focus?.(); __lastModalTrigger=null; }
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return; const m=[...document.querySelectorAll(__modalSelector)].find(x=>!x.classList.contains('hidden')); if(m){ e.preventDefault(); const b=m.querySelector('.close-btn,.modal-close-btn,[aria-label*=Закрыть],[data-close-modal]'); if(b) b.click(); else __closeModal(m.id); }});
 function openChartModal() {
     const modal=document.getElementById('chartModal'); if(!modal) return;
     __openModal('chartModal');
@@ -10423,7 +10434,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.3', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.0.4', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -14540,6 +14551,29 @@ window.closeImportConfirm=function(){
   });
 })();
 
+</script>
+
+<script>
+(function(){
+  'use strict';
+  const modalSelector='.theme-modal,.exercise-modal,.date-modal,.confirm-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.food-modal,.catalog-modal,.technique-modal';
+  const closeById={deleteConfirmModal:'closeDeleteConfirm',themeModal:'closeThemeModal',renameExerciseModal:'closeRenameExerciseModal',directoryNewExerciseModal:'closeNewDirectoryExerciseModal',workoutNewExerciseModal:'closeWorkoutNewExerciseModal',replaceExerciseModal:'closeReplaceExerciseModal',exerciseModal:'closeExerciseModal',dateModal:'closeDateModal',confirmExitModal:'closeConfirmExit',finishWorkoutConfirmModal:'closeFinishWorkoutConfirm',importConfirmModal:'closeImportConfirm',workoutDetailModal:'closeWorkoutDetail',achievementsModal:'closeAchievements',manualWorkoutModal:'closeManualWorkout',addFoodModal:'closeAddFoodModal',foodLimitModal:'closeFoodLimitModal',copyDatePickerModal:'closeCopyDatePicker',catalogEditModal:'closeCatalogEdit',workoutSummaryModal:'closeWorkoutSummary',bodyGraphModal:'closeBodyGraph',foodCopyConfirmModal:'closeFoodCopyConfirm',measurementSaveConfirmModal:'closeMeasurementSaveConfirm',chartModal:'closeChartModal',measurementManagerModal:'closeMeasurementManager',measurementFieldModal:'closeMeasurementFieldEditor',exercisePickerModal:'closeExercisePicker',progressExercisePickerModal:'closeProgressExercisePicker',exerciseOrderModal:'closeExerciseOrderModal',techniqueModal:'closeTechniqueModal',measurementHistoryModal:'closeBodyHistory',newMeasurementModal:'closeNewMeasurementModal',historicalMeasurementEditModal:'closeHistoricalMeasurementEdit'};
+  function ensure(root){
+    if(!root)return;
+    const content=root.querySelector(':scope > .theme-modal-content,:scope > .exercise-modal-content,:scope > .date-modal-content,:scope > .confirm-modal-content,:scope > .workout-detail-content,:scope > .manual-workout-content,:scope > .achievements-content,:scope > .food-modal-content,:scope > .catalog-modal-content,:scope > .technique-modal-content')||root.firstElementChild;
+    if(!content||content.querySelector('.close-btn,.modal-close-btn,[data-close-modal],[aria-label="Закрыть"]'))return;
+    const b=document.createElement('button'); b.type='button'; b.className='modal-universal-close'; b.textContent='×'; b.setAttribute('aria-label','Закрыть');
+    b.onclick=function(){const fn=closeById[root.id];if(fn&&typeof window[fn]==='function'){window[fn]();return;}root.classList.add('hidden');if(!document.querySelector(modalSelector.split(',').map(x=>x+':not(.hidden)').join(',')))document.body.classList.remove('modal-open');};
+    content.appendChild(b);
+  }
+  function syncLock(){
+    const anyOpen=document.querySelector(modalSelector.split(',').map(x=>x+':not(.hidden)').join(','));
+    document.body.classList.toggle('modal-open',!!anyOpen);
+  }
+  function scan(){document.querySelectorAll(modalSelector).forEach(ensure);syncLock();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scan,{once:true});else scan();
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+})();
 </script>
 </body>
 </html>
