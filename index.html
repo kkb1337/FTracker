@@ -5467,7 +5467,7 @@ input[type="checkbox"],
 
 /* Ordinary fixed controls remain safe-area aware. */
 .toast{
-  top:calc(var(--safe-top) + 60px) !important;
+  top:auto !important;
 }
 
 .theme-toggle-btn{
@@ -5730,7 +5730,7 @@ body{
 /* FTracker v1.0.7 — unified modal close controls and stack surface */
 .home-title-clickable{cursor:pointer;user-select:none;display:inline-flex!important;align-items:center;justify-content:center;gap:7px;}
 .home-title-clickable:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:8px;}
-.home-title-gear{font-size:.72em;line-height:1;opacity:.82;}
+.home-title-gear{font-size:20px!important;line-height:1!important;opacity:1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:24px!important;height:24px!important;flex:0 0 24px!important;}
 .modal-stack-root{position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;overflow:hidden!important;overscroll-behavior:contain!important;}
 .modal-stack-root.hidden{display:none!important;}
 .modal-stack-root>.modal-stack-content{position:relative!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;box-sizing:border-box!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 28px)!important;width:100%!important;}
@@ -5820,7 +5820,7 @@ body{
 <div class="safe-area"><div class="container" id="app">
     <!-- Экраны -->
     <div id="homeScreen">
-        <div class="title home-title-clickable" onclick="openThemeModal()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openThemeModal()" title="Настройки FTracker">FTracker <span class="home-title-gear" aria-hidden="true">⚙️</span></div>
+        <div class="title home-title-clickable" onclick="openThemeModal()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openThemeModal()" title="Настройки FTracker">FTracker <span class="home-title-gear" aria-hidden="true">⚙︎</span></div>
         
         <div id="draftBanner" class="card hidden" style="background: var(--accent-gradient); color:#fff; text-align:center; cursor:pointer;" onclick="resumeDraft()">У вас есть незавершённая тренировка.<br>Нажмите, чтобы продолжить.</div>
         <div id="exportReminder" class="card hidden" style="background: var(--accent-gradient); color:#fff; text-align:center;">
@@ -6459,7 +6459,7 @@ body{
 
 <script id="ftracker-app">
 /* ================================================================
-   FTracker Modal Stack v1.0.7
+   FTracker Modal Stack v1.0.8
    One centralized stack: only the top modal can scroll/interact.
    ================================================================ */
 const modalStack = [];
@@ -10727,13 +10727,41 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.2', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.0.8', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
 }
 
 
+
+/* v1.0.8 — compact in-app notifications for import/export */
+.toast{
+  position:fixed!important;
+  left:50%!important;
+  top:calc(var(--safe-top) + 14px)!important;
+  bottom:auto!important;
+  transform:translate(-50%,-10px)!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  width:max-content!important;
+  max-width:min(92vw,420px)!important;
+  min-width:180px!important;
+  padding:13px 18px!important;
+  border-radius:16px!important;
+  box-sizing:border-box!important;
+  background:var(--card-bg)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  box-shadow:0 12px 34px rgba(0,0,0,.28)!important;
+  font-size:14px!important;
+  line-height:1.4!important;
+  font-weight:650!important;
+  text-align:center!important;
+  z-index:10000!important;
+  transition:opacity .18s ease,transform .18s ease,visibility .18s ease!important;
+}
+.toast.toast-visible{opacity:1!important;visibility:visible!important;transform:translate(-50%,0)!important;}
 
 /* ===== Exercise Progress — modal exercise list ===== */
 window.progressExerciseQuery = window.progressExerciseQuery || '';
@@ -13671,9 +13699,14 @@ const foodList=$('foodPresetList');if(foodList&&!foodList.dataset.v66Bound){food
   window.showToast=function(msg){
     document.querySelectorAll('.toast').forEach(x=>x.remove());
     const toast=document.createElement('div');
-    toast.className='toast';toast.setAttribute('role','status');toast.textContent=String(msg??'');
+    toast.className='toast';
+    toast.setAttribute('role','status');
+    toast.setAttribute('aria-live','polite');
+    toast.textContent=String(msg??'');
     document.body.appendChild(toast);
-    setTimeout(()=>toast.remove(),2200);
+    requestAnimationFrame(()=>toast.classList.add('toast-visible'));
+    const timer=setTimeout(()=>{ toast.classList.remove('toast-visible'); setTimeout(()=>toast.remove(),180); },3000);
+    toast.addEventListener('click',()=>{ clearTimeout(timer); toast.remove(); },{once:true});
   };
 })();
 
