@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>FTracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1911,6 +1911,54 @@ body.light-mode{
 #themeModal .theme-modal-content button:active,
 #themeModal .theme-modal-content .ftracker-import-trigger:active{
     background:var(--input-bg) !important;
+}
+</style>
+
+<style id="v63-safe-area-fix">
+/* v63 iOS Safe Area normalization */
+html, body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.active-window-layer,
+[data-modal].active-window-layer,
+.modal-layer.active-window-layer,
+.food-modal.active-window-layer,
+.exercise-modal.active-window-layer,
+.catalog-modal.active-window-layer,
+.workout-detail-modal.active-window-layer {
+  padding-top: env(safe-area-inset-top, 20px) !important;
+  padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+  box-sizing: border-box;
+}
+
+.active-window-layer[style*="top: 0"],
+.modal-layer[style*="top: 0"],
+[data-modal][style*="top: 0"] {
+  top: env(safe-area-inset-top, 20px) !important;
+}
+
+.background-locked,
+.layer-locked {
+  padding-top: 0 !important;
+}
+
+/* Do not let fixed modal headers hide below the island */
+.active-window-layer .modal-header,
+.active-window-layer .modal-topbar,
+.active-window-layer .window-header {
+  padding-top: env(safe-area-inset-top, 20px);
+}
+
+/* Keep iOS home indicator area clear */
+.active-window-layer > *:last-child {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
 }
 </style>
 </head>
