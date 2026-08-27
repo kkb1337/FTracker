@@ -1,104 +1,14 @@
-const CACHE_VERSION = 'ftracker-v1.0.2';
+const CACHE_VERSION = 'ftracker-v1.0.3';
 const CACHE_NAME = CACHE_VERSION;
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
-
-const STATIC_DESTINATIONS = new Set([
-  'style',
-  'script',
-  'font',
-  'image',
-  'manifest'
-]);
-
-function isSameOrigin(request) {
-  return new URL(request.url).origin === self.location.origin;
-}
-
-function isNavigation(request) {
-  return request.mode === 'navigate' ||
-    request.destination === 'document' ||
-    request.headers.get('accept')?.includes('text/html');
-}
-
-function isStatic(request) {
-  if (STATIC_DESTINATIONS.has(request.destination)) return true;
-  const url = new URL(request.url);
-  return /\.(?:css|js|mjs|woff2?|ttf|otf|png|jpe?g|gif|webp|svg|ico|json)$/i.test(url.pathname);
-}
-
-async function putInCache(request, response) {
-  if (!response || (!response.ok && response.type !== 'opaque')) return;
-  const cache = await caches.open(CACHE_NAME);
-  await cache.put(request, response.clone());
-}
-
-async function networkFirst(request) {
-  try {
-    const response = await fetch(request, { cache: 'no-store' });
-    if (response.ok) {
-      await putInCache(request, response);
-    }
-    return response;
-  } catch (error) {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    throw error;
-  }
-}
-
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-
-  const networkUpdate = fetch(request, { cache: 'no-cache' })
-    .then(response => {
-      if (response.ok || response.type === 'opaque') {
-        return cache.put(request, response.clone()).then(() => response);
-      }
-      return response;
-    })
-    .catch(() => null);
-
-  return cached || await networkUpdate || Response.error();
-}
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', event => {
-  const request = event.request;
-
-  if (request.method !== 'GET' || !isSameOrigin(request)) return;
-
-  if (isNavigation(request)) {
-    event.respondWith(networkFirst(request));
-    return;
-  }
-
-  if (isStatic(request)) {
-    event.respondWith(staleWhileRevalidate(request));
-  }
-});
+const APP_SHELL = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
+const STATIC_DESTINATIONS = new Set(['style','script','font','image','manifest']);
+const isSameOrigin=r=>new URL(r.url).origin===self.location.origin;
+const isNavigation=r=>r.mode==='navigate'||r.destination==='document'||r.headers.get('accept')?.includes('text/html');
+const isStatic=r=>STATIC_DESTINATIONS.has(r.destination)||/\.(?:css|js|mjs|woff2?|ttf|otf|png|jpe?g|gif|webp|svg|ico|json)$/i.test(new URL(r.url).pathname);
+async function precache(){const c=await caches.open(CACHE_NAME); await Promise.all(APP_SHELL.map(async u=>{try{await c.add(u)}catch(e){console.warn('precache failed',u,e)}}));}
+async function navigation(request){try{const r=await fetch(request,{cache:'no-store'}); if(r.ok){const c=await caches.open(CACHE_NAME); c.put('./index.html',r.clone()).catch(()=>{});} return r;}catch(e){return (await caches.match('./index.html'))||(await caches.match('./'))||new Response('<h1>Offline</h1><p>Приложение ещё не было сохранено для офлайн-режима.</p>',{headers:{'Content-Type':'text/html;charset=utf-8'},status:503});}}
+async function stale(request){const c=await caches.open(CACHE_NAME), cached=await c.match(request); const update=fetch(request,{cache:'no-cache'}).then(r=>{if(r.ok||r.type==='opaque')c.put(request,r.clone()).catch(()=>{});return r}).catch(()=>null); return cached||await update||Response.error();}
+self.addEventListener('install',e=>e.waitUntil(precache()));
+self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+self.addEventListener('message',e=>{if(e.data&&e.data.type==='SKIP_WAITING')self.skipWaiting();});
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET'||!isSameOrigin(r))return;if(isNavigation(r)){e.respondWith(navigation(r));return;}if(isStatic(r))e.respondWith(stale(r));});

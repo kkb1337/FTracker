@@ -5649,6 +5649,7 @@ body{
 /* Prevent narrow white scrollbar tracks on iOS/Yandex and nested panes. */
 .modal-open,.layer-locked{overflow:hidden!important}
 
+body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -6671,33 +6672,24 @@ function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!dra
 function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EXPORT_KEY); if (lastExport && (Date.now() - parseInt(lastExport)) > 7*24*60*60*1000) document.getElementById('exportReminder').classList.remove('hidden'); }
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
+const screenScrollPositions = Object.create(null);
 function resetAppViewport(screenId){
-  const root=document.getElementById('app');
   const screen=screenId ? document.getElementById(screenId) : null;
-  try{ window.scrollTo({top:0,left:0,behavior:'instant'}); }catch(e){ window.scrollTo(0,0); }
-  document.documentElement.scrollTop=0;
-  document.body.scrollTop=0;
-  if(root) root.scrollTop=0;
-  document.querySelectorAll('#app > div').forEach(el=>{
-    el.scrollTop=0;
-    el.scrollLeft=0;
-  });
-  if(screen){
-    screen.scrollTop=0;
-    screen.scrollLeft=0;
-    const header=screen.querySelector('.screen-header');
-    if(header) header.scrollTop=0;
-  }
+  if(!screen) return;
+  const saved=screenScrollPositions[screenId];
+  if(saved){ screen.scrollTop=saved.top||0; screen.scrollLeft=saved.left||0; }
 }
 function showScreen(id) {
   // Close transient overlays before changing app screens.
   if (typeof closeBackupExportPrompt === 'function') closeBackupExportPrompt();
-  document.querySelectorAll('#app > div').forEach(el => { el.classList.add('hidden'); el.style.pointerEvents='none'; });
+  document.querySelectorAll('#app > div').forEach(el => {
+    if(!el.classList.contains('hidden')) screenScrollPositions[el.id]={top:el.scrollTop,left:el.scrollLeft};
+    el.classList.add('hidden'); el.style.pointerEvents='none';
+  });
   const screen=document.getElementById(id);
   if(!screen) return;
   screen.classList.remove('hidden');
   screen.style.pointerEvents='auto';
-  resetAppViewport(id);
   requestAnimationFrame(()=>{
     resetAppViewport(id);
     if(typeof window.__syncScreenHeader==='function') window.__syncScreenHeader(screen);
@@ -9338,9 +9330,9 @@ function showDeleteConfirm(text) {
         <div style="font-size:20px;font-weight:600;margin-bottom:16px;">${text}</div>
         <button onclick="confirmDeleteEntry()">Да</button>
         <button class="gray" onclick="closeDeleteConfirm()">Нет</button>`;
-    document.getElementById('deleteConfirmModal').classList.remove('hidden');
+    __openModal('deleteConfirmModal');
 }
-function closeDeleteConfirm() { document.getElementById('deleteConfirmModal').classList.add('hidden'); pendingDeleteType=null; pendingDeleteIndex=null; pendingDeleteDate=null; pendingProgramIndex=null; pendingArchiveExercise=null; }
+function closeDeleteConfirm() { __closeModal('deleteConfirmModal'); pendingDeleteType=null; pendingDeleteIndex=null; pendingDeleteDate=null; pendingProgramIndex=null; pendingArchiveExercise=null; }
 function confirmDeleteEntry() {
     if (pendingDeleteType === 'history' && pendingDeleteIndex !== null) { data.history.splice(pendingDeleteIndex,1); saveData(); renderHistory(); showToast('Запись удалена'); }
     else if (pendingDeleteType === 'measurement' && pendingDeleteIndex !== null) { data.measurements.splice(pendingDeleteIndex,1); saveData(); renderMeasurementScreen(); showToast('Замер удалён'); }
@@ -9561,16 +9553,20 @@ window.addManualSet = function(exIdx) {
     container.appendChild(row);
 };
 
+const foodUIState = { tab:'today', date:null };
 function showFoodDiary() {
   showScreen('foodScreen');
   const date=document.getElementById('foodDate');
-  if(date) date.value=localDateString(new Date());
-  switchFoodTab('today');
-  requestAnimationFrame(()=>resetAppViewport('foodScreen'));
+  if(date && !date.value) date.value=foodUIState.date || localDateString(new Date());
+  switchFoodTab(foodUIState.tab || 'today');
 }
 function switchFoodTab(tabName) {
+    const tab=document.querySelector(`#foodScreen .tab[data-tab="${tabName}"]`);
+    if(!tab) { console.warn('Unknown food tab',tabName); return; }
+    foodUIState.tab=tabName;
+    const date=document.getElementById('foodDate'); if(date) foodUIState.date=date.value;
     document.querySelectorAll('#foodScreen .tab').forEach(t => t.classList.remove('active'));
-    document.querySelector(`#foodScreen .tab[data-tab="${tabName}"]`).classList.add('active');
+    tab.classList.add('active');
     document.querySelectorAll('#foodScreen .tab-content').forEach(c => c.classList.remove('active'));
     if (tabName === 'today') {
         document.getElementById('foodTabToday').classList.add('active');
@@ -9739,16 +9735,20 @@ const CHART_LABELS = {
 let chartCustomStart = '';
 let chartCustomEnd = '';
 
+let __lastModalTrigger = null;
+function __openModal(id){ const m=document.getElementById(id); if(!m)return null; __lastModalTrigger=document.activeElement; m.classList.remove('hidden'); document.body.classList.add('modal-open'); m.setAttribute('aria-modal','true'); requestAnimationFrame(()=>m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus()); return m; }
+function __closeModal(id){ const m=document.getElementById(id); if(!m)return; m.classList.add('hidden'); if(!document.querySelector('.theme-modal:not(.hidden),.confirm-modal:not(.hidden),.exercise-modal:not(.hidden),.catalog-modal:not(.hidden),.technique-modal:not(.hidden)')) document.body.classList.remove('modal-open'); __lastModalTrigger?.focus?.(); __lastModalTrigger=null; }
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return; const m=[...document.querySelectorAll('.theme-modal,.confirm-modal,.exercise-modal,.catalog-modal,.technique-modal')].find(x=>!x.classList.contains('hidden')); if(m){ e.preventDefault(); const b=m.querySelector('.close-btn,[aria-label*=Закрыть],[data-close-modal]'); b?.click?.(); if(!b) __closeModal(m.id); }});
 function openChartModal() {
     const modal=document.getElementById('chartModal'); if(!modal) return;
-    modal.classList.remove('hidden');
+    __openModal('chartModal');
     requestAnimationFrame(()=>{
         setChartPeriod(chartPeriod==='custom'&&chartCustomStart&&chartCustomEnd?'custom':'week',{render:false});
         setChartDataType(chartDataType||'calories',{render:false});
         requestAnimationFrame(()=>renderChart());
     });
 }
-function closeChartModal(){document.getElementById('chartModal')?.classList.add('hidden');}
+function closeChartModal(){__closeModal('chartModal');}
 function setChartPeriod(period,options={}){
     chartPeriod=period;
     document.querySelectorAll('#chartModal .period-selector button').forEach(b=>{const active=b.dataset.period===period;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');});
@@ -10423,7 +10423,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.2', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.0.3', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
