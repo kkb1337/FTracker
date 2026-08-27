@@ -380,7 +380,7 @@ html,body{
   overscroll-behavior:none;
 }
 #homeScreen{
-  height:100vh;
+  height:100dvh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
@@ -405,7 +405,7 @@ html, body { overscroll-behavior: none; }
 .chart-modal-content, .history-modal-content, .modal-content { overscroll-behavior: contain; }
 .screen-header { position: relative !important; top: auto !important; }
 /* keep safe area on active app surface */
-body { padding-top: env(safe-area-inset-top); }
+body { padding-top: 0; }
 
 
 /* v67 header alignment only: safe area + stable header layout */
@@ -2194,7 +2194,7 @@ body.light-mode{
 
 /* Keep the modal itself scrollable; Save remains visible at the bottom while scrolling. */
 #techniqueModal .technique-modal-content.exercise-editor-unified{
-  max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
   overflow-y:auto!important;
   overscroll-behavior:contain!important;
   -webkit-overflow-scrolling:touch!important;
@@ -5149,7 +5149,7 @@ body {
   position:relative !important;
   width:100% !important;
   max-width:600px !important;
-  min-height:100vh !important;
+  min-height:100dvh !important;
   min-height:100dvh !important;
   height:auto !important;
   overflow:visible !important;
@@ -14509,5 +14509,56 @@ window.closeImportConfirm=function(){
   new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
+<style id="ftracker-v1.0.8-viewport-geometry">
+/* FTracker v1.0.8 — viewport geometry normalization */
+#homeScreen{
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+  padding-top:env(safe-area-inset-top, 20px);
+  padding-bottom:env(safe-area-inset-bottom, 20px);
+  box-sizing:border-box;
+}
+#programList{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+}
+.theme-modal,
+.exercise-modal,
+.date-modal,
+.confirm-modal,
+.workout-detail-modal,
+.manual-workout-modal,
+.achievements-modal,
+.food-modal,
+.catalog-modal,
+.technique-modal{
+  position:fixed!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  z-index:200!important;
+  background:var(--modal-overlay)!important;
+}
+.theme-modal-content,
+.exercise-modal-content,
+.date-modal-content,
+.confirm-modal-content,
+.workout-detail-content,
+.manual-workout-content,
+.achievements-content,
+.food-modal-content,
+.catalog-modal-content,
+.technique-modal-content{
+  position:relative!important;
+  max-height:85dvh!important;
+  overflow-y:auto!important;
+}
+</style>
+
 </body>
 </html>
