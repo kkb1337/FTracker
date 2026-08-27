@@ -7818,7 +7818,6 @@ function renderMeasurementHistory() {
 }
 
 function openHistoricalMeasurementEdit(index) {
-    closeBodyHistory();
     const measurement = data.measurements[index];
     if (!measurement) return;
     const fields = getMeasurementFields();
@@ -14653,5 +14652,27 @@ body.modal-open{overflow:hidden!important;}
 #chartModal .chart-container canvas{display:block!important;width:100%!important;max-width:100%!important;}
 </style>
 
+
+<style id="ftracker-v1.0.10-modal-scroll-home-fix">
+/* v1.0.10: confirmation screen header must not remain behind the confirmation card */
+#confirmScreen .screen-header{display:none!important;}
+#confirmScreen{box-sizing:border-box;padding:24px 16px!important;}
+#confirmScreen .centered-card{width:min(100%,760px)!important;margin:40px auto 0!important;box-sizing:border-box!important;text-align:center!important;}
+#confirmScreen #confirmTitle{width:100%;text-align:center;}
+
+/* v1.0.10: the home screen is the only fixed app surface; only its program list scrolls */
+#homeScreen{height:100dvh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;position:relative!important;box-sizing:border-box!important;padding-top:env(safe-area-inset-top,20px)!important;padding-bottom:env(safe-area-inset-bottom,20px)!important;}
+#programList{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
+#homeScreen .nav-buttons{flex:0 0 auto!important;}
+
+/* v1.0.10: modal layers own their scrolling; nested measurement editor sits above history */
+#measurementHistoryModal{position:fixed!important;inset:0!important;z-index:1000!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
+#measurementHistoryModal .body-history-modal-content{position:relative!important;max-height:85dvh!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
+#measurementFieldModal,#historicalMeasurementEditModal{position:fixed!important;inset:0!important;z-index:1100!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
+#measurementFieldModal .catalog-modal-content,#historicalMeasurementEditModal .catalog-modal-content{position:relative!important;max-height:85dvh!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
+
+/* v1.0.10: lock the page underneath every modal without disabling modal scrolling */
+body.modal-open{overflow:hidden!important;}
+</style>
 </body>
 </html>
