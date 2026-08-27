@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=auto">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>FTracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -396,6 +396,17 @@ html,body{
 .screen-header{
   padding-top:8px!important;
 }
+
+/* v61 window layer fix */
+html, body { overscroll-behavior: none; }
+#app > div:not(.hidden) { position: relative; z-index: 1; }
+#app > div.hidden { display:none!important; }
+/* nested modal/screen containers must own their scroll */
+.chart-modal-content, .history-modal-content, .modal-content { overscroll-behavior: contain; }
+.screen-header { position: relative !important; top: auto !important; }
+/* keep safe area on active app surface */
+body { padding-top: env(safe-area-inset-top); }
+
 </style>
 
 <style id="measurement-v27-style">
@@ -2709,10 +2720,11 @@ function resetAppViewport(screenId){
 function showScreen(id) {
   // Close transient overlays before changing app screens.
   if (typeof closeBackupExportPrompt === 'function') closeBackupExportPrompt();
-  document.querySelectorAll('#app > div').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('#app > div').forEach(el => { el.classList.add('hidden'); el.style.pointerEvents='none'; });
   const screen=document.getElementById(id);
   if(!screen) return;
   screen.classList.remove('hidden');
+  screen.style.pointerEvents='auto';
   resetAppViewport(id);
   requestAnimationFrame(()=>{
     resetAppViewport(id);

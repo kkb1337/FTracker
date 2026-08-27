@@ -8,5 +8,5 @@
   "id": "./",
   "scope": "./",
   "orientation": "portrait",
-  "_build": "ftracker-v60-pwa-safearea-scroll"
+  "_build": "ftracker-v61-window-layer-fix"
 }
