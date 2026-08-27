@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v1.0.11';
+const CACHE_VERSION = 'ftracker-v1.0.12';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = [
   './',
@@ -18,6 +18,11 @@ const STATIC_DESTINATIONS = new Set([
 
 function isSameOrigin(request) {
   return new URL(request.url).origin === self.location.origin;
+}
+
+function isExerciseRemoteMedia(request) {
+  try { return new URL(request.url).origin === 'https://upload.wikimedia.org'; }
+  catch (_) { return false; }
 }
 
 function isNavigation(request) {
@@ -91,7 +96,14 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
 
-  if (request.method !== 'GET' || !isSameOrigin(request)) return;
+  if (request.method !== 'GET') return;
+
+  if (isExerciseRemoteMedia(request)) {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  if (!isSameOrigin(request)) return;
 
   if (isNavigation(request)) {
     event.respondWith(networkFirst(request));
