@@ -5887,6 +5887,7 @@ body{
 <div id="exerciseModal" class="exercise-modal hidden" onclick="if(event.target === this) closeExerciseModal()">
     <div class="exercise-modal-content">
         <span class="modal-close-btn" onclick="closeExerciseModal()">&times;</span>
+        <div class="exercise-modal-scroll">
         <div id="exerciseModalTitle" style="font-size:22px; font-weight:700; margin-bottom:16px;"></div>
         <div class="tabs">
             <div class="tab active" data-tab="history" onclick="switchExerciseModalTab('history')">История</div>
@@ -5896,6 +5897,7 @@ body{
         <div class="tab-content active" id="tabHistory"></div>
         <div class="tab-content" id="tabRecords"></div>
         <div class="tab-content" id="tabGraph"><div id="exerciseGraphControls" class="exercise-graph-metrics"></div><div class="graph-container"><canvas id="progressGraph"></canvas></div></div>
+        </div>
     </div>
 </div>
 <div id="dateModal" class="date-modal hidden" onclick="if(event.target === this) closeDateModal()">
@@ -12478,16 +12480,17 @@ function renderExerciseCard(name,type,mode='view'){
 
   m.innerHTML=`
     <div class="technique-modal-content exercise-card-unified">
-      <div class="exercise-card-header">
-        <div class="exercise-card-heading">
-          <div class="exercise-card-kicker">УПРАЖНЕНИЕ</div>
-          <div class="exercise-card-title">${esc(e.name)}</div>
-          <div class="exercise-card-group">${esc(e.group||'Другое')}</div>
+      <button type="button" class="modal-close-btn exercise-card-close" onclick="closeTechniqueModal()" aria-label="Закрыть">×</button>
+      <div class="exercise-card-scroll">
+        <div class="exercise-card-header">
+          <div class="exercise-card-heading">
+            <div class="exercise-card-kicker">УПРАЖНЕНИЕ</div>
+            <div class="exercise-card-title">${esc(e.name)}</div>
+            <div class="exercise-card-group">${esc(e.group||'Другое')}</div>
+          </div>
         </div>
-        <button type="button" class="modal-close-btn exercise-card-close" onclick="closeTechniqueModal()" aria-label="Закрыть">×</button>
-      </div>
 
-      <div class="tabs technique-tabs exercise-card-tabs">
+        <div class="tabs technique-tabs exercise-card-tabs">
         <div class="tab active" data-tab="exerciseViewExec" onclick="switchTechniqueTab('exerciseViewExec')">Выполнение</div>
         <div class="tab" data-tab="exerciseViewMuscles" onclick="switchTechniqueTab('exerciseViewMuscles')">Мышцы</div>
         <div class="tab" data-tab="exerciseViewTips" onclick="switchTechniqueTab('exerciseViewTips')">Советы</div>
@@ -12531,6 +12534,7 @@ function renderExerciseCard(name,type,mode='view'){
             : ''}
           ${!bad.length&&!rec.length ? '<div class="exercise-card-empty">Советы пока не добавлены.</div>' : ''}
         </div>
+      </div>
       </div>
 
     </div>`;
@@ -14558,6 +14562,131 @@ window.closeImportConfirm=function(){
   max-height:85dvh!important;
   overflow-y:auto!important;
 }
+
+
+/* === FINAL MOBILE MODAL / CHART FIX === */
+body.modal-open { overflow: hidden !important; }
+
+#techniqueModal,
+#exerciseModal,
+#workoutDetailModal {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+#techniqueModal .technique-modal-content,
+#exerciseModal .exercise-modal-content,
+#workoutDetailModal .workout-detail-content {
+  position: relative !important;
+  width: min(94%, 560px) !important;
+  max-width: 560px !important;
+  max-height: 85dvh !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  overscroll-behavior: contain !important;
+}
+
+#techniqueModal .exercise-card-scroll,
+#exerciseModal .exercise-modal-scroll,
+#workoutDetailModal #workoutDetailContent {
+  max-height: calc(85dvh - 24px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  min-height: 0 !important;
+}
+
+#techniqueModal .exercise-card-close,
+#exerciseModal .modal-close-btn,
+#workoutDetailModal .close-btn {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  z-index: 100 !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+}
+
+/* Nutrition chart modal */
+#chartModal {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+#chartModal .chart-modal-content {
+  position: relative !important;
+  width: min(94%, 560px) !important;
+  max-width: 560px !important;
+  max-height: 85dvh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+#chartModal .period-selector,
+#chartModal .data-type-selector {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+#chartModal .period-selector button,
+#chartModal .data-type-selector button {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+}
+
+#chartModal .chart-container {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 260px !important;
+  min-height: 220px !important;
+  margin: 14px 0 8px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+#chartModal .chart-container canvas {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+}
+
 </style>
 
 </body>
