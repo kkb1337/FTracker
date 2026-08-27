@@ -5323,12 +5323,6 @@ body{
   margin-top:12px !important;
 }
 
-#app > [id$="Screen"]{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
 #app > #homeScreen .card,
 #app > #workoutScreen .card{
   margin-bottom:0 !important;
@@ -5649,6 +5643,94 @@ body{
 
 
 
+
+<style id="ftracker-pwa-clean-v1.0.10">
+#homeScreen{
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+  padding-top:env(safe-area-inset-top, 20px);
+  padding-bottom:env(safe-area-inset-bottom, 20px);
+  box-sizing:border-box;
+}
+#programList{
+  flex:1;
+  overflow-y:auto;
+  min-height:0;
+}
+
+#techniqueModal,
+#exerciseModal,
+#workoutDetailModal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:200;
+  background:var(--modal-overlay);
+}
+
+.theme-modal,
+.exercise-modal,
+.date-modal,
+.confirm-modal,
+.workout-detail-modal,
+.manual-workout-modal,
+.achievements-modal,
+.food-modal,
+.catalog-modal,
+.technique-modal,
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--modal-overlay);
+}
+
+.theme-modal-content,
+.exercise-modal-content,
+.date-modal-content,
+.confirm-modal-content,
+.workout-detail-content,
+.manual-workout-content,
+.achievements-content,
+.food-modal-content,
+.catalog-modal-content,
+.technique-modal-content{
+  position:relative;
+  max-height:85dvh;
+  overflow-y:auto;
+}
+
+.close-btn,
+.modal-close-btn{
+  position:absolute;
+  top:12px;
+  right:16px;
+  font-size:24px;
+  z-index:100;
+}
+
+#techniqueModal .exercise-unified-media,
+#techniqueModal .exercise-media-gallery,
+#techniqueModal .exercise-media-view,
+#techniqueModal .exercise-photo,
+#techniqueModal .exercise-animation,
+#techniqueModal .exercise-media-view img,
+#techniqueModal .exercise-media-view video,
+#techniqueModal .tech-phase img{
+  display:block;
+  width:100%;
+  max-height:54dvh;
+  object-fit:contain;
+}
+</style>
 </head>
 <body>
 <div class="safe-area"><div class="container" id="app">
@@ -12462,7 +12544,6 @@ function renderExerciseCard(name,type,mode='view'){
           <div class="exercise-card-title">${esc(e.name)}</div>
           <div class="exercise-card-group">${esc(e.group||'Другое')}</div>
         </div>
-        <button type="button" class="modal-close-btn exercise-card-close" onclick="closeTechniqueModal()" aria-label="Закрыть">×</button>
       </div>
 
       <div class="tabs technique-tabs exercise-card-tabs">
@@ -14465,231 +14546,10 @@ window.closeImportConfirm=function(){
 </script>
 
 
-<style id="ftracker-v1.0.10-layout">
-/* Canonical screen geometry */
-#app > [id$="Screen"]{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  min-height:0;
-}
-
-#homeScreen{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  position:relative;
-  padding-top:env(safe-area-inset-top, 20px);
-  padding-bottom:env(safe-area-inset-bottom, 20px);
-  box-sizing:border-box;
-}
-
-#programList{
-  flex:1;
-  overflow-y:auto;
-  min-height:0;
-}
-
-#progressContent,
-#measurementForm,
-#exerciseContainer,
-#programsEditor,
-#exerciseDirectoryContent,
-#historyList,
-#foodScreen > .tab-content{
-  flex:1;
-  min-height:0;
-  overflow-y:auto;
-}
-
-#confirmScreen > .centered-card{
-  flex:1;
-  min-height:0;
-  overflow-y:auto;
-}
-
-#workoutScreen > .workout-topbar,
-#settingsScreen > .screen-header,
-#exerciseDirectoryScreen > .screen-header,
-#historyScreen > .screen-header,
-#progressScreen > .screen-header,
-#bodyScreen > .screen-header,
-#confirmScreen > .screen-header,
-#foodScreen > .screen-header,
-#foodScreen > .food-main-tabs{
-  flex:0 0 auto;
-}
-
-/* Canonical modal geometry */
-.modal,
-.theme-modal,
-.exercise-modal,
-.date-modal,
-.confirm-modal,
-.workout-detail-modal,
-.manual-workout-modal,
-.achievements-modal,
-.food-modal,
-.catalog-modal,
-.technique-modal{
-}
-
-.theme-modal-content,
-.exercise-modal-content,
-.date-modal-content,
-.confirm-modal-content,
-.workout-detail-content,
-.manual-workout-content,
-.achievements-content,
-.food-modal-content,
-.catalog-modal-content,
-.technique-modal-content{
-}
-
-.close-btn,
-.modal-close-btn{
-  font-size:24px;
-}
-
-/* Exercise illustrations */
-#techniqueModal .exercise-unified-media,
-#techniqueModal .exercise-media-gallery{
-  display:block;
-  width:100%;
-}
-
-#techniqueModal .exercise-media-view,
-#techniqueModal .exercise-photo,
-#techniqueModal .exercise-animation,
-#techniqueModal .exercise-media-view img,
-#techniqueModal .exercise-media-view video{
-  display:block;
-  width:100%;
-  max-height:54dvh;
-  object-fit:contain;
-}
-</style>
 
 
-<style id="ftracker-v1.0.10-layout">
-/* Screen isolation */
-#app > [id$="Screen"]{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  min-height:0;
-}
 
-#homeScreen{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  position:relative;
-  padding-top:env(safe-area-inset-top, 20px);
-  padding-bottom:env(safe-area-inset-bottom, 20px);
-  box-sizing:border-box;
-}
 
-#programList{
-  flex:1;
-  overflow-y:auto;
-  min-height:0;
-}
-
-#progressContent,
-#measurementForm,
-#exerciseContainer,
-#programsEditor,
-#exerciseDirectoryContent,
-#historyList,
-#foodScreen > .tab-content,
-#confirmScreen > .centered-card{
-  flex:1;
-  min-height:0;
-  overflow-y:auto;
-}
-
-#workoutScreen > .workout-topbar,
-#settingsScreen > .screen-header,
-#exerciseDirectoryScreen > .screen-header,
-#historyScreen > .screen-header,
-#progressScreen > .screen-header,
-#bodyScreen > .screen-header,
-#confirmScreen > .screen-header,
-#foodScreen > .screen-header,
-#foodScreen > .food-main-tabs{
-  flex:0 0 auto;
-}
-
-/* Modal isolation */
-.modal,
-.theme-modal,
-.exercise-modal,
-.date-modal,
-.confirm-modal,
-.workout-detail-modal,
-.manual-workout-modal,
-.achievements-modal,
-.food-modal,
-.catalog-modal,
-.technique-modal{
-  position:fixed;
-  inset:0;
-  z-index:200;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow-y:auto;
-  background:var(--modal-overlay);
-}
-
-.theme-modal-content,
-.exercise-modal-content,
-.date-modal-content,
-.confirm-modal-content,
-.workout-detail-content,
-.manual-workout-content,
-.achievements-content,
-.food-modal-content,
-.catalog-modal-content,
-.technique-modal-content{
-  position:relative;
-  max-height:85dvh;
-  overflow-y:auto;
-}
-
-.close-btn,
-.modal-close-btn{
-  position:absolute;
-  top:12px;
-  right:16px;
-  font-size:24px;
-  z-index:100;
-}
-
-/* Technique media */
-#techniqueModal .exercise-unified-media,
-#techniqueModal .exercise-media-gallery{
-  display:block;
-  width:100%;
-}
-
-#techniqueModal .exercise-media-view,
-#techniqueModal .exercise-photo,
-#techniqueModal .exercise-animation,
-#techniqueModal .exercise-media-view img,
-#techniqueModal .exercise-media-view video,
-#techniqueModal .tech-phase img{
-  display:block;
-  width:100%;
-  max-height:54dvh;
-  object-fit:contain;
-}
-</style>
 
 </body>
 </html>
