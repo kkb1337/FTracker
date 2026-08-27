@@ -62,13 +62,13 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 
 .comparison { margin-top: 12px; font-size: 15px; }
 .comparison .positive { color: var(--positive); } .comparison .negative { color: var(--negative); }
-.theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
+.theme-toggle-btn { position: absolute; top: 20px; right: 20px; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
 #deleteConfirmModal { z-index: 1000 !important; }
 #deleteConfirmModal .confirm-modal-content { position: relative; z-index: 1001; }
-.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: 47px; padding-bottom: 34px; box-sizing: border-box; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal, .technique-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 200; overflow-y: auto; background: var(--modal-overlay); }
 .theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
-.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
+.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content, .technique-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; position: relative; padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
 .close-btn, .modal-close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--subtext); cursor: pointer; background: none; border: none; }
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; background: var(--input-bg); color: var(--subtext); cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 15px; }
@@ -134,7 +134,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .field-label { display: block; font-size: 12px; color: var(--subtext); margin: 6px 0 2px; }
 
 /* --- Refined charts / body parameters UI --- */
-.chart-modal-content { width: min(94%, 560px); max-width: 560px; max-height: 88vh; padding: 20px; border-radius: 24px; }
+.chart-modal-content { width: min(94%, 560px); max-width: 560px; max-height:85vh; padding: 20px; border-radius: 24px; }
 .chart-modal-header { display:flex; align-items:center; gap:12px; padding-right:28px; margin-bottom:18px; }
 .chart-modal-icon { width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); font-size:22px; }
 .chart-modal-title { font-size:21px; font-weight:800; }
@@ -189,7 +189,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .body-history-values { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
 .body-history-value { background:var(--card-bg); border-radius:9px; padding:5px 8px; font-size:12px; color:var(--text); }
 .body-history-comparison { margin-top:9px; padding-top:9px; border-top:1px solid var(--border); }
-.measurement-manager-modal-content { width:min(92%,480px); max-height:82vh; }
+.measurement-manager-modal-content { width:min(92%,480px); max-height:85vh; }
 .measurement-manager-list { display:grid; gap:7px; margin:12px 0; }
 .measurement-manager-row { display:flex; align-items:center; gap:8px; background:var(--input-bg); border-radius:13px; padding:8px; }
 .measurement-manager-row-name { flex:1; min-width:0; font-weight:600; font-size:14px; }
@@ -213,7 +213,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .progress-filter button{flex:0 0 auto;width:auto;margin:0;padding:9px 12px;font-size:13px;background:var(--input-bg);color:var(--subtext)}
 .progress-filter button.active{background:var(--accent-gradient);color:#fff}
 .body-graph-btn{width:auto;margin:0;padding:8px 10px;font-size:13px}
-.body-graph-modal-content{width:min(94%,560px);max-height:88vh}
+.body-graph-modal-content{width:min(94%,560px);max-height:85vh}
 .body-graph-chart{height:210px;background:var(--input-bg);border-radius:15px;padding:0;margin-top:12px;position:relative;overflow:hidden}
 .body-graph-chart canvas{width:100%;height:100%;display:block}
 .summary-record{background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.25);border-radius:13px;padding:10px;margin-top:7px}
@@ -380,11 +380,11 @@ html,body{
   overscroll-behavior:none;
 }
 #homeScreen{
-  position:relative;
   height:100vh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
+  position:relative;
 }
 #programList{
   flex:1;
@@ -579,7 +579,7 @@ body { padding-top: env(safe-area-inset-top); }
 .progress-ex-change{margin-top:10px;border-top:1px solid var(--border)}.progress-ex-change-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}.progress-ex-change-row:last-child{border-bottom:0}.progress-ex-positive{color:var(--positive);font-weight:850}.progress-ex-negative{color:#ff453a;font-weight:850}.progress-ex-neutral{color:var(--subtext);font-weight:700}
 .progress-ex-chart{height:205px;margin-top:10px;border-radius:14px;background:var(--input-bg);padding:5px;box-sizing:border-box}.progress-ex-chart canvas{width:100%;height:100%}
 .progress-ex-history{display:grid;gap:6px;margin-top:10px}.progress-ex-history-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 11px;background:var(--input-bg);border-radius:12px;font-size:13px}.progress-ex-history-date{font-weight:750}.progress-ex-history-value{text-align:right;font-weight:800}.progress-ex-history-value small{display:block;color:var(--subtext);font-weight:500;margin-top:2px}
-.exercise-modal-content{width:min(92%,520px)!important;max-height:86vh!important;padding:18px!important}.exercise-modal-title{padding-right:28px!important;font-size:20px!important}.exercise-modal-content .tabs{gap:6px;margin:14px 0!important;padding:4px;background:var(--input-bg);border-radius:14px}.exercise-modal-content .tabs .tab{padding:10px 6px!important;border-radius:10px!important;font-size:12px!important}.exercise-modal-content .best-result{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;text-align:left!important}.exercise-modal-content .best-item{background:var(--input-bg);border-radius:13px;padding:11px}.exercise-modal-content .best-value{font-size:19px!important}.exercise-modal-content .best-label{font-size:11px!important;line-height:1.25}.exercise-modal-content .history-item{padding:11px 0!important}.exercise-modal-content .graph-container{height:220px!important;background:var(--input-bg);border-radius:14px;padding:5px;box-sizing:border-box}
+.exercise-modal-content{width:min(92%,520px)!important;max-height:85vh!important;padding:18px!important}.exercise-modal-title{padding-right:28px!important;font-size:20px!important}.exercise-modal-content .tabs{gap:6px;margin:14px 0!important;padding:4px;background:var(--input-bg);border-radius:14px}.exercise-modal-content .tabs .tab{padding:10px 6px!important;border-radius:10px!important;font-size:12px!important}.exercise-modal-content .best-result{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;text-align:left!important}.exercise-modal-content .best-item{background:var(--input-bg);border-radius:13px;padding:11px}.exercise-modal-content .best-value{font-size:19px!important}.exercise-modal-content .best-label{font-size:11px!important;line-height:1.25}.exercise-modal-content .history-item{padding:11px 0!important}.exercise-modal-content .graph-container{height:220px!important;background:var(--input-bg);border-radius:14px;padding:5px;box-sizing:border-box}
 @media(max-width:420px){.progress-ex-title{font-size:22px}.progress-ex-metric-value{font-size:15px}.progress-ex-chart{height:190px}.progress-ex-selected-meta{display:none}.workout-analytics-title{font-size:13px}}
 
 /* v67 header alignment only: safe area + stable header layout */
@@ -708,7 +708,7 @@ body { padding-top: env(safe-area-inset-top); }
 #bodyScreen .body-empty-title{font-size:19px;font-weight:850}
 #bodyScreen .body-empty-sub{font-size:12px;color:var(--subtext);margin:5px auto 14px;max-width:300px;line-height:1.4}
 #measurementHistoryModal{z-index:450!important}
-#measurementHistoryModal .body-history-modal-content{width:min(94%,560px);max-height:88vh;padding:20px;border-radius:22px}
+#measurementHistoryModal .body-history-modal-content{width:min(94%,560px);max-height:85vh;padding:20px;border-radius:22px}
 #measurementHistoryModal .body-history-modal-title{font-size:21px;font-weight:900}
 #measurementHistoryModal .body-history-modal-sub{color:var(--subtext);font-size:12px;margin-top:3px}
 #measurementHistoryModal .body-history-modal-head{padding-right:26px;margin-bottom:12px}
@@ -860,7 +860,7 @@ body { padding-top: env(safe-area-inset-top); }
 
 
 
-.replace-exercise-sheet{max-height:88vh!important;overflow:hidden!important;padding:22px 18px 16px!important;}
+.replace-exercise-sheet{max-height:85vh!important;overflow:hidden!important;padding:22px 18px 16px!important;}
 .replace-sheet-title{font-size:23px;font-weight:850;letter-spacing:-.4px;}
 .replace-sheet-current{margin-top:4px;color:var(--subtext);font-size:14px;font-weight:650;}
 .replace-search-wrap{position:relative;margin:18px 0 12px;}
@@ -1081,7 +1081,7 @@ body { padding-top: env(safe-area-inset-top); }
 /* ===== Мышцы и техника v3: модальная карточка, статичные фазы ===== */
 .technique-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--modal-overlay);display:flex;align-items:center;justify-content:center;z-index:200;}
 .technique-modal.hidden{display:none;}
-.technique-modal-content{background:var(--card-bg);border-radius:20px;padding:20px;width:calc(100% - 32px);max-width:520px;max-height:86vh;overflow-y:auto;position:relative;-webkit-overflow-scrolling:touch;}
+.technique-modal-content{background:var(--card-bg);border-radius:20px;padding:20px;width:calc(100% - 32px);max-width:520px;max-height:85vh;overflow-y:auto;position:relative;-webkit-overflow-scrolling:touch;}
 .technique-modal-sub{font-size:13px;font-weight:700;color:var(--button-green);margin:-12px 0 14px;}
 /* Кликабельное название упражнения в тренировке */
 .workout-exercise-title{cursor:pointer;}
@@ -1374,7 +1374,7 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 #workoutScreen .workout-bottom-action.next-action{background:#22252f!important;border:1px solid #3a3f50!important;color:#fff!important;}
 #workoutScreen .workout-bottom-action:active{transform:scale(.965)!important;}
 #replaceExerciseModal .replace-exercise-sheet{
-  display:flex!important;flex-direction:column!important;max-height:88vh!important;overflow:hidden!important;
+  display:flex!important;flex-direction:column!important;max-height:85vh!important;overflow:hidden!important;
   position:relative!important;z-index:1!important;
 }
 #replaceExerciseModal .replace-exercise-list{
@@ -1594,7 +1594,7 @@ input,select{border:1px solid var(--border)!important;background:var(--input-bg)
 #workoutScreen .workout-bottom-action:active{transform:scale(.965)!important;}
 /* All modal/list surfaces share one geometry. */
 .exercise-modal,.catalog-modal,.theme-modal,.confirm-modal,.date-modal,.food-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal{padding:16px!important;}
-.exercise-modal-content,.catalog-modal-content,.theme-modal-content,.confirm-modal-content,.date-modal-content,.food-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{width:min(100%,540px)!important;max-width:540px!important;max-height:88vh!important;padding:18px!important;border-radius:22px!important;background:var(--card-bg)!important;border:1px solid var(--border)!important;overflow:auto!important;}
+.exercise-modal-content,.catalog-modal-content,.theme-modal-content,.confirm-modal-content,.date-modal-content,.food-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{width:min(100%,540px)!important;max-width:540px!important;max-height:85vh!important;padding:18px!important;border-radius:22px!important;background:var(--card-bg)!important;border:1px solid var(--border)!important;overflow:auto!important;}
 .replace-exercise-sheet{display:flex!important;flex-direction:column!important;min-height:0!important;}
 .replace-exercise-list{min-height:120px!important;max-height:46vh!important;overflow-y:auto!important;overscroll-behavior:contain!important;display:grid!important;gap:7px!important;}
 .replace-exercise-option{width:100%!important;min-height:54px!important;margin:0!important;padding:10px 12px!important;border-radius:13px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--text)!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto 24px!important;gap:8px!important;align-items:center!important;text-align:left!important;pointer-events:auto!important;}
@@ -2368,7 +2368,7 @@ body.light-mode{
 
 
 /* v44: clean, touch-safe modal/picker surfaces */
-.catalog-modal-content,.workout-new-exercise-sheet{width:min(92vw,520px)!important;max-width:520px!important;max-height:86vh!important;overflow-y:auto!important;overscroll-behavior:contain!important;border-radius:24px!important;padding:20px!important;box-sizing:border-box!important;}
+.catalog-modal-content,.workout-new-exercise-sheet{width:min(92vw,520px)!important;max-width:520px!important;max-height:85vh!important;overflow-y:auto!important;overscroll-behavior:contain!important;border-radius:24px!important;padding:20px!important;box-sizing:border-box!important;}
 .catalog-modal-content input,.catalog-modal-content select,.workout-new-exercise-sheet input,.workout-new-exercise-sheet select{width:100%!important;box-sizing:border-box!important;min-height:50px!important;border-radius:14px!important;margin:6px 0 12px!important;font-size:16px!important;}
 .catalog-modal-content .field-label,.workout-new-exercise-sheet .field-label{display:block!important;margin-top:8px!important;font-size:13px!important;font-weight:800!important;color:var(--subtext)!important;}
 .catalog-modal-content button,.workout-new-exercise-sheet button{width:100%!important;min-height:52px!important;border-radius:15px!important;margin-top:8px!important;font-size:16px!important;font-weight:800!important;}
@@ -2412,7 +2412,7 @@ body.light-mode{
 
 /* Manual exercise cards use the same card shell as built-in exercises. */
 #techniqueModal{z-index:6000!important;}
-#techniqueModal .technique-modal-content{width:min(92vw,520px)!important;max-height:88vh!important;overflow-y:auto!important;background:var(--card-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:24px!important;padding:20px!important;box-sizing:border-box!important;box-shadow:0 24px 80px rgba(0,0,0,.42)!important;}
+#techniqueModal .technique-modal-content{width:min(92vw,520px)!important;max-height:85vh!important;overflow-y:auto!important;background:var(--card-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:24px!important;padding:20px!important;box-sizing:border-box!important;box-shadow:0 24px 80px rgba(0,0,0,.42)!important;}
 #techniqueModal .technique-title{font-size:23px!important;font-weight:900!important;line-height:1.12!important;padding-right:38px!important;overflow-wrap:anywhere!important;margin:0!important;}
 #techniqueModal .technique-group{margin-top:5px!important;color:var(--button-green)!important;font-size:15px!important;font-weight:850!important;}
 #techniqueModal .technique-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;padding:4px!important;background:var(--input-bg)!important;border-radius:16px!important;margin:16px 0!important;}
@@ -3212,6 +3212,7 @@ body.light-mode{
   box-shadow:0 -10px 22px rgba(0,0,0,.22)!important;
 }
 
+/* Close button remains in the header and cannot overlap the title. */
 
 /* Don't allow legacy manual-editor styles to affect the unified editor. */
 #techniqueModal .exercise-editor-unified .manual-editor-tabs,
@@ -3315,17 +3316,6 @@ body.light-mode{
 }
 
 /* Keep close button clickable and inside the modal header. */
-#techniqueModal .exercise-editor-unified > .modal-close-btn{
-  position:absolute!important;
-  top:12px!important;
-  right:12px!important;
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  z-index:200!important;
-  pointer-events:auto!important;
-  touch-action:manipulation!important;
-}
 
 /* No media loading should create another scroll box. */
 #techniqueModal .exercise-editor-built-list,
@@ -3656,24 +3646,6 @@ body.light-mode{
   color:var(--button-green)!important;
   font-size:12px!important;
   font-weight:800!important;
-}
-#techniqueModal .exercise-card-close{
-  position:relative!important;
-  inset:auto!important;
-  flex:0 0 38px!important;
-  width:38px!important;
-  height:38px!important;
-  min-width:38px!important;
-  border-radius:12px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:rgba(255,255,255,.06)!important;
-  border:1px solid rgba(255,255,255,.10)!important;
-  color:var(--text)!important;
-  font-size:26px!important;
-  line-height:1!important;
-  z-index:20!important;
 }
 #techniqueModal .exercise-card-tabs{
   margin:0 16px 14px!important;
@@ -4967,11 +4939,6 @@ body.light-mode{
   min-height:42px!important;height:auto!important;margin-top:7px!important;padding:9px 11px!important;
   border-radius:11px!important;font-size:13px!important;line-height:1.2!important;font-weight:700!important;
 }
-.confirm-modal-content .close-btn,.date-modal-content .close-btn,.catalog-modal-content .close-btn,.food-modal-content .close-btn,.manual-workout-content .close-btn,.achievements-content .close-btn,.workout-detail-content .close-btn,.theme-modal-content .close-btn,.exercise-modal-content .modal-close-btn{
-  width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
-  border-radius:10px!important;
-  background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--subtext)!important;
-}
 .confirm-modal-content [style*="font-size:22px"],.confirm-modal-content [style*="font-size:21px"],.confirm-modal-content [style*="font-size:20px"],
 .date-modal-content [style*="font-size:22px"],.date-modal-content [style*="font-size:21px"],.date-modal-content [style*="font-size:20px"],
 .catalog-modal-content [style*="font-size:22px"],.catalog-modal-content [style*="font-size:21px"],.catalog-modal-content [style*="font-size:20px"],
@@ -5462,15 +5429,12 @@ input[type="checkbox"],
   top:calc(var(--safe-top) + 60px) !important;
 }
 
+
 /* Workout keeps its dedicated sport header + horizontal exercise carousel. */
 #workoutScreen{
   gap:0 !important;
 }
 
-#workoutScreen .workout-topbar{
-  padding:8px 0 10px;
-  margin-bottom:8px;
-}
 
 #workoutScreen .exercise-strip{
   display:flex !important;
@@ -5624,18 +5588,9 @@ body{
 #workoutScreen .workout-topbar{right:auto;left:auto;max-width:100%;overflow:hidden}
 #workoutScreen .exercise-strip{scrollbar-width:none!important}
 /* Prevent narrow white scrollbar tracks on iOS/Yandex and nested panes. */
-.modal-open,.layer-locked{overflow:hidden!important}
-
-body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 
 /* FTracker v1.0.4 — targeted navigation/header/modal polish */
-.theme-modal,.exercise-modal,.date-modal,.confirm-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.food-modal,.catalog-modal,.technique-modal{padding-top:calc(var(--safe-top) + 8px)!important;padding-bottom:calc(var(--safe-bottom) + 8px)!important;}
 .toast{top:auto!important;bottom:calc(var(--safe-bottom) + 18px)!important;left:50%!important;width:min(calc(100vw - 28px),360px)!important;max-width:360px!important;transform:translateX(-50%)!important;z-index:6000!important;}
-.modal-universal-close{position:absolute!important;top:8px!important;right:10px!important;width:38px!important;height:38px!important;min-width:38px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:12px!important;background:transparent!important;color:var(--subtext)!important;font-size:26px!important;line-height:1!important;}
-
-/* Unified modal close-button standard */
-.close-btn, .modal-close-btn { position:absolute; top:12px; right:16px; font-size:24px; }
-
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5713,7 +5668,9 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 
 
 
-
+<style id="deep-modal-navigation-fix">
+.catalog-modal-content{position:relative!important;}
+</style>
 </head>
 <body>
 <div class="safe-area"><div class="container" id="app">
@@ -6205,7 +6162,7 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 
 
 <div id="exercisePickerModal" class="date-modal hidden" onclick="if(event.target===this)closeExercisePicker()">
-  <div class="date-modal-content" style="max-height:86vh;display:flex;flex-direction:column;">
+  <div class="date-modal-content" style="max-height:85vh;display:flex;flex-direction:column;">
     <span class="close-btn" onclick="closeExercisePicker()">&times;</span>
     <div id="exercisePickerTitle" style="font-size:20px;font-weight:800;margin-bottom:5px;padding-right:30px;">Добавить упражнение</div>
     <div style="font-size:13px;color:var(--subtext);margin-bottom:10px;">Выбери упражнение из справочника или воспользуйся поиском.</div>
@@ -6214,7 +6171,7 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
   </div>
 </div>
 <div id="progressExercisePickerModal" class="date-modal hidden" onclick="if(event.target===this)closeProgressExercisePicker()">
-  <div class="date-modal-content" style="max-height:82vh;display:flex;flex-direction:column;">
+  <div class="date-modal-content" style="max-height:85vh;display:flex;flex-direction:column;">
     <span class="close-btn" onclick="closeProgressExercisePicker()">&times;</span>
     <div style="font-size:20px;font-weight:700;margin-bottom:5px;">Упражнения с прогрессом</div>
     <div style="font-size:13px;color:var(--subtext);margin-bottom:12px;">Выбери упражнение, по которому уже есть сохранённые данные.</div>
@@ -6223,7 +6180,7 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
   </div>
 </div>
 <div id="exerciseOrderModal" class="date-modal hidden" onclick="if(event.target===this)closeExerciseOrderModal()">
-  <div class="date-modal-content" style="max-height:82vh;display:flex;flex-direction:column;">
+  <div class="date-modal-content" style="max-height:85vh;display:flex;flex-direction:column;">
     <span class="close-btn" onclick="closeExerciseOrderModal()">&times;</span>
     <div id="exerciseOrderTitle" style="font-size:20px;font-weight:700;margin-bottom:5px;">Порядок упражнений</div>
     <div style="font-size:13px;color:var(--subtext);margin-bottom:12px;">Для каждого упражнения выбери новую позицию. Изменения применятся только после «Сохранить порядок».</div>
@@ -9728,8 +9685,8 @@ let __lastModalTrigger = null;
 const __modalSelector = '.theme-modal,.confirm-modal,.exercise-modal,.date-modal,.catalog-modal,.technique-modal,.food-modal,.manual-workout-modal,.achievements-modal,.workout-detail-modal';
 const __historyModalIds=new Set(['chartModal','bodyGraphModal','measurementManagerModal','measurementFieldModal','measurementHistoryModal','progressExercisePickerModal','exercisePickerModal','exerciseOrderModal']);
 let __historyModalClosing=false;
-function __openModal(id){ const m=document.getElementById(id); if(!m)return null; __lastModalTrigger=document.activeElement; m.classList.remove('hidden'); document.body.classList.add('modal-open'); m.setAttribute('aria-modal','true'); m.setAttribute('role','dialog'); if(__historyModalIds.has(id)&&history.state?.modalId!==id) history.pushState({...(history.state||{}),modalId:id},''); requestAnimationFrame(()=>m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus()); return m; }
-function __closeModal(id,fromPopstate=false){ const m=document.getElementById(id); if(!m)return; if(__historyModalIds.has(id)&&!fromPopstate&&history.state?.modalId===id){ __historyModalClosing=true; history.back(); return; } m.classList.add('hidden'); if(!document.querySelector(__modalSelector.split(',').map(x=>x.trim()+':not(.hidden)').join(','))) document.body.classList.remove('modal-open'); __lastModalTrigger?.focus?.(); __lastModalTrigger=null; }
+function __openModal(id){ const m=document.getElementById(id); if(!m)return null; __lastModalTrigger=document.activeElement; m.classList.remove('hidden'); document.body.classList.add('modal-open'); document.body.style.overflow = 'hidden'; m.setAttribute('aria-modal','true'); m.setAttribute('role','dialog'); if(__historyModalIds.has(id)&&history.state?.modalId!==id) history.pushState({...(history.state||{}),modalId:id},''); requestAnimationFrame(()=>m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus()); return m; }
+function __closeModal(id,fromPopstate=false){ const m=document.getElementById(id); if(!m)return; if(__historyModalIds.has(id)&&!fromPopstate&&history.state?.modalId===id){ __historyModalClosing=true; history.back(); return; } m.classList.add('hidden'); if(!document.querySelector(__modalSelector.split(',').map(x=>x.trim()+':not(.hidden)').join(','))) document.body.classList.remove('modal-open'); document.body.style.overflow = ''; __lastModalTrigger?.focus?.(); __lastModalTrigger=null; }
 window.addEventListener('popstate',()=>{ const open=[...__historyModalIds].find(id=>{const m=document.getElementById(id);return m&&!m.classList.contains('hidden');}); if(open){ __historyModalClosing=false; __closeModal(open,true); } });
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return; const m=[...document.querySelectorAll(__modalSelector)].find(x=>!x.classList.contains('hidden')); if(m){ e.preventDefault(); const b=m.querySelector('.close-btn,.modal-close-btn,[aria-label*=Закрыть],[data-close-modal]'); if(b) b.click(); else __closeModal(m.id); }});
 function openChartModal() {
