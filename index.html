@@ -13169,5 +13169,42 @@ body {
 
 
 
+
+<style id="v62-window-manager-fix">
+/* v62: active layer owns scrolling */
+body.modal-open, body.layer-locked { overflow:hidden !important; }
+[data-modal], .modal-layer, .food-modal, .exercise-modal, .catalog-modal, .workout-detail-modal { overscroll-behavior:contain; }
+.active-window-layer { z-index:9999 !important; pointer-events:auto !important; }
+.background-locked { pointer-events:none !important; overflow:hidden !important; }
+</style>
+<script id="v62-window-manager-fix">
+(function(){
+  const stack=[];
+  window.FTrackerWindowManager={
+    open(el, opener){
+      if(!el) return;
+      const current=document.querySelector('.active-window-layer');
+      if(current && current!==el){ current.classList.remove('active-window-layer'); current.classList.add('background-locked'); }
+      stack.push({el:el, opener:opener||document.activeElement, scroll:window.scrollY});
+      el.classList.add('active-window-layer');
+      document.body.classList.add('layer-locked');
+      el.querySelector('[autofocus],button,input,textarea')?.focus?.();
+    },
+    close(el){
+      if(el) el.classList.remove('active-window-layer');
+      const item=stack.pop();
+      const prev=stack[stack.length-1];
+      if(prev && prev.el){ prev.el.classList.remove('background-locked'); prev.el.classList.add('active-window-layer'); prev.opener?.focus?.(); }
+      else { document.body.classList.remove('layer-locked'); item?.opener?.focus?.(); }
+    }
+  };
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      const active=document.querySelector('.active-window-layer');
+      if(active) window.FTrackerWindowManager.close(active);
+    }
+  });
+})();
+</script>
 </body>
 </html>

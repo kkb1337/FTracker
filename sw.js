@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v61-window-layer-fix';
+const CACHE_VERSION = 'ftracker-v62-window-manager-audit';
 const APP_SHELL = [
   './',
   './index.html',
