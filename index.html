@@ -6985,11 +6985,98 @@ function loadData() {
     renderHome(); checkDraft(); checkExportReminder();
 }
 
-function saveData(showError=true) {
+/* ---------- Automatic safety backups ----------
+   Manual Import / Export remains completely unchanged.
+   This is an internal rolling backup only: it never opens a system save dialog.
+   The backup is written to a separate IndexedDB store after a successful data save.
+*/
+const AUTO_BACKUP_DB = 'FTrackerAutoBackupV1';
+const AUTO_BACKUP_STORE = 'snapshots';
+const AUTO_BACKUP_LIMIT = 5;
+let autoBackupDbPromise = null;
+let autoBackupTimer = null;
+
+function openAutoBackupDB(){
+  if(autoBackupDbPromise) return autoBackupDbPromise;
+  autoBackupDbPromise = new Promise((resolve,reject)=>{
+    if(!window.indexedDB) return reject(new Error('IndexedDB unavailable'));
+    const r = indexedDB.open(AUTO_BACKUP_DB,1);
+    r.onupgradeneeded = () => {
+      if(!r.result.objectStoreNames.contains(AUTO_BACKUP_STORE)){
+        const store = r.result.createObjectStore(AUTO_BACKUP_STORE,{keyPath:'id',autoIncrement:true});
+        store.createIndex('createdAt','createdAt',{unique:false});
+      }
+    };
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+  return autoBackupDbPromise;
+}
+
+async function createAutoBackup(reason='Изменение данных'){
+  try{
+    const db = await openAutoBackupDB();
+    const snapshot = JSON.parse(JSON.stringify(data));
+    await new Promise((resolve,reject)=>{
+      const tx = db.transaction(AUTO_BACKUP_STORE,'readwrite');
+      tx.objectStore(AUTO_BACKUP_STORE).add({
+        createdAt:Date.now(),
+        reason:String(reason||'Изменение данных'),
+        data:snapshot
+      });
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+      tx.onabort=()=>reject(tx.error||new Error('Auto backup transaction aborted'));
+    });
+
+    const rows = await new Promise((resolve,reject)=>{
+      const tx=db.transaction(AUTO_BACKUP_STORE,'readonly');
+      const req=tx.objectStore(AUTO_BACKUP_STORE).index('createdAt').getAll();
+      req.onsuccess=()=>resolve(req.result||[]);
+      req.onerror=()=>reject(req.error);
+    });
+    rows.sort((a,b)=>b.createdAt-a.createdAt);
+    if(rows.length>AUTO_BACKUP_LIMIT){
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction(AUTO_BACKUP_STORE,'readwrite');
+        const store=tx.objectStore(AUTO_BACKUP_STORE);
+        rows.slice(AUTO_BACKUP_LIMIT).forEach(row=>store.delete(row.id));
+        tx.oncomplete=resolve;
+        tx.onerror=()=>reject(tx.error);
+      });
+    }
+  }catch(e){
+    /* Automatic backup must never break or interrupt the main save. */
+    console.warn('FTracker automatic backup skipped:',e);
+  }
+}
+
+function scheduleAutoBackup(reason='Изменение данных'){
+  clearTimeout(autoBackupTimer);
+  autoBackupTimer=setTimeout(()=>{
+    autoBackupTimer=null;
+    createAutoBackup(reason);
+  },800);
+}
+
+window.getAutoBackups=async function(){
+  try{
+    const db=await openAutoBackupDB();
+    return await new Promise((resolve,reject)=>{
+      const tx=db.transaction(AUTO_BACKUP_STORE,'readonly');
+      const req=tx.objectStore(AUTO_BACKUP_STORE).index('createdAt').getAll();
+      req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>b.createdAt-a.createdAt));
+      req.onerror=()=>reject(req.error);
+    });
+  }catch(e){ return []; }
+};
+
+function saveData(showError=true, autoBackupReason='Изменение данных') {
   try {
     try { data = migrateFTrackerState(data); } catch(migrationError) { console.warn('FTracker save migration skipped',migrationError); }
     const serialized = JSON.stringify(data);
     localStorage.setItem(STORAGE_KEY, serialized);
+    scheduleAutoBackup(autoBackupReason);
     return true;
   } catch(e) {
     if(showError) showToast('Ошибка сохранения');
@@ -8134,7 +8221,7 @@ function saveMeasurementFieldEditor() {
 
     if (editingMeasurementFieldIndex !== null && fields[editingMeasurementFieldIndex]) {
         fields[editingMeasurementFieldIndex].label = cleanLabel;
-        saveData();
+        saveData(true, 'Изменение параметров замеров');
         closeMeasurementFieldEditor();
         renderMeasurementFieldManager();
         renderMeasurementScreen();
@@ -8306,7 +8393,7 @@ function confirmSaveMeasurements() {
         showToast('Новый замер сохранён');
     }
 
-    saveData();
+    saveData(true, pendingMeasurementEditIndex !== null ? 'Изменение замера' : 'Добавление замера');
     pendingMeasurementSave = null;
     pendingMeasurementEditIndex = null;
     document.getElementById('measurementSaveConfirmModal').classList.add('hidden');
@@ -9008,7 +9095,7 @@ function finishWorkout() {
         }).filter(x => x && x.sets.length)
     };
     data.history.push(newHistoryEntry);
-    saveData(); clearDraft(); workoutTransientExercises=[]; currentProgram = null;
+    saveData(true, 'Завершение тренировки'); clearDraft(); workoutTransientExercises=[]; currentProgram = null;
     showWorkoutSummary(newHistoryEntry);
 
     } catch(err) {
@@ -10756,7 +10843,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.10', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.0.11', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
