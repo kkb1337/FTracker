@@ -68,7 +68,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 #deleteConfirmModal .confirm-modal-content { position: relative; z-index: 1001; }
 .theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal, .technique-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 200; overflow-y: auto; background: var(--modal-overlay); }
 .theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
-.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content, .technique-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; position: relative; padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
+.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content, .technique-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; position: relative; margin-top: env(safe-area-inset-top, 20px); margin-bottom: env(safe-area-inset-bottom, 20px); padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
 .close-btn, .modal-close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--subtext); cursor: pointer; background: none; border: none; }
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; background: var(--input-bg); color: var(--subtext); cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 15px; }
@@ -380,108 +380,22 @@ html,body{
   overscroll-behavior:none;
 }
 #homeScreen{
-  height:100vh;
+  height:100dvh;
   display:flex;
   flex-direction:column;
   overflow:hidden;
   position:relative;
+  padding-top:env(safe-area-inset-top, 20px);
+  padding-bottom:env(safe-area-inset-bottom, 20px);
 }
 #programList{
   flex:1;
   overflow-y:auto;
+  min-height:0;
 }
 .screen-header{
   padding-top:8px!important;
 }
-
-/* v1.0.6 isolated screen and modal structure */
-#homeScreen{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  position:relative;
-}
-#programList{
-  flex:1;
-  overflow-y:auto;
-  min-height:0;
-}
-.theme-toggle-btn{
-  position:absolute;
-  top:20px;
-  right:20px;
-}
-
-#app > div[id$="Screen"]{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  min-height:0;
-}
-#app > div[id$="Screen"] > .screen-header{flex:0 0 auto;}
-#progressContent,
-#measurementForm,
-#exerciseContainer,
-#programsEditor,
-#exerciseDirectoryContent,
-#historyList{
-  flex:1;
-  min-height:0;
-  overflow-y:auto;
-}
-#exerciseDirectoryScreen > .directory-tabs,
-#exerciseDirectoryScreen > #directoryActiveActions,
-#historyScreen > .screen-header,
-#foodScreen > .screen-header,
-#foodScreen > .food-main-tabs{flex:0 0 auto;}
-#foodScreen > .tab-content{flex:1;min-height:0;overflow-y:auto;}
-#confirmScreen > .centered-card{flex:1;min-height:0;overflow-y:auto;}
-
-.theme-modal,
-.exercise-modal,
-.date-modal,
-.confirm-modal,
-.workout-detail-modal,
-.manual-workout-modal,
-.achievements-modal,
-.food-modal,
-.catalog-modal,
-.technique-modal{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:200;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:var(--modal-overlay);
-}
-.theme-modal-content,
-.exercise-modal-content,
-.date-modal-content,
-.confirm-modal-content,
-.workout-detail-content,
-.manual-workout-content,
-.achievements-content,
-.food-modal-content,
-.catalog-modal-content,
-.technique-modal-content{
-  position:relative;
-  max-height:85vh;
-  overflow-y:auto;
-}
-.close-btn,
-.modal-close-btn{
-  position:absolute;
-  top:12px;
-  right:16px;
-  font-size:24px;
-}
-body.modal-open{overflow:hidden;}
 
 /* v61 window layer fix */
 html, body { overscroll-behavior: none; }
@@ -491,7 +405,7 @@ html, body { overscroll-behavior: none; }
 .chart-modal-content, .history-modal-content, .modal-content { overscroll-behavior: contain; }
 .screen-header { position: relative !important; top: auto !important; }
 /* keep safe area on active app surface */
-body { padding-top: env(safe-area-inset-top); }
+body { padding-top: 0; }
 
 
 /* v67 header alignment only: safe area + stable header layout */
@@ -1885,7 +1799,7 @@ body.light-mode{
 #foodScreen .food-calorie-main>span:last-child{display:inline!important;margin:0!important;font-size:12px!important;white-space:nowrap!important;flex:0 0 auto!important;}
 /* Large exercise/detail modals start from the top so long content is readable without awkward centering. */
 #techniqueModal.technique-modal,#exerciseModal.exercise-modal,#catalogModal.catalog-modal,#chartModal.catalog-modal{align-items:flex-start!important;justify-content:center!important;padding-top:calc(env(safe-area-inset-top,0px) + 12px)!important;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;box-sizing:border-box!important;}
-#techniqueModal .technique-modal-content,#exerciseModal .exercise-modal-content,#catalogModal .catalog-modal-content,#chartModal .chart-modal-content{margin-top:0!important;}
+#techniqueModal .technique-modal-content,#exerciseModal .exercise-modal-content,#catalogModal .catalog-modal-content,#chartModal .chart-modal-content{margin-top:env(safe-area-inset-top,20px)!important;margin-bottom:env(safe-area-inset-bottom,20px)!important;}
 /* Compact structured editor rows: 1. [text], with textarea growing only as needed. */
 #techniqueModal .manual-field-card{padding:9px 10px!important;border-radius:14px!important;}
 #techniqueModal .manual-field-head{align-items:flex-start!important;gap:9px!important;}
@@ -1927,7 +1841,7 @@ body.light-mode{
 .screen-header .title.section-title{min-width:0!important;width:100%!important;}
 /* All large sheets start near the safe top and scroll inside their own content. */
 .technique-modal,.exercise-modal,.catalog-modal,.food-modal,.confirm-modal,.date-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal{align-items:flex-start!important;padding-top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;}
-.technique-modal-content,.exercise-modal-content,.catalog-modal-content,.food-modal-content,.confirm-modal-content,.date-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{margin-top:0!important;}
+.technique-modal-content,.exercise-modal-content,.catalog-modal-content,.food-modal-content,.confirm-modal-content,.date-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{margin-top:env(safe-area-inset-top,20px)!important;margin-bottom:env(safe-area-inset-bottom,20px)!important;}
 /* Compact, elegant confirmation/event sheets. */
 .confirm-modal-content{width:min(92%,360px)!important;max-width:360px!important;padding:18px!important;border-radius:18px!important;}
 .confirm-modal-content button{min-height:44px!important;margin-top:7px!important;border-radius:13px!important;}
@@ -2280,7 +2194,7 @@ body.light-mode{
 
 /* Keep the modal itself scrollable; Save remains visible at the bottom while scrolling. */
 #techniqueModal .technique-modal-content.exercise-editor-unified{
-  max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
   overflow-y:auto!important;
   overscroll-behavior:contain!important;
   -webkit-overflow-scrolling:touch!important;
@@ -5235,7 +5149,7 @@ body {
   position:relative !important;
   width:100% !important;
   max-width:600px !important;
-  min-height:100vh !important;
+  min-height:100dvh !important;
   min-height:100dvh !important;
   height:auto !important;
   overflow:visible !important;
@@ -14595,5 +14509,56 @@ window.closeImportConfirm=function(){
   new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
+<style id="ftracker-v1.0.8-viewport-geometry">
+/* FTracker v1.0.8 — viewport geometry normalization */
+#homeScreen{
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+  padding-top:env(safe-area-inset-top, 20px);
+  padding-bottom:env(safe-area-inset-bottom, 20px);
+  box-sizing:border-box;
+}
+#programList{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+}
+.theme-modal,
+.exercise-modal,
+.date-modal,
+.confirm-modal,
+.workout-detail-modal,
+.manual-workout-modal,
+.achievements-modal,
+.food-modal,
+.catalog-modal,
+.technique-modal{
+  position:fixed!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  z-index:200!important;
+  background:var(--modal-overlay)!important;
+}
+.theme-modal-content,
+.exercise-modal-content,
+.date-modal-content,
+.confirm-modal-content,
+.workout-detail-content,
+.manual-workout-content,
+.achievements-content,
+.food-modal-content,
+.catalog-modal-content,
+.technique-modal-content{
+  position:relative!important;
+  max-height:85dvh!important;
+  overflow-y:auto!important;
+}
+</style>
+
 </body>
 </html>
