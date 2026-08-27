@@ -5671,6 +5671,60 @@ body{
   box-sizing: border-box !important;
 }
 
+
+/* FTracker Modal Stack: one active scrolling surface at a time. */
+.modal-stack-root {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  overscroll-behavior: contain !important;
+}
+.modal-stack-root.hidden { display: none !important; }
+.modal-stack-root > .theme-modal-content,
+.modal-stack-root > .exercise-modal-content,
+.modal-stack-root > .date-modal-content,
+.modal-stack-root > .confirm-modal-content,
+.modal-stack-root > .workout-detail-content,
+.modal-stack-root > .manual-workout-content,
+.modal-stack-root > .achievements-content,
+.modal-stack-root > .food-modal-content,
+.modal-stack-root > .catalog-modal-content,
+.modal-stack-root > .measurement-modal-content,
+.modal-stack-root > .chart-modal-content,
+.modal-stack-root > .technique-modal-content,
+.modal-stack-root > .modal-content,
+.modal-stack-root > [class*="modal"][class*="content"] {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 500px;
+}
+.modal-stack-root .modal-close-btn,
+.modal-stack-root .close-btn {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+}
+.modal-stack-root.is-stack-inactive {
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+.modal-stack-root.is-stack-active {
+  pointer-events: auto !important;
+}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5984,7 +6038,6 @@ body{
 </div>
 <div id="confirmExitModal" class="confirm-modal hidden" onclick="if(event.target === this) closeConfirmExit()">
     <div class="confirm-modal-content">
-        <span class="close-btn" onclick="closeConfirmExit()">&times;</span>
         <div style="font-size:20px; font-weight:600; margin-bottom:16px;">Завершить тренировку?</div>
         <button onclick="finishWorkout()">💾 Сохранить</button>
         <button onclick="exitWorkoutWithoutSaving()" class="gray">🚫 Выйти без сохранения</button>
@@ -5993,7 +6046,6 @@ body{
 </div>
 <div id="finishWorkoutConfirmModal" class="confirm-modal hidden" onclick="if(event.target === this) closeFinishWorkoutConfirm()">
     <div class="confirm-modal-content finish-workout-confirm-content">
-        <span class="close-btn" onclick="closeFinishWorkoutConfirm()">&times;</span>
         <div class="finish-confirm-icon">✓</div>
         <div class="finish-confirm-title">Завершить тренировку?</div>
         <div class="finish-confirm-text">Сохранить выполненные подходы и перейти к результатам тренировки?</div>
@@ -6005,7 +6057,6 @@ body{
 </div>
 <div id="importConfirmModal" class="confirm-modal hidden" onclick="if(event.target === this) closeImportConfirm()">
     <div class="confirm-modal-content">
-        <span class="close-btn" onclick="closeImportConfirm()">&times;</span>
         <div style="font-size:20px; font-weight:600; margin-bottom:16px;">Импортировать данные?</div>
         <div style="color:var(--subtext); margin-bottom:16px;">Текущие данные не удаляются. История, замеры и питание добавляются без дублей; сохранённые сплиты и продукты при совпадении восстанавливаются из бэкапа, а прежние варианты сохраняются в журнале конфликтов.</div>
         <button onclick="confirmImport()">✅ Импортировать</button>
@@ -6166,7 +6217,6 @@ body{
 </div>
 <div id="foodCopyConfirmModal" class="confirm-modal hidden" onclick="if(event.target===this) closeFoodCopyConfirm()">
     <div class="confirm-modal-content">
-        <span class="close-btn" onclick="closeFoodCopyConfirm()">&times;</span>
         <div style="font-size:20px;font-weight:700;margin-bottom:8px;">Скопировать данные дня?</div>
         <div id="foodCopyConfirmText" style="color:var(--subtext);margin-bottom:16px;"></div>
         <button onclick="confirmFoodCopy()">📋 Скопировать</button>
@@ -6175,7 +6225,6 @@ body{
 </div>
 <div id="measurementSaveConfirmModal" class="confirm-modal hidden" onclick="if(event.target===this) closeMeasurementSaveConfirm()">
     <div class="confirm-modal-content">
-        <span class="close-btn" onclick="closeMeasurementSaveConfirm()">&times;</span>
         <div style="font-size:20px;font-weight:700;margin-bottom:8px;">Сохранить замер?</div>
         <div id="measurementSaveConfirmText" style="color:var(--subtext);margin-bottom:16px;"></div>
         <button onclick="confirmSaveMeasurements()">💾 Сохранить</button>
@@ -6396,38 +6445,163 @@ body{
 
 
 <script id="ftracker-app">
-function lockModalScroll(){
+/* ================================================================
+   FTracker Modal Stack
+   Only the top modal may receive pointer/touch/scroll input.
+   ================================================================ */
+const modalStack = [];
+let modalBodyScrollY = 0;
+let modalStackInitialized = false;
+
+function isModalElement(el) {
+  if (!(el instanceof Element)) return false;
+  if (el.id && /Modal$/i.test(el.id)) return true;
+  return !!el.className && typeof el.className === 'string' && el.className.split(/\s+/).some(token => /(?:^|-)modal$/i.test(token));
+}
+
+function getModalRoots() {
+  return Array.from(document.body.children).filter(isModalElement);
+}
+
+function lockModalBody() {
+  if (!modalStackInitialized) {
+    modalBodyScrollY = window.scrollY || window.pageYOffset || 0;
+    modalStackInitialized = true;
+  }
   document.body.style.position = 'fixed';
   document.body.style.width = '100%';
   document.body.style.overflow = 'hidden';
 }
-function syncModalScroll(){
-  const roots = document.body.children;
-  let open = false;
-  for (const el of roots) {
-    if (el === document.querySelector('script#ftracker-app')) continue;
-    const cls = el.classList;
-    if (!cls) continue;
-    const isModalRoot =
-      cls.contains('theme-modal') || cls.contains('exercise-modal') ||
-      cls.contains('date-modal') || cls.contains('confirm-modal') ||
-      cls.contains('workout-detail-modal') || cls.contains('manual-workout-modal') ||
-      cls.contains('achievements-modal') || cls.contains('food-modal') ||
-      cls.contains('catalog-modal') || cls.contains('technique-modal');
-    if (isModalRoot && !cls.contains('hidden')) { open = true; break; }
-  }
-  if (!open) {
-    document.body.style.position = '';
-    document.body.style.width = '';
-    document.body.style.overflow = '';
-  } else {
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.overflow = 'hidden';
-  }
+
+function unlockModalBody() {
+  document.body.style.position = '';
+  document.body.style.width = '';
+  document.body.style.overflow = '';
+  const y = modalBodyScrollY;
+  modalBodyScrollY = 0;
+  modalStackInitialized = false;
+  if (y) window.scrollTo(0, y);
 }
-const modalScrollObserver = new MutationObserver(syncModalScroll);
-modalScrollObserver.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class']});
+
+function updateModalStackState() {
+  const top = modalStack[modalStack.length - 1] || null;
+  modalStack.forEach((modal, index) => {
+    modal.style.zIndex = String(1000 + (index + 1) * 10);
+  });
+  getModalRoots().forEach(modal => {
+    const isOpen = !modal.classList.contains('hidden');
+    modal.classList.toggle('modal-stack-root', true);
+    modal.classList.toggle('is-stack-active', isOpen && modal === top);
+    modal.classList.toggle('is-stack-inactive', isOpen && modal !== top);
+    if (isOpen && modal !== top) {
+      modal.style.pointerEvents = 'none';
+      modal.style.overflow = 'hidden';
+    } else if (isOpen && modal === top) {
+      modal.style.pointerEvents = 'auto';
+      modal.style.overflow = 'hidden';
+      modal.style.overscrollBehavior = 'contain';
+    } else {
+      modal.style.pointerEvents = '';
+      modal.style.overflow = '';
+      modal.style.overscrollBehavior = '';
+    }
+  });
+
+  if (top) lockModalBody();
+  else unlockModalBody();
+}
+
+function openModal(modalElement) {
+  if (!modalElement) return null;
+  if (!(modalElement instanceof Element)) return null;
+
+  const existingIndex = modalStack.indexOf(modalElement);
+  if (existingIndex !== -1) modalStack.splice(existingIndex, 1);
+  modalStack.push(modalElement);
+
+  modalElement.classList.add('modal-stack-root');
+  modalElement.classList.remove('hidden');
+  modalElement.setAttribute('aria-hidden', 'false');
+  modalElement.style.zIndex = String(1000 + modalStack.length * 10);
+
+  lockModalBody();
+  updateModalStackState();
+  return modalElement;
+}
+
+function closeModal() {
+  const modalElement = modalStack.pop();
+  if (modalElement) {
+    modalElement.classList.add('hidden');
+    modalElement.setAttribute('aria-hidden', 'true');
+    modalElement.style.pointerEvents = '';
+    modalElement.style.overflow = '';
+    modalElement.style.overscrollBehavior = '';
+  }
+
+  const top = modalStack[modalStack.length - 1] || null;
+  modalStack.forEach((modal, index) => {
+    modal.style.zIndex = String(1000 + (index + 1) * 10);
+  });
+  updateModalStackState();
+  return modalElement || null;
+}
+
+function removeClosedModalFromStack(modal) {
+  const index = modalStack.indexOf(modal);
+  if (index === -1) return;
+  modalStack.splice(index, 1);
+  modal.style.pointerEvents = '';
+  modal.style.overflow = '';
+  modal.style.overscrollBehavior = '';
+  modal.classList.remove('is-stack-active', 'is-stack-inactive');
+  modal.style.zIndex = '';
+}
+
+/* Existing application open/close functions still toggle .hidden directly.
+   This observer makes those calls use the same centralized stack. */
+const modalStackObserver = new MutationObserver(mutations => {
+  let changed = false;
+  for (const mutation of mutations) {
+    const modal = mutation.target;
+    if (!isModalElement(modal)) continue;
+    if (modal.classList.contains('hidden')) {
+      if (modalStack.includes(modal)) {
+        removeClosedModalFromStack(modal);
+        changed = true;
+      }
+    } else if (!modalStack.includes(modal)) {
+      modalStack.push(modal);
+      modal.setAttribute('aria-hidden', 'false');
+      changed = true;
+    }
+  }
+  if (changed) updateModalStackState();
+});
+
+function initModalStack() {
+  getModalRoots().forEach(modal => {
+    modal.classList.add('modal-stack-root');
+    if (!modal.classList.contains('hidden') && !modalStack.includes(modal)) modalStack.push(modal);
+  });
+  updateModalStackState();
+  modalStackObserver.observe(document.body, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class']
+  });
+}
+
+function lockModalScroll(){
+  if (modalStack.length) updateModalStackState();
+  else lockModalBody();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initModalStack, { once: true });
+} else {
+  initModalStack();
+}
 
 
 const STORAGE_KEY = 'ftracker_v23';
@@ -13331,10 +13505,10 @@ let v66PendingProgramAdd=null;
 function ensureProgramAddConfirm(){
   let m=$('v66ProgramAddConfirm'); if(m)return m;
   m=document.createElement('div');m.id='v66ProgramAddConfirm';m.className='confirm-modal hidden';
-  m.innerHTML='<div class="confirm-modal-content"><span class="close-btn" id="v66ProgramAddClose">&times;</span><div style="font-size:20px;font-weight:700;margin-bottom:10px;">Добавить упражнение?</div><div id="v66ProgramAddText" style="color:var(--subtext);margin-bottom:16px;"></div><button type="button" id="v66ProgramAddYes">Да, добавить</button><button type="button" class="gray" id="v66ProgramAddNo">Нет</button></div>';
+  m.innerHTML='<div class="confirm-modal-content"><div style="font-size:20px;font-weight:700;margin-bottom:10px;">Добавить упражнение?</div><div id="v66ProgramAddText" style="color:var(--subtext);margin-bottom:16px;"></div><button type="button" id="v66ProgramAddYes">Да, добавить</button><button type="button" class="gray" id="v66ProgramAddNo">Нет</button></div>';
   document.body.appendChild(m);
   const close=()=>{m.classList.add('hidden');v66PendingProgramAdd=null;};
-  $('v66ProgramAddClose').onclick=close;$('v66ProgramAddNo').onclick=close;m.onclick=e=>{if(e.target===m)close();};
+  $('v66ProgramAddNo').onclick=close;m.onclick=e=>{if(e.target===m)close();};
   $('v66ProgramAddYes').onclick=()=>{const x=v66PendingProgramAdd;if(!x)return;close();window.__v66CommitProgramAdd(x.progIdx,x.name,x.type);};
   return m;
 }
@@ -13439,7 +13613,6 @@ const foodList=$('foodPresetList');if(foodList&&!foodList.dataset.v66Bound){food
         m=document.createElement('div');
         m.id='systemConfirmModal';m.className='confirm-modal hidden';
         m.innerHTML=`<div class="confirm-modal-content system-confirm-content">
-          <button type="button" class="close-btn system-confirm-close" aria-label="Закрыть">×</button>
           <div class="system-confirm-title"></div>
           <div class="system-confirm-text"></div>
           <div class="system-confirm-actions">
@@ -13452,7 +13625,6 @@ const foodList=$('foodPresetList');if(foodList&&!foodList.dataset.v66Bound){food
       const finish=value=>{m.classList.add('hidden');resolve(value);};
       m.querySelector('.system-confirm-title').textContent=title;
       m.querySelector('.system-confirm-text').textContent=message;
-      m.querySelector('.system-confirm-close').onclick=()=>finish(false);
       m.querySelector('.system-confirm-no').onclick=()=>finish(false);
       m.querySelector('.system-confirm-yes').onclick=()=>finish(true);
       m.onclick=e=>{if(e.target===m)finish(false);};
