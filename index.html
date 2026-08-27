@@ -5725,6 +5725,20 @@ body{
 .modal-stack-root.is-stack-active {
   pointer-events: auto !important;
 }
+
+
+/* FTracker v1.0.7 — unified modal close controls and stack surface */
+.home-title-clickable{cursor:pointer;user-select:none;display:inline-flex!important;align-items:center;justify-content:center;gap:7px;}
+.home-title-clickable:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:8px;}
+.home-title-gear{font-size:.72em;line-height:1;opacity:.82;}
+.modal-stack-root{position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;overflow:hidden!important;overscroll-behavior:contain!important;}
+.modal-stack-root.hidden{display:none!important;}
+.modal-stack-root>.modal-stack-content{position:relative!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;box-sizing:border-box!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 28px)!important;width:100%!important;}
+.modal-stack-root.is-stack-inactive{pointer-events:none!important;overflow:hidden!important;}
+.modal-stack-root.is-stack-active{pointer-events:auto!important;}
+.modal-stack-root .modal-close-btn,.modal-stack-root .close-btn{position:absolute!important;top:10px!important;right:10px!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:10px!important;box-sizing:border-box!important;font-size:22px!important;line-height:1!important;z-index:20!important;}
+.modal-stack-root .modal-stack-auto-close{background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--subtext)!important;}
+
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5806,8 +5820,7 @@ body{
 <div class="safe-area"><div class="container" id="app">
     <!-- Экраны -->
     <div id="homeScreen">
-        <div class="theme-toggle-btn" onclick="openThemeModal()" title="Выбор темы">⚙️</div>
-        <div class="title">FTracker</div>
+        <div class="title home-title-clickable" onclick="openThemeModal()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openThemeModal()" title="Настройки FTracker">FTracker <span class="home-title-gear" aria-hidden="true">⚙️</span></div>
         
         <div id="draftBanner" class="card hidden" style="background: var(--accent-gradient); color:#fff; text-align:center; cursor:pointer;" onclick="resumeDraft()">У вас есть незавершённая тренировка.<br>Нажмите, чтобы продолжить.</div>
         <div id="exportReminder" class="card hidden" style="background: var(--accent-gradient); color:#fff; text-align:center;">
@@ -6446,21 +6459,65 @@ body{
 
 <script id="ftracker-app">
 /* ================================================================
-   FTracker Modal Stack
-   Only the top modal may receive pointer/touch/scroll input.
+   FTracker Modal Stack v1.0.7
+   One centralized stack: only the top modal can scroll/interact.
    ================================================================ */
 const modalStack = [];
 let modalBodyScrollY = 0;
 let modalStackInitialized = false;
+let modalStackObserverStarted = false;
 
 function isModalElement(el) {
   if (!(el instanceof Element)) return false;
   if (el.id && /Modal$/i.test(el.id)) return true;
-  return !!el.className && typeof el.className === 'string' && el.className.split(/\s+/).some(token => /(?:^|-)modal$/i.test(token));
+  const cls = typeof el.className === 'string' ? el.className : '';
+  return /(?:^|\s)[\w-]*modal(?:\s|$)/i.test(cls) || /(?:^|\s)technique-modal(?:\s|$)/i.test(cls);
 }
 
 function getModalRoots() {
   return Array.from(document.body.children).filter(isModalElement);
+}
+
+function isConfirmationModal(modal) {
+  if (!modal) return false;
+  const id = String(modal.id || '');
+  const cls = typeof modal.className === 'string' ? modal.className : '';
+  return /confirm/i.test(id) || /(?:^|\s)confirm-modal(?:\s|$)/i.test(cls);
+}
+
+function getModalContent(modal) {
+  if (!modal) return null;
+  return modal.firstElementChild || null;
+}
+
+function ensureModalCloseButton(modal) {
+  if (!modal || isConfirmationModal(modal)) return;
+  const content = getModalContent(modal);
+  if (!content) return;
+  if (content.querySelector('.modal-close-btn, .close-btn')) return;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'modal-close-btn modal-stack-auto-close';
+  button.setAttribute('aria-label', 'Закрыть');
+  button.textContent = '×';
+  button.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeModal();
+  });
+  content.appendChild(button);
+}
+
+function prepareModalRoot(modal) {
+  if (!modal) return;
+  modal.classList.add('modal-stack-root');
+  modal.setAttribute('aria-modal', 'true');
+  const content = getModalContent(modal);
+  if (content) {
+    content.classList.add('modal-stack-content');
+  }
+  ensureModalCloseButton(modal);
 }
 
 function lockModalBody() {
@@ -6484,26 +6541,37 @@ function unlockModalBody() {
 }
 
 function updateModalStackState() {
-  const top = modalStack[modalStack.length - 1] || null;
-  modalStack.forEach((modal, index) => {
-    modal.style.zIndex = String(1000 + (index + 1) * 10);
+  const openRoots = getModalRoots().filter(modal => !modal.classList.contains('hidden'));
+
+  /* Remove stale entries and preserve actual opening order. */
+  for (let i = modalStack.length - 1; i >= 0; i--) {
+    if (!openRoots.includes(modalStack[i])) modalStack.splice(i, 1);
+  }
+  openRoots.forEach(modal => {
+    prepareModalRoot(modal);
+    if (!modalStack.includes(modal)) modalStack.push(modal);
   });
-  getModalRoots().forEach(modal => {
-    const isOpen = !modal.classList.contains('hidden');
-    modal.classList.toggle('modal-stack-root', true);
-    modal.classList.toggle('is-stack-active', isOpen && modal === top);
-    modal.classList.toggle('is-stack-inactive', isOpen && modal !== top);
-    if (isOpen && modal !== top) {
-      modal.style.pointerEvents = 'none';
-      modal.style.overflow = 'hidden';
-    } else if (isOpen && modal === top) {
-      modal.style.pointerEvents = 'auto';
-      modal.style.overflow = 'hidden';
-      modal.style.overscrollBehavior = 'contain';
-    } else {
-      modal.style.pointerEvents = '';
-      modal.style.overflow = '';
-      modal.style.overscrollBehavior = '';
+
+  const top = modalStack[modalStack.length - 1] || null;
+
+  modalStack.forEach((modal, index) => {
+    const active = modal === top;
+    modal.style.zIndex = String(1000 + (index + 1) * 10);
+    modal.classList.toggle('is-stack-active', active);
+    modal.classList.toggle('is-stack-inactive', !active);
+    modal.style.pointerEvents = active ? 'auto' : 'none';
+    modal.style.overflow = 'hidden';
+    modal.style.overscrollBehavior = 'contain';
+
+    const content = getModalContent(modal);
+    if (content) {
+      content.style.pointerEvents = active ? 'auto' : 'none';
+      content.style.overflowY = 'auto';
+      content.style.overflowX = 'hidden';
+      content.style.overscrollBehavior = 'contain';
+      content.style.webkitOverflowScrolling = 'touch';
+      content.style.maxHeight = 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 28px)';
+      content.style.boxSizing = 'border-box';
     }
   });
 
@@ -6512,18 +6580,15 @@ function updateModalStackState() {
 }
 
 function openModal(modalElement) {
-  if (!modalElement) return null;
   if (!(modalElement instanceof Element)) return null;
+  prepareModalRoot(modalElement);
 
   const existingIndex = modalStack.indexOf(modalElement);
   if (existingIndex !== -1) modalStack.splice(existingIndex, 1);
   modalStack.push(modalElement);
 
-  modalElement.classList.add('modal-stack-root');
   modalElement.classList.remove('hidden');
   modalElement.setAttribute('aria-hidden', 'false');
-  modalElement.style.zIndex = String(1000 + modalStack.length * 10);
-
   lockModalBody();
   updateModalStackState();
   return modalElement;
@@ -6531,49 +6596,56 @@ function openModal(modalElement) {
 
 function closeModal() {
   const modalElement = modalStack.pop();
-  if (modalElement) {
-    modalElement.classList.add('hidden');
-    modalElement.setAttribute('aria-hidden', 'true');
-    modalElement.style.pointerEvents = '';
-    modalElement.style.overflow = '';
-    modalElement.style.overscrollBehavior = '';
+  if (!modalElement) {
+    updateModalStackState();
+    return null;
   }
 
-  const top = modalStack[modalStack.length - 1] || null;
-  modalStack.forEach((modal, index) => {
-    modal.style.zIndex = String(1000 + (index + 1) * 10);
-  });
+  modalElement.classList.add('hidden');
+  modalElement.setAttribute('aria-hidden', 'true');
+  modalElement.classList.remove('is-stack-active', 'is-stack-inactive');
+  modalElement.style.pointerEvents = '';
+  modalElement.style.overflow = '';
+  modalElement.style.overscrollBehavior = '';
+  modalElement.style.zIndex = '';
+
   updateModalStackState();
-  return modalElement || null;
+  return modalElement;
 }
 
-function removeClosedModalFromStack(modal) {
-  const index = modalStack.indexOf(modal);
-  if (index === -1) return;
+function closeModalElement(modalElement) {
+  if (!(modalElement instanceof Element)) return null;
+  const index = modalStack.indexOf(modalElement);
+  if (index === -1) {
+    modalElement.classList.add('hidden');
+    updateModalStackState();
+    return modalElement;
+  }
+  if (index === modalStack.length - 1) return closeModal();
   modalStack.splice(index, 1);
-  modal.style.pointerEvents = '';
-  modal.style.overflow = '';
-  modal.style.overscrollBehavior = '';
-  modal.classList.remove('is-stack-active', 'is-stack-inactive');
-  modal.style.zIndex = '';
+  modalElement.classList.add('hidden');
+  updateModalStackState();
+  return modalElement;
 }
 
-/* Existing application open/close functions still toggle .hidden directly.
-   This observer makes those calls use the same centralized stack. */
 const modalStackObserver = new MutationObserver(mutations => {
   let changed = false;
   for (const mutation of mutations) {
-    const modal = mutation.target;
-    if (!isModalElement(modal)) continue;
-    if (modal.classList.contains('hidden')) {
-      if (modalStack.includes(modal)) {
-        removeClosedModalFromStack(modal);
+    const target = mutation.target;
+    if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') continue;
+
+    if (isModalElement(target)) {
+      const wasOpen = modalStack.includes(target);
+      const isOpen = !target.classList.contains('hidden');
+      if (isOpen && !wasOpen) {
+        prepareModalRoot(target);
+        modalStack.push(target);
+        target.setAttribute('aria-hidden', 'false');
+        changed = true;
+      } else if (!isOpen && wasOpen) {
+        modalStack.splice(modalStack.indexOf(target), 1);
         changed = true;
       }
-    } else if (!modalStack.includes(modal)) {
-      modalStack.push(modal);
-      modal.setAttribute('aria-hidden', 'false');
-      changed = true;
     }
   }
   if (changed) updateModalStackState();
@@ -6581,20 +6653,22 @@ const modalStackObserver = new MutationObserver(mutations => {
 
 function initModalStack() {
   getModalRoots().forEach(modal => {
-    modal.classList.add('modal-stack-root');
+    prepareModalRoot(modal);
     if (!modal.classList.contains('hidden') && !modalStack.includes(modal)) modalStack.push(modal);
   });
   updateModalStackState();
-  modalStackObserver.observe(document.body, {
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['class']
-  });
+  if (!modalStackObserverStarted) {
+    modalStackObserverStarted = true;
+    modalStackObserver.observe(document.body, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
 }
 
-function lockModalScroll(){
-  if (modalStack.length) updateModalStackState();
-  else lockModalBody();
+function lockModalScroll() {
+  updateModalStackState();
 }
 
 if (document.readyState === 'loading') {
