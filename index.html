@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>FTracker</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -5186,9 +5186,7 @@ body {
   max-height:100% !important;
   box-sizing:border-box !important;
 }
-@media (display-mode:standalone){
-  html, body, #app { height:auto !important; min-height:100% !important; }
-}
+
 
 /* v67 header alignment only: safe area + stable header layout */
 .screen-header {
@@ -7818,6 +7816,7 @@ function renderMeasurementHistory() {
 }
 
 function openHistoricalMeasurementEdit(index) {
+    closeBodyHistory();
     const measurement = data.measurements[index];
     if (!measurement) return;
     const fields = getMeasurementFields();
@@ -10367,7 +10366,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.12', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.0.10', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -14495,17 +14494,31 @@ window.closeImportConfirm=function(){
     const content=root.querySelector(':scope > .theme-modal-content,:scope > .exercise-modal-content,:scope > .date-modal-content,:scope > .confirm-modal-content,:scope > .workout-detail-content,:scope > .manual-workout-content,:scope > .achievements-content,:scope > .food-modal-content,:scope > .catalog-modal-content,:scope > .technique-modal-content')||root.firstElementChild;
     if(root.classList.contains('confirm-modal'))return;
     if(!content||content.querySelector('.close-btn,.modal-close-btn,[data-close-modal],[aria-label="Закрыть"]'))return;
-    // Do not inject synthetic close buttons. Each modal keeps its own explicit close control.
-    return;
+    const b=document.createElement('button'); b.type='button'; b.className='modal-universal-close'; b.textContent='×'; b.setAttribute('aria-label','Закрыть');
+    b.onclick=function(){const fn=closeById[root.id];if(fn&&typeof window[fn]==='function'){window[fn]();return;}root.classList.add('hidden');if(!document.querySelector(modalSelector.split(',').map(x=>x+':not(.hidden)').join(',')))document.body.classList.remove('modal-open');};
+    content.appendChild(b);
   }
+  let lockedScrollY=0;
   function syncLock(){
     const anyOpen=document.querySelector(modalSelector.split(',').map(x=>x+':not(.hidden)').join(','));
     if(anyOpen){
+      if(!document.body.classList.contains('modal-open')) lockedScrollY=window.scrollY||window.pageYOffset||0;
       document.body.classList.add('modal-open');
+      document.body.style.position='fixed';
+      document.body.style.top=`-${lockedScrollY}px`;
+      document.body.style.left='0';
+      document.body.style.right='0';
+      document.body.style.width='100%';
       document.body.style.overflow='hidden';
     }else{
       document.body.classList.remove('modal-open');
+      document.body.style.position='';
+      document.body.style.top='';
+      document.body.style.left='';
+      document.body.style.right='';
+      document.body.style.width='';
       document.body.style.overflow='';
+      window.scrollTo(0,lockedScrollY);
     }
   }
   function scan(){document.querySelectorAll(modalSelector).forEach(ensure);syncLock();}
@@ -14639,136 +14652,100 @@ body.modal-open{overflow:hidden!important;}
 </style>
 
 
-<style id="ftracker-v1.0.10-modal-scroll-home-fix">
-/* v1.0.10: confirmation screen header must not remain behind the confirmation card */
-#confirmScreen .screen-header{display:none!important;}
-#confirmScreen{box-sizing:border-box;padding:24px 16px!important;}
-#confirmScreen .centered-card{width:min(100%,760px)!important;margin:40px auto 0!important;box-sizing:border-box!important;text-align:center!important;}
-#confirmScreen #confirmTitle{width:100%;text-align:center;}
+<style id="ftracker-v1.0.10-ios-pwa-fix">
+/* === iOS PWA / standalone viewport normalization === */
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  max-height: none;
+}
 
-/* v1.0.10: the home screen is the only fixed app surface; only its program list scrolls */
-#homeScreen{height:100dvh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;position:relative!important;box-sizing:border-box!important;padding-top:env(safe-area-inset-top,20px)!important;padding-bottom:env(safe-area-inset-bottom,20px)!important;}
-#programList{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
-#homeScreen .nav-buttons{flex:0 0 auto!important;}
+body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
 
-/* v1.0.10: modal layers own their scrolling; nested measurement editor sits above history */
-#measurementHistoryModal{position:fixed!important;inset:0!important;z-index:1000!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
-#measurementHistoryModal .body-history-modal-content{position:relative!important;max-height:85dvh!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
-#measurementFieldModal,#historicalMeasurementEditModal{position:fixed!important;inset:0!important;z-index:1100!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
-#measurementFieldModal .catalog-modal-content,#historicalMeasurementEditModal .catalog-modal-content{position:relative!important;max-height:85dvh!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
+/* Main screen is the only fixed application surface. */
+#homeScreen {
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  padding-top: env(safe-area-inset-top, 20px) !important;
+  padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+}
 
-/* v1.0.10: lock the page underneath every modal without disabling modal scrolling */
-body.modal-open{overflow:hidden!important;}
+#programList {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Modal layer owns the visible viewport and its own scroll. */
+#app [id$="Modal"]:not(.hidden),
+#app .theme-modal:not(.hidden),
+#app .exercise-modal:not(.hidden),
+#app .date-modal:not(.hidden),
+#app .confirm-modal:not(.hidden),
+#app .workout-detail-modal:not(.hidden),
+#app .manual-workout-modal:not(.hidden),
+#app .achievements-modal:not(.hidden),
+#app .food-modal:not(.hidden),
+#app .catalog-modal:not(.hidden),
+#app .technique-modal:not(.hidden) {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-top: env(safe-area-inset-top, 20px) !important;
+  padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+}
+
+/* Modal contents scroll independently. */
+.confirm-modal-content,
+.catalog-modal-content,
+.exercise-modal-content,
+.theme-modal-content,
+.date-modal-content,
+.food-modal-content,
+.workout-detail-content,
+.manual-workout-content,
+.achievements-content,
+.technique-modal-content {
+  position: relative !important;
+  max-height: 85dvh !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-sizing: border-box !important;
+}
+
+/* Safe-area-aware headers without adding a second body inset. */
+.screen-header {
+  padding-top: calc(env(safe-area-inset-top, 20px) + 8px) !important;
+  box-sizing: border-box !important;
+}
+
+/* Do not allow a modal to pass its scroll gesture to the page. */
+body.modal-open {
+  overflow: hidden !important;
+}
 </style>
 
-<style id="ftracker-v1.0.12-ui-stability">
-/* Main screen: the ONLY fixed page surface */
-#app:has(> #homeScreen:not(.hidden)){
-  height:100dvh!important;
-  min-height:100dvh!important;
-  overflow:hidden!important;
-}
-#homeScreen{
-  height:100dvh!important;
-  min-height:0!important;
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:hidden!important;
-  position:relative!important;
-  padding-top:env(safe-area-inset-top,20px)!important;
-  padding-bottom:env(safe-area-inset-bottom,20px)!important;
-  box-sizing:border-box!important;
-  flex:0 0 100dvh!important;
-}
-#programList{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior:contain!important;
-}
-
-/* Confirmation screen: no page header/back button behind the confirmation card */
-#confirmScreen .screen-header{display:none!important;}
-#confirmScreen{padding:24px 16px!important;box-sizing:border-box!important;}
-#confirmScreen .centered-card{width:min(100%,760px)!important;margin:0 auto!important;text-align:center!important;}
-#confirmScreen #confirmTitle{text-align:center!important;width:100%!important;}
-#confirmScreen .centered-card .row{width:100%!important;align-items:stretch!important;}
-#confirmScreen .centered-card .row>button{margin-top:0!important;min-height:56px!important;}
-
-/* Modal layers: modal scroll belongs to the active layer, never to the page beneath */
-.theme-modal,.exercise-modal,.date-modal,.confirm-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.food-modal,.catalog-modal,.technique-modal,[id$="Modal"]:not(.hidden){
-  position:fixed!important;
-  inset:0!important;
-  z-index:200!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:var(--modal-overlay)!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-  touch-action:pan-y!important;
-  -webkit-overflow-scrolling:touch!important;
-}
-.theme-modal-content,.exercise-modal-content,.date-modal-content,.confirm-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content,.food-modal-content,.catalog-modal-content,.technique-modal-content,.body-history-modal-content{
-  position:relative!important;
-  max-height:85dvh!important;
-  min-height:0!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-  touch-action:pan-y!important;
-  -webkit-overflow-scrolling:touch!important;
-}
-
-/* Measurement history and nested editor are separate scrolling layers */
-#measurementHistoryModal{z-index:1000!important;}
-#measurementHistoryModal .body-history-modal-content{z-index:1001!important;}
-#measurementFieldModal,#historicalMeasurementEditModal{z-index:1100!important;}
-#measurementFieldModal .catalog-modal-content,#historicalMeasurementEditModal .catalog-modal-content{z-index:1101!important;}
-
-/* Existing close buttons only — no synthetic/green close controls */
-.close-btn,.modal-close-btn{
-  position:absolute!important;
-  top:10px!important;
-  right:10px!important;
-  z-index:10000!important;
-  width:auto!important;
-  min-width:0!important;
-  min-height:0!important;
-  padding:0!important;
-  margin:0!important;
-  font-size:28px!important;
-  line-height:1!important;
-  background:transparent!important;
-  color:var(--text)!important;
-  border:0!important;
-}
-.exercise-card-unified .exercise-card-close{top:10px!important;right:10px!important;z-index:10001!important;}
-
-/* Body lock without position:fixed, which was leaving iOS standalone frozen after close */
-body.modal-open{overflow:hidden!important;touch-action:none!important;}
-body.modal-open .screen-header{display:none!important;}
-
-/* Nutrition graph: compact controls and a bounded chart */
-#chartModal .period-selector,#chartModal .data-type-selector{
-  display:flex!important;
-  flex-wrap:wrap!important;
-  align-items:center!important;
-  align-content:flex-start!important;
-  gap:8px!important;
-  width:100%!important;
-}
-#chartModal .period-selector button,#chartModal .data-type-selector button{
-  flex:1 1 120px!important;
-  height:44px!important;
-  min-height:44px!important;
-  margin:0!important;
-  box-sizing:border-box!important;
-}
-#chartModal .chart-container{width:100%!important;height:250px!important;min-height:250px!important;max-height:250px!important;overflow:hidden!important;}
-</style>
 </body>
 </html>
