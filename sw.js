@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v1.0.5-r1';
+const CACHE_VERSION = 'ftracker-v1.0.5-r2';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const STATIC_DESTINATIONS = new Set(['style','script','font','image','manifest']);

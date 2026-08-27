@@ -379,16 +379,16 @@ html,body{
   touch-action: pan-x pan-y;
   overscroll-behavior:none;
 }
-.theme-toggle-btn{
-  position:absolute!important;
-  top:8px!important;
-  right:0!important;
-  transform:none!important;
-  margin:0!important;
-  z-index:20!important;
-}
 #homeScreen{
   position:relative;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#programList{
+  flex:1;
+  overflow-y:auto;
 }
 .screen-header{
   padding-top:8px!important;
@@ -3212,19 +3212,6 @@ body.light-mode{
   box-shadow:0 -10px 22px rgba(0,0,0,.22)!important;
 }
 
-/* Close button remains in the header and cannot overlap the title. */
-#techniqueModal .exercise-editor-unified > .modal-close-btn{
-  position:absolute!important;
-  top:12px!important;
-  right:12px!important;
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  z-index:120!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-}
 
 /* Don't allow legacy manual-editor styles to affect the unified editor. */
 #techniqueModal .exercise-editor-unified .manual-editor-tabs,
@@ -4982,7 +4969,7 @@ body.light-mode{
 }
 .confirm-modal-content .close-btn,.date-modal-content .close-btn,.catalog-modal-content .close-btn,.food-modal-content .close-btn,.manual-workout-content .close-btn,.achievements-content .close-btn,.workout-detail-content .close-btn,.theme-modal-content .close-btn,.exercise-modal-content .modal-close-btn{
   width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
-  top:10px!important;right:10px!important;border-radius:10px!important;font-size:22px!important;
+  border-radius:10px!important;
   background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--subtext)!important;
 }
 .confirm-modal-content [style*="font-size:22px"],.confirm-modal-content [style*="font-size:21px"],.confirm-modal-content [style*="font-size:20px"],
@@ -5475,11 +5462,6 @@ input[type="checkbox"],
   top:calc(var(--safe-top) + 60px) !important;
 }
 
-.theme-toggle-btn{
-  top:calc(var(--safe-top) + 16px) !important;
-  right:calc(var(--safe-right) + 16px) !important;
-}
-
 /* Workout keeps its dedicated sport header + horizontal exercise carousel. */
 #workoutScreen{
   gap:0 !important;
@@ -5650,6 +5632,10 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 .theme-modal,.exercise-modal,.date-modal,.confirm-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.food-modal,.catalog-modal,.technique-modal{padding-top:calc(var(--safe-top) + 8px)!important;padding-bottom:calc(var(--safe-bottom) + 8px)!important;}
 .toast{top:auto!important;bottom:calc(var(--safe-bottom) + 18px)!important;left:50%!important;width:min(calc(100vw - 28px),360px)!important;max-width:360px!important;transform:translateX(-50%)!important;z-index:6000!important;}
 .modal-universal-close{position:absolute!important;top:8px!important;right:10px!important;width:38px!important;height:38px!important;min-width:38px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:12px!important;background:transparent!important;color:var(--subtext)!important;font-size:26px!important;line-height:1!important;}
+
+/* Unified modal close-button standard */
+.close-btn, .modal-close-btn { position:absolute; top:12px; right:16px; font-size:24px; }
+
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5966,7 +5952,6 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 </div>
 <div id="confirmExitModal" class="confirm-modal hidden" onclick="if(event.target === this) closeConfirmExit()">
     <div class="confirm-modal-content">
-        <span class="close-btn" onclick="closeConfirmExit()">&times;</span>
         <div style="font-size:20px; font-weight:600; margin-bottom:16px;">Завершить тренировку?</div>
         <button onclick="finishWorkout()">💾 Сохранить</button>
         <button onclick="exitWorkoutWithoutSaving()" class="gray">🚫 Выйти без сохранения</button>
@@ -5975,7 +5960,6 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 </div>
 <div id="finishWorkoutConfirmModal" class="confirm-modal hidden" onclick="if(event.target === this) closeFinishWorkoutConfirm()">
     <div class="confirm-modal-content finish-workout-confirm-content">
-        <span class="close-btn" onclick="closeFinishWorkoutConfirm()">&times;</span>
         <div class="finish-confirm-icon">✓</div>
         <div class="finish-confirm-title">Завершить тренировку?</div>
         <div class="finish-confirm-text">Сохранить выполненные подходы и перейти к результатам тренировки?</div>
