@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>FTracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -69,9 +69,9 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
 #deleteConfirmModal { z-index: 1000 !important; }
 #deleteConfirmModal .confirm-modal-content { position: relative; z-index: 1001; }
-.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
 .theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
-.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; }
+.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
 .close-btn, .modal-close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--subtext); cursor: pointer; background: none; border: none; }
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; background: var(--input-bg); color: var(--subtext); cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 15px; }
@@ -1911,54 +1911,6 @@ body.light-mode{
 #themeModal .theme-modal-content button:active,
 #themeModal .theme-modal-content .ftracker-import-trigger:active{
     background:var(--input-bg) !important;
-}
-</style>
-
-<style id="v63-safe-area-fix">
-/* v63 iOS Safe Area normalization */
-html, body {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-body {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.active-window-layer,
-[data-modal].active-window-layer,
-.modal-layer.active-window-layer,
-.food-modal.active-window-layer,
-.exercise-modal.active-window-layer,
-.catalog-modal.active-window-layer,
-.workout-detail-modal.active-window-layer {
-  padding-top: env(safe-area-inset-top, 20px) !important;
-  padding-bottom: env(safe-area-inset-bottom, 20px) !important;
-  box-sizing: border-box;
-}
-
-.active-window-layer[style*="top: 0"],
-.modal-layer[style*="top: 0"],
-[data-modal][style*="top: 0"] {
-  top: env(safe-area-inset-top, 20px) !important;
-}
-
-.background-locked,
-.layer-locked {
-  padding-top: 0 !important;
-}
-
-/* Do not let fixed modal headers hide below the island */
-.active-window-layer .modal-header,
-.active-window-layer .modal-topbar,
-.active-window-layer .window-header {
-  padding-top: env(safe-area-inset-top, 20px);
-}
-
-/* Keep iOS home indicator area clear */
-.active-window-layer > *:last-child {
-  padding-bottom: env(safe-area-inset-bottom, 20px);
 }
 </style>
 </head>
