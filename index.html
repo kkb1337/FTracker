@@ -5657,6 +5657,9 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 .theme-modal,.exercise-modal,.date-modal,.confirm-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.food-modal,.catalog-modal,.technique-modal{padding-top:calc(var(--safe-top) + 8px)!important;padding-bottom:calc(var(--safe-bottom) + 8px)!important;}
 .toast{top:auto!important;bottom:calc(var(--safe-bottom) + 18px)!important;left:50%!important;width:min(calc(100vw - 28px),360px)!important;max-width:360px!important;transform:translateX(-50%)!important;z-index:6000!important;}
 .modal-universal-close{position:absolute!important;top:8px!important;right:10px!important;width:38px!important;height:38px!important;min-width:38px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:12px!important;background:transparent!important;color:var(--subtext)!important;font-size:26px!important;line-height:1!important;}
+
+/* v1.0.5 universal navigation */
+[data-universal-modal-close]{box-sizing:border-box!important}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5774,15 +5777,15 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
         </div>
     </div>
     <div id="progressScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">↗</span><span>Прогресс</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">↗</span><span>Прогресс</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="progressContent"></div>
     </div>
     <div id="bodyScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">⌁</span><span>Замеры</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">⌁</span><span>Замеры</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="measurementForm"></div>
     </div>
     <div id="confirmScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▶</span><span>Подтверждение</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▶</span><span>Подтверждение</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div class="card centered-card">
             <div style="font-size:22px; font-weight:600; margin-bottom:12px;" id="confirmTitle"></div>
             <div style="color:#8e8e93; margin-bottom:20px;">Начать тренировку?</div>
@@ -5806,12 +5809,12 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
         <div id="exerciseContainer"></div>
     </div>
     <div id="settingsScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">ϟ</span><span>Программы</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">ϟ</span><span>Программы</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="programsEditor"></div>
         <button onclick="addProgram()" style="margin-top:12px;">➕ Новая программа</button>
     </div>
     <div id="exerciseDirectoryScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▤</span><span>Справочник</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▤</span><span>Справочник</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div class="directory-tabs">
             <button type="button" id="directoryActiveTab" class="directory-tab active" onclick="setDirectoryView('active')">Упражнения</button>
             <button type="button" id="directoryArchiveTab" class="directory-tab" onclick="setDirectoryView('archive')">Архив</button>
@@ -5824,12 +5827,12 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
         <div id="exerciseDirectoryContent"></div>
     </div>
     <div id="historyScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">◷</span><span>История</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">◷</span><span>История</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <button onclick="openManualWorkoutModal()" class="outline" style="margin-bottom:12px;">➕ Добавить тренировку</button>
         <div id="historyList"></div>
     </div>
     <div id="foodScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▦</span><span>Питание</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▦</span><span>Питание</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div class="tabs food-main-tabs">
             <div class="tab active" data-tab="today" onclick="switchFoodTab('today')">Сегодня</div>
             <div class="tab" data-tab="stats" onclick="switchFoodTab('stats')">Статистика</div>
@@ -6683,29 +6686,33 @@ function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EX
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
 const screenScrollPositions = Object.create(null);
+const screenHistory = [];
 function resetAppViewport(screenId){
   const screen=screenId ? document.getElementById(screenId) : null;
   if(!screen) return;
   const saved=screenScrollPositions[screenId];
   if(saved){ screen.scrollTop=saved.top||0; screen.scrollLeft=saved.left||0; }
 }
-function showScreen(id) {
-  // Close transient overlays before changing app screens.
+function getActiveScreen(){ return [...document.querySelectorAll('#app > div')].find(el=>!el.classList.contains('hidden'))||null; }
+function showScreen(id, options={}) {
   if (typeof closeBackupExportPrompt === 'function') closeBackupExportPrompt();
-  document.querySelectorAll('#app > div').forEach(el => {
-    if(!el.classList.contains('hidden')) screenScrollPositions[el.id]={top:el.scrollTop,left:el.scrollLeft};
-    el.classList.add('hidden'); el.style.pointerEvents='none';
-  });
+  const current=getActiveScreen();
+  if(current && current.id!==id){
+    screenScrollPositions[current.id]={top:current.scrollTop,left:current.scrollLeft};
+    if(options.push!==false) screenHistory.push(current.id);
+  }
+  document.querySelectorAll('#app > div').forEach(el => { el.classList.add('hidden'); el.style.pointerEvents='none'; });
   const screen=document.getElementById(id);
   if(!screen) return;
-  screen.classList.remove('hidden');
-  screen.style.pointerEvents='auto';
-  requestAnimationFrame(()=>{
-    resetAppViewport(id);
-    if(typeof window.__syncScreenHeader==='function') window.__syncScreenHeader(screen);
-  });
+  screen.classList.remove('hidden'); screen.style.pointerEvents='auto';
+  requestAnimationFrame(()=>{ resetAppViewport(id); if(typeof window.__syncScreenHeader==='function') window.__syncScreenHeader(screen); });
 }
-function goHome() { showScreen('homeScreen'); renderHome(); checkDraft(); checkExportReminder(); }
+function goBack(){
+  const previous=screenHistory.pop();
+  if(previous){ showScreen(previous,{push:false}); return; }
+  showScreen('homeScreen',{push:false}); renderHome(); checkDraft(); checkExportReminder();
+}
+function goHome() { screenHistory.length=0; showScreen('homeScreen',{push:false}); renderHome(); checkDraft(); checkExportReminder(); }
 
 function renderHome() {
     const list = document.getElementById('programList');
@@ -10434,7 +10441,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.4', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.0.5', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -14573,6 +14580,32 @@ window.closeImportConfirm=function(){
   function scan(){document.querySelectorAll(modalSelector).forEach(ensure);syncLock();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scan,{once:true});else scan();
   new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<script>
+(function(){
+  function isModal(el){ return /(^|\s)(theme-modal|exercise-modal|date-modal|confirm-modal|workout-detail-modal|manual-workout-modal|achievements-modal|food-modal|catalog-modal|chart-modal)(\s|$)/.test(el.className||''); }
+  function closeModalElement(modal){
+    const known=[['themeModal','closeThemeModal'],['chartModal','closeChartModal'],['deleteConfirmModal','closeDeleteConfirm']];
+    const match=known.find(x=>modal.id===x[0]);
+    if(match && typeof window[match[1]]==='function'){ window[match[1]](); return; }
+    modal.classList.add('hidden'); document.body.classList.remove('modal-open');
+  }
+  function ensureModalCloseButtons(){
+    document.querySelectorAll('[class*="modal"]').forEach(modal=>{
+      if(!isModal(modal) || modal.querySelector('[data-universal-modal-close]')) return;
+      const content=[...modal.children].find(c=>/content/.test(c.className||'')) || modal.firstElementChild;
+      if(!content) return;
+      const btn=document.createElement('button'); btn.type='button'; btn.setAttribute('data-universal-modal-close','1'); btn.setAttribute('aria-label','Закрыть'); btn.textContent='×';
+      btn.style.cssText='position:absolute;top:10px;right:10px;width:38px;height:38px;margin:0;padding:0;border-radius:50%;background:var(--input-bg);color:var(--text);font-size:26px;line-height:1;z-index:10';
+      btn.onclick=(e)=>{e.stopPropagation();closeModalElement(modal)}; content.appendChild(btn);
+    });
+  }
+  document.addEventListener('DOMContentLoaded',ensureModalCloseButtons);
+  new MutationObserver(ensureModalCloseButtons).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const m=[...document.querySelectorAll('[class*="modal"]')].reverse().find(x=>isModal(x)&&!x.classList.contains('hidden')); if(m){e.preventDefault();closeModalElement(m);} else if(getActiveScreen()?.id!=='homeScreen') goBack(); } });
+  document.addEventListener('click',e=>{ if(e.target===e.currentTarget){} });
 })();
 </script>
 </body>
