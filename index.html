@@ -2,16 +2,13 @@
 <!-- FTracker duplicate system rewritten as one canonical creation-time flow. -->
 <html lang="ru">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>FTracker</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <style id="ftracker-styles">
-
-body { --bg: #000; --card-bg: #1c1c1e; --text: #fff; --subtext: #8e8e93; --input-bg: #2c2c2e; --button-green: #34c759; --button-gray: #3a3a3c; --border: #2c2c2e; --positive: #34c759; --negative: #ff3b30; --toast-bg: #34c759; --toast-text: #000; --modal-overlay: rgba(0,0,0,0.7); --accent-gradient: linear-gradient(135deg, #34c759, #30d158); --accent: var(--button-green); --surface-2: var(--card-bg); padding: 0; margin: 0; background: var(--bg); color: var(--text); overscroll-behavior: none; touch-action: manipulation; }
-body.light-mode { --bg: #f2f2f7; --card-bg: #ffffff; --text: #1c1c1e; --subtext: #6e6e73; --input-bg: #e5e5ea; --button-green: #2e7d32; --button-gray: #d1d1d6; --border: #d1d1d6; --positive: #2e7d32; --negative: #c62828; --toast-bg: #2e7d32; --toast-text: #fff; --modal-overlay: rgba(0,0,0,0.4); --accent-gradient: linear-gradient(135deg, #2e7d32, #4caf50); }
 * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 .container { width:100%; max-width:600px; margin:0 auto; padding:16px; position:relative; box-sizing:border-box; }
 .card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
@@ -64,11 +61,6 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .comparison .positive { color: var(--positive); } .comparison .negative { color: var(--negative); }
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
-#deleteConfirmModal { z-index: 1000 !important; }
-#deleteConfirmModal .confirm-modal-content { z-index: 1001; }
-.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal, .technique-modal { }
-.theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { }
-.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content, .technique-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
 .close-btn, .modal-close-btn { font-size: 24px; color: var(--subtext); cursor: pointer; border: none; }
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; background: var(--input-bg); color: var(--subtext); cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 15px; }
@@ -86,9 +78,6 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .exercise-click-hint { font-size: 14px; color: var(--subtext); margin-left: 4px; cursor: pointer; }
 .split-title { font-size: 24px; font-weight: 700; color: var(--text); }
 .split-subtitle { font-size: 18px; color: var(--subtext); }
-.screen-header { position: sticky; top: 0; z-index: 100; background: var(--bg); padding: 8px 0; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.screen-header .title { margin-bottom: 0; font-size: 28px; }
-.screen-header button.gray { width: auto; padding: 10px 16px; margin: 0; }
 .food-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .food-item:last-child { border-bottom: none; }
 .food-preset-list { position: absolute; top: 100%; left: 0; width: 100%; max-height: 200px; overflow-y: auto; background: var(--card-bg); border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; margin-top: 4px; }
@@ -132,9 +121,6 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .stats-tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; background: var(--input-bg); color: var(--subtext); cursor: pointer; font-weight: 600; font-size: 15px; }
 .stats-tab.active { background: var(--accent-gradient); color: #fff; }
 .field-label { display: block; font-size: 12px; color: var(--subtext); margin: 6px 0 2px; }
-
-/* --- Refined charts / body parameters UI --- */
-.chart-modal-content { width: min(94%, 560px); max-width: 560px; max-height:85dvh; padding: 20px; border-radius: 24px; }
 .chart-modal-header { display:flex; align-items:center; gap:12px; padding-right:28px; margin-bottom:18px; }
 .chart-modal-icon { width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); font-size:22px; }
 .chart-modal-title { font-size:21px; font-weight:800; }
@@ -219,13 +205,6 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .summary-record{background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.25);border-radius:13px;padding:10px;margin-top:7px}
 .summary-improvement{font-size:13px;color:var(--subtext);margin-top:3px}.summary-program-name{font-weight:800;font-size:16px;margin-bottom:4px}.summary-overall{padding:15px}.overall-result{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}.overall-result span{color:var(--subtext)}.overall-result b{font-weight:800}.overall-diff{margin-top:11px;padding:10px 12px;border-radius:12px;font-weight:800;text-align:center}.overall-diff.positive{background:rgba(52,199,89,.12);color:var(--positive)}.overall-diff.negative{background:rgba(255,59,48,.10);color:var(--negative)}.overall-diff.same{background:var(--card-bg);color:var(--subtext)}.analysis-subtitle{font-size:12px;color:var(--subtext);line-height:1.35;margin:-2px 0 8px}.best-compare-row{padding:11px 0;border-top:1px solid var(--border)}.best-compare-name{font-weight:800;font-size:14px;margin-bottom:6px}.best-compare-values{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:12px;color:var(--subtext)}.best-compare-values span{background:var(--card-bg);border-radius:10px;padding:8px}.best-compare-values b{display:block;color:var(--text);font-size:13px;margin-top:2px}.best-compare-values em{grid-column:1/-1;font-style:normal;font-weight:800;padding-top:3px}.best-compare-values em.positive{color:var(--positive)}.best-compare-values em.negative{color:var(--negative)}.best-compare-values em.same{color:var(--subtext)}.summary-record{display:flex;justify-content:space-between;align-items:center;gap:10px}.summary-record b{color:var(--positive);font-size:13px;text-align:right}.final-insight-card .analysis-line b{color:var(--text)}
 @media(max-width:420px){.smart-summary-grid{grid-template-columns:repeat(2,1fr)}}
-
-#measurementManagerModal { z-index: 200 !important; }
-#measurementFieldModal { z-index: 300 !important; }
-#deleteConfirmModal { z-index: 1000 !important; }
-#measurementSaveConfirmModal { z-index: 1000 !important; }
-#newMeasurementModal, #editMeasurementModal, #historicalMeasurementEditModal { z-index: 400 !important; }
-#foodCopyConfirmModal { z-index: 1000 !important; }
 /* Новый CSS для графика в прогрессе */
 .progress-chart-container {
     position: relative;
@@ -261,11 +240,6 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .progress-record-name{font-weight:700;min-width:0}
 .progress-record-value{font-weight:800;color:var(--positive);white-space:nowrap}
 @media(max-width:420px){.progress-stats,.progress-metrics{grid-template-columns:repeat(2,1fr)}}
-
-/* Chart interaction fix — reliable iPhone/iOS taps */
-#chartModal .period-selector,#chartModal .data-type-selector{position:relative;z-index:20;pointer-events:auto;}
-#chartModal .period-selector button,#chartModal .data-type-selector button,#chartModal .apply-period-btn{position:relative;z-index:21;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,255,255,.08);}
-#chartModal .chart-container{position:relative;z-index:1;}
 
 /* FTracker v135 final text alignment cleanup */
 .workout-exercise-titleblock{
@@ -367,58 +341,13 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
     z-index:10;
     touch-action:manipulation;
 }
-
-
-
-
-/* Clean window system owns sticky positioning; carousel only scrolls horizontally. */
-.screen-header .exercise-strip,.screen-header .exercise-strip-container,.screen-header .exercise-carousel,#workoutScreen #exerciseStrip{position:relative!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;}
-
-/* FTracker v60 PWA safe-area/header correction */
-html,body{
-  touch-action: pan-x pan-y;
-  overscroll-behavior:none;
-}
-#homeScreen{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  position:relative;
-  padding-top:env(safe-area-inset-top, 20px);
-  padding-bottom:env(safe-area-inset-bottom, 20px);
-  box-sizing:border-box;
-}
 #programList{
   flex:1;
   overflow-y:auto;
   min-height:0;
 }
-.screen-header{
-  padding-top:8px!important;
-}
-
-/* v61 window layer fix */
-html, body { overscroll-behavior: none; }
-
-#app > div.hidden { display:none!important; }
 /* nested modal/screen containers must own their scroll */
 .chart-modal-content, .history-modal-content, .modal-content { overscroll-behavior: contain; }
-.screen-header { position: relative !important; top: auto !important; }
-/* keep safe area on active app surface */
-body { padding-top: 0; }
-
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -426,18 +355,6 @@ body { padding-top: 0; }
 .body-hero-card .measurement-summary{background:var(--input-bg);border-radius:16px;padding:6px 14px}
 .body-hero-card .measurement-item{padding:12px 0}
 .body-action-row button{min-height:46px}
-#newMeasurementModal, #editMeasurementModal{z-index:400!important}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -548,17 +465,6 @@ body { padding-top: 0; }
 .progress-v2-period button.active{background:var(--accent-gradient)!important;color:#fff!important}
 @media(max-width:420px){.progress-v2-tabs{gap:3px}.progress-v2-tab{font-size:11px!important;padding:9px 2px!important}.progress-v2-chart{height:185px}}
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
@@ -583,19 +489,7 @@ body { padding-top: 0; }
 .progress-ex-change{margin-top:10px;border-top:1px solid var(--border)}.progress-ex-change-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}.progress-ex-change-row:last-child{border-bottom:0}.progress-ex-positive{color:var(--positive);font-weight:850}.progress-ex-negative{color:#ff453a;font-weight:850}.progress-ex-neutral{color:var(--subtext);font-weight:700}
 .progress-ex-chart{height:205px;margin-top:10px;border-radius:14px;background:var(--input-bg);padding:5px;box-sizing:border-box}.progress-ex-chart canvas{width:100%;height:100%}
 .progress-ex-history{display:grid;gap:6px;margin-top:10px}.progress-ex-history-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 11px;background:var(--input-bg);border-radius:12px;font-size:13px}.progress-ex-history-date{font-weight:750}.progress-ex-history-value{text-align:right;font-weight:800}.progress-ex-history-value small{display:block;color:var(--subtext);font-weight:500;margin-top:2px}
-.exercise-modal-content{width:min(92%,520px)!important;padding:18px!important}.exercise-modal-title{padding-right:28px!important;font-size:20px!important}.exercise-modal-content .tabs{gap:6px;margin:14px 0!important;padding:4px;background:var(--input-bg);border-radius:14px}.exercise-modal-content .tabs .tab{padding:10px 6px!important;border-radius:10px!important;font-size:12px!important}.exercise-modal-content .best-result{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;text-align:left!important}.exercise-modal-content .best-item{background:var(--input-bg);border-radius:13px;padding:11px}.exercise-modal-content .best-value{font-size:19px!important}.exercise-modal-content .best-label{font-size:11px!important;line-height:1.25}.exercise-modal-content .history-item{padding:11px 0!important}.exercise-modal-content .graph-container{height:220px!important;background:var(--input-bg);border-radius:14px;padding:5px;box-sizing:border-box}
 @media(max-width:420px){.progress-ex-title{font-size:22px}.progress-ex-metric-value{font-size:15px}.progress-ex-chart{height:190px}.progress-ex-selected-meta{display:none}.workout-analytics-title{font-size:13px}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -653,8 +547,6 @@ body { padding-top: 0; }
 .progress-history-section .progress-ex-history{margin-top:11px!important}
 /* Consistent screen language for Nutrition / Measurements / Programs */
 #foodScreen,#bodyScreen,#settingsScreen{padding-bottom:20px}
-#foodScreen .screen-header,#bodyScreen .screen-header,#settingsScreen .screen-header{margin-bottom:14px}
-#foodScreen .screen-header .title,#bodyScreen .screen-header .title,#settingsScreen .screen-header .title{font-size:24px;font-weight:900;letter-spacing:-.4px}
 #foodScreen>.tabs{display:flex;gap:5px;padding:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow-x:auto}
 #foodScreen>.tabs .tab{flex:1;min-width:0;padding:10px 9px;border-radius:12px;text-align:center;font-weight:750;font-size:13px;color:var(--subtext);background:transparent;white-space:nowrap}
 #foodScreen>.tabs .tab.active{background:var(--card-bg);color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,.12)}
@@ -670,12 +562,6 @@ body { padding-top: 0; }
 #settingsScreen .inline-select{border-radius:10px!important}
 #settingsScreen #programsEditor + button,#settingsScreen>button:last-child{border-radius:14px}
 @media(max-width:420px){.progress-ex-title{font-size:22px!important}.progress-ex-period button{font-size:12px!important;padding-left:7px!important;padding-right:7px!important}.progress-single-chart{height:210px!important}.progress-chart-metric{font-size:11px!important;padding:7px 4px!important}#foodScreen>.tabs .tab{font-size:12px;padding-left:6px;padding-right:6px}}
-
-/* === Body measurements redesign === */
-#bodyScreen .body-current-card,
-#bodyScreen .body-tools-card,
-#bodyScreen .body-change-card,
-#bodyScreen .body-empty-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;box-shadow:none;margin-bottom:10px;padding:16px}
 #bodyScreen .body-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 #bodyScreen .body-section-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--subtext);font-weight:850}
 #bodyScreen .body-section-date{font-size:18px;font-weight:850;margin-top:3px}
@@ -711,29 +597,7 @@ body { padding-top: 0; }
 #bodyScreen .body-empty-icon{width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:25px}
 #bodyScreen .body-empty-title{font-size:19px;font-weight:850}
 #bodyScreen .body-empty-sub{font-size:12px;color:var(--subtext);margin:5px auto 14px;max-width:300px;line-height:1.4}
-#measurementHistoryModal{z-index:450!important}
-#measurementHistoryModal .body-history-modal-content{width:min(94%,560px);max-height:85dvh;padding:20px;border-radius:22px}
-#measurementHistoryModal .body-history-modal-title{font-size:21px;font-weight:900}
-#measurementHistoryModal .body-history-modal-sub{color:var(--subtext);font-size:12px;margin-top:3px}
-#measurementHistoryModal .body-history-modal-head{padding-right:26px;margin-bottom:12px}
-#measurementHistoryModal .body-history-item{margin-top:8px;padding:12px;border:1px solid var(--border)}
-#measurementHistoryModal .body-history-values{margin-top:9px}
-#measurementHistoryModal .body-history-value{background:var(--card-bg);border:1px solid var(--border)}
-#measurementHistoryModal .body-history-value b{margin-left:4px}
-#measurementHistoryModal .body-history-empty{color:var(--subtext);text-align:center;padding:18px 8px}
-#measurementHistoryModal>div>button:last-child{margin-top:10px}
 @media(max-width:420px){#bodyScreen .body-values-grid{grid-template-columns:1fr 1fr}#bodyScreen .body-change-list{grid-template-columns:1fr}#bodyScreen .body-tool small{font-size:9px}#bodyScreen .body-main-actions{grid-template-columns:1fr 1fr}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -760,8 +624,6 @@ body { padding-top: 0; }
 .progress-selected-exercise strong{font-size:16px}
 .progress-selected-exercise button{width:auto;margin:0;padding:8px 11px}
 .progressExercisePickerModalFix{}
-#progressExercisePickerModal .date-modal-content{z-index:201;pointer-events:auto;}
-#progressExercisePickerModal .progress-picker-list{pointer-events:auto;}
 .progress-picker-list{display:flex;flex-direction:column;gap:5px;max-height:58dvh;overflow:auto;-webkit-overflow-scrolling:touch}
 .progress-picker-row{position:relative;z-index:2;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,.08);width:100%;display:flex;align-items:center;gap:10px;background:transparent;border:0;border-radius:12px;text-align:left;margin:0;padding:12px}
 .progress-picker-row:active,.progress-picker-row.selected{background:var(--input-bg)}
@@ -774,17 +636,6 @@ body { padding-top: 0; }
 .order-position-num{width:30px;height:30px;border-radius:9px;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
 .order-position-name{flex:1;min-width:0;font-weight:650}
 .order-position-select{width:72px!important;margin:0!important;padding:8px!important}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -799,17 +650,6 @@ body { padding-top: 0; }
 .program-original-body{display:none;padding:0 15px 15px;border-top:1px solid var(--border)}
 .programs-original-card.open .program-original-body{display:block}
 .program-original-body .checkbox-label{margin-top:8px}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -830,17 +670,6 @@ body { padding-top: 0; }
 .order-position-select{font-size:15px!important}
 @media(max-width:420px){.program-action-stack{grid-template-columns:1fr}.program-delete-row{align-items:flex-start}.program-delete-btn{padding:8px 11px!important}}
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
@@ -849,17 +678,6 @@ body { padding-top: 0; }
 .exercise-graph-metrics{display:flex;gap:8px;margin-bottom:12px;}
 .exercise-graph-metric{flex:1!important;margin:0!important;padding:10px 12px!important;background:var(--input-bg)!important;color:var(--subtext)!important;border:1px solid var(--border)!important;border-radius:12px!important;font-size:14px!important;font-weight:800!important;}
 .exercise-graph-metric.active{background:var(--button-green)!important;border-color:var(--button-green)!important;color:#fff!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -895,17 +713,6 @@ body { padding-top: 0; }
 .replace-confirm-btn{margin-top:0!important;}
 @media(max-height:720px){.replace-exercise-list{max-height:34dvh;}.replace-exercise-sheet{max-height:92dvh!important;}}
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
@@ -913,35 +720,12 @@ body { padding-top: 0; }
 .workout-last-copy{min-width:0!important;flex:1!important;}
 .workout-last-value{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
 .workout-title-actions{margin-left:auto;display:inline-flex;align-items:center;gap:8px;flex:none;}
 .workout-replace-btn{width:auto!important;min-width:0!important;padding:7px 9px!important;border-radius:10px!important;background:var(--surface-2)!important;color:var(--subtext)!important;font-size:12px!important;font-weight:800!important;line-height:1!important;box-shadow:none!important;}
 .workout-replace-btn:active{transform:scale(.97);}
-#replaceExerciseModal .exercise-modal-content{}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -1026,17 +810,6 @@ body { padding-top: 0; }
   .workout-title-actions button{min-height:43px!important;font-size:12.5px!important;}
 }
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
@@ -1067,26 +840,6 @@ body { padding-top: 0; }
 #workoutScreen #exerciseStrip .exercise-dot.active{background:rgba(99,210,108,.11)!important;border-color:#62d26d!important;color:#f3f3f3!important;}
 #workoutScreen #exerciseStrip .exercise-dot.done{opacity:.72;}
 @media(max-width:390px){#workoutScreen .workout-set-row{grid-template-columns:36px minmax(0,1fr) 48px 40px!important;gap:5px!important}.workout-set-row input{font-size:16px!important}.workout-title-actions{grid-template-columns:1fr 1.25fr!important}.workout-title-actions button{padding:9px 8px!important;font-size:12px!important}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* ===== Мышцы и техника v3: модальная карточка, статичные фазы ===== */
-.technique-modal{}
-.technique-modal.hidden{}
-.technique-modal-content{background:var(--card-bg);border-radius:20px;padding:20px;width:calc(100% - 32px);max-width:520px;-webkit-overflow-scrolling:touch;}
-.technique-modal-sub{font-size:13px;font-weight:700;color:var(--button-green);margin:-12px 0 14px;}
 /* Кликабельное название упражнения в тренировке */
 .workout-exercise-title{cursor:pointer;}
 .workout-exercise-title .workout-title-hint{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-size:12px;font-weight:700;color:var(--button-green);vertical-align:middle;white-space:nowrap;}
@@ -1094,7 +847,6 @@ body { padding-top: 0; }
 .program-tech-btn{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;}
 /* Статичные кадры фаз */
 .tech-phase{border:1px solid rgba(255,255,255,.07);border-radius:14px;background:radial-gradient(120% 130% at 50% 0%,rgba(52,199,89,.07),rgba(0,0,0,.24));overflow:hidden;margin-bottom:10px;}
-body.light-mode .tech-phase{background:radial-gradient(120% 130% at 50% 0%,rgba(46,125,50,.06),#fff);border-color:var(--border);}
 .tech-phase-label{display:flex;align-items:center;gap:8px;padding:9px 12px 0;font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--subtext);}
 .tech-phase-label .num{width:18px;height:18px;border-radius:50%;background:rgba(52,199,89,.16);color:var(--button-green);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;}
 .tech-phase img{display:block;width:100%;height:auto;border-radius:0 0 13px 13px;margin-top:8px;}
@@ -1107,7 +859,6 @@ body.light-mode .tech-phase{background:radial-gradient(120% 130% at 50% 0%,rgba(
 .ex-muscle.m-primary{fill:var(--button-green);}
 .ex-muscle.m-secondary{fill:color-mix(in srgb,var(--button-green) 45%,rgba(142,142,147,.3));}
 .ex-body-base{fill:rgba(142,142,147,.13);}
-body.light-mode .ex-body-base{fill:rgba(110,110,115,.15);}
 .ex-guide-legend{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--subtext);min-width:0;}
 .ex-guide-legend b{color:var(--text);font-weight:700;}
 .ex-guide-legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:baseline;flex:none;}
@@ -1121,30 +872,6 @@ body.light-mode .ex-body-base{fill:rgba(110,110,115,.15);}
 .ex-guide-mistakes li{position:relative;padding:4px 0 4px 22px;font-size:13.5px;line-height:1.4;color:var(--subtext);}
 .ex-guide-mistakes li::before{content:'✕';position:absolute;left:2px;top:4px;color:var(--negative);font-size:11px;font-weight:900;}
 .tech-tip{margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);font-size:13.5px;line-height:1.4;}
-/* Светлая тема: воркаут-карточка была захардкожена тёмной и в light-mode текст становился нечитаемым */
-body.light-mode #workoutScreen .workout-exercise-card{background:var(--card-bg)!important;border-color:var(--border)!important;box-shadow:0 8px 20px rgba(0,0,0,.08)!important;}
-body.light-mode #workoutScreen .workout-set-row{background:var(--input-bg)!important;border-color:var(--border)!important;}
-body.light-mode #workoutScreen .workout-set-row input{background:#fff!important;color:var(--text)!important;}
-body.light-mode #workoutScreen .set-num{background:#fff!important;color:var(--subtext)!important;}
-body.light-mode #workoutScreen .set-done-btn{background:#e5e5ea!important;color:var(--text)!important;}
-body.light-mode #workoutScreen .set-done-btn.done{background:var(--button-green)!important;color:#fff!important;}
-body.light-mode #workoutScreen .set-delete-btn{background:transparent!important;}
-body.light-mode #workoutScreen .workout-last-result{background:var(--input-bg)!important;border-color:var(--border)!important;}
-body.light-mode #workoutScreen .workout-last-icon{background:#fff!important;}
-body.light-mode #workoutScreen .workout-replace-btn{background:var(--input-bg)!important;border-color:var(--border)!important;color:var(--subtext)!important;}
-body.light-mode #workoutScreen #exerciseStrip .exercise-dot{background:var(--input-bg)!important;border-color:var(--border)!important;color:var(--subtext)!important;}
-body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rgba(46,125,50,.12)!important;border-color:var(--button-green)!important;color:var(--text)!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -1173,7 +900,6 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 .directory-item-name{flex:1;min-width:0;font-size:15px;font-weight:750;line-height:1.25;overflow-wrap:anywhere;word-break:break-word;cursor:pointer;}
 .directory-edit{width:38px!important;height:38px!important;flex:none;padding:0!important;}
 .directory-search{margin-bottom:12px!important;}
-.catalog-modal-list{margin-top:10px;overflow:auto;-webkit-overflow-scrolling:touch;max-height:55dvh;}
 .catalog-choice{display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin:0 0 6px!important;padding:11px 12px!important;background:var(--card-bg)!important;border:1px solid var(--border)!important;color:var(--text)!important;border-radius:13px!important;min-height:48px!important;}
 .catalog-choice-name{flex:1;min-width:0;overflow-wrap:anywhere;word-break:break-word;font-size:15px;font-weight:700;}
 .catalog-choice-group{font-size:11px;color:var(--subtext);white-space:nowrap;}
@@ -1183,19 +909,7 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 .tech-phase-label{display:none;}
 .tech-phase img{margin-top:0;max-height:54dvh;object-fit:contain;background:transparent;}
 .tech-phase{padding:0;}
-#exerciseDirectoryScreen .screen-header .title{min-width:0;}
 @media(max-width:430px){.program-v5-actions{grid-template-columns:1fr;}.program-v5-ex{gap:6px;}.program-v5-ex-name{font-size:15px;}.directory-item-name{font-size:15px;}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -1213,17 +927,6 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 .completion-summary-main span{color:var(--subtext);font-size:13px;}
 .completion-summary-message{font-size:14px;line-height:1.4;}
 @media(max-width:430px){.directory-item{gap:4px}.directory-edit,.directory-delete{width:38px!important}.workout-recommendation{padding:11px!important}.recommendation-main{font-size:17px!important}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -1245,17 +948,6 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 .replace-create-exercise-btn{width:100%;min-height:48px;margin:8px 0;border-radius:14px;border:1px solid var(--border);background:var(--input-bg);font-weight:800}
 .workout-new-exercise-sheet{max-width:520px}
 @media(max-width:430px){#workoutScreen .workout-exercise-name-large{font-size:23px}.workout-bottom-action{min-height:138px!important}.workout-bottom-action .nav-icon{font-size:45px}.workout-bottom-action .nav-label{font-size:13px}.workout-action-grid button{font-size:13px}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -1377,19 +1069,6 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 #workoutScreen .workout-bottom-action.add-action{background:linear-gradient(135deg,#7420b7,#a42ce1)!important;color:#fff!important;}
 #workoutScreen .workout-bottom-action.next-action{background:#22252f!important;border:1px solid #3a3f50!important;color:#fff!important;}
 #workoutScreen .workout-bottom-action:active{transform:scale(.965)!important;}
-#replaceExerciseModal .replace-exercise-sheet{
-  display:flex!important;flex-direction:column!important;max-height:85dvh!important;overflow:hidden!important;
-  position:relative!important;z-index:1!important;
-}
-#replaceExerciseModal .replace-exercise-list{
-  flex:1 1 auto!important;min-height:120px!important;max-height:none!important;
-  overflow-y:auto!important;overscroll-behavior:contain!important;position:relative!important;z-index:2!important;
-  -webkit-overflow-scrolling:touch!important;
-}
-#replaceExerciseModal .replace-exercise-option{
-  position:relative!important;z-index:3!important;pointer-events:auto!important;touch-action:manipulation!important;
-}
-#replaceExerciseModal .replace-create-exercise-btn{position:static!important;z-index:1!important;flex:0 0 auto!important;}
 @media(max-width:430px){
   #workoutScreen .workout-title-wrap{text-align:left!important;}
   #workoutScreen #workoutTitle{font-size:17px!important;}
@@ -1399,38 +1078,6 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
   #workoutScreen .workout-bottom-action{height:140px!important;min-height:140px!important;}
   #workoutScreen .workout-bottom-action .nav-icon{font-size:44px!important;}
   #workoutScreen .workout-bottom-action .nav-label{font-size:13px!important;}
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* Replacement modal is a real modal layer; list rows are the only clickable choices. */
-#replaceExerciseModal{z-index:5000!important;pointer-events:auto!important;}
-#replaceExerciseModal .exercise-modal-content{z-index:5001!important;pointer-events:auto!important;}
-#replaceExerciseModal .replace-exercise-list{pointer-events:auto!important;}
-#replaceExerciseModal .replace-exercise-option{pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;}
-#replaceExerciseModal .replace-exercise-option *{pointer-events:none!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
 }
 
 
@@ -1443,45 +1090,6 @@ body.light-mode #workoutScreen #exerciseStrip .exercise-dot.active{background:rg
 #workoutScreen .workout-recommendation .recommendation-head{color:#62d26d!important;}
 #workoutScreen .workout-recommendation .recommendation-toggle{background:rgba(52,199,89,.16)!important;color:#62d26d!important;}
 #workoutScreen .workout-recommendation .recommendation-main b{color:#fff!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* FTracker v41 — one visual system. No new event delegation or legacy renderer. */
-body{
-  --bg:#0b0b0f;
-  --card-bg:#15151b;
-  --text:#f7f7fb;
-  --subtext:#a8a7b2;
-  --input-bg:#20202a;
-  --button-green:#34c759;
-  --button-gray:#272731;
-  --border:#2c2b36;
-  --positive:#34c759;
-  --negative:#ff5f67;
-  --toast-bg:#34c759;
-  --toast-text:#fff;
-  --modal-overlay:rgba(5,5,9,.78);
-  --accent-gradient:linear-gradient(135deg,#2e7d32,#55b963);
-}
-body.light-mode{
-  --bg:#f5f3f9;--card-bg:#fff;--text:#19161f;--subtext:#77717f;--input-bg:#ece9f2;
-  --button-green:#2e7d32;--button-gray:#e3e0e9;--border:#ddd8e5;--positive:#2e7d32;--negative:#d83b49;
-  --toast-bg:#2e7d32;--toast-text:#fff;--modal-overlay:rgba(25,20,35,.35);--accent-gradient:linear-gradient(135deg,#256b2b,#a55cf0);
-}
-html,body{min-height:100%;background:var(--bg);}
-body{overflow-x:hidden;}
 .container{width:min(100%,680px);padding:18px 14px 30px;margin:0 auto;}
 .card,.progress-section,.analysis-card,.body-hero-card,.body-comparison-card,.body-history-card,.timer-box,.centered-card{
   background:var(--card-bg)!important;border:1px solid var(--border)!important;border-radius:20px!important;
@@ -1492,9 +1100,6 @@ button,.tab,.stats-tab{touch-action:manipulation;-webkit-tap-highlight-color:tra
 button.gray{background:var(--button-gray)!important;color:var(--text)!important;border:1px solid var(--border)!important;}
 button.outline{background:transparent!important;color:var(--button-green)!important;border:1px solid color-mix(in srgb,var(--button-green) 55%,var(--border))!important;}
 input,select{border:1px solid var(--border)!important;background:var(--input-bg)!important;color:var(--text)!important;min-width:0;}
-.screen-header{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;position:sticky!important;top:0!important;padding:8px 0 12px!important;background:color-mix(in srgb,var(--bg) 92%,transparent)!important;backdrop-filter:blur(14px);}
-.screen-header .title{font-size:24px!important;line-height:1.1!important;margin:0!important;text-align:center!important;min-width:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.screen-header>button{width:auto!important;margin:0!important;min-height:40px!important;padding:9px 12px!important;border-radius:12px!important;}
 .tabs,.stats-tabs,.directory-tabs{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px!important;}
 .tabs .tab,.stats-tab,.directory-tab{min-width:0!important;margin:0!important;padding:11px 8px!important;border-radius:12px!important;background:var(--input-bg)!important;color:var(--subtext)!important;}
 .tabs .tab.active,.stats-tab.active,.directory-tab.active{background:var(--accent-gradient)!important;color:#fff!important;}
@@ -1596,9 +1201,6 @@ input,select{border:1px solid var(--border)!important;background:var(--input-bg)
 #workoutScreen .workout-bottom-action.add-action{background:var(--accent-gradient)!important;color:#fff!important;border-color:transparent!important;}
 #workoutScreen .workout-bottom-action.next-action{background:var(--input-bg)!important;color:var(--text)!important;}
 #workoutScreen .workout-bottom-action:active{transform:scale(.965)!important;}
-/* All modal/list surfaces share one geometry. */
-.exercise-modal,.catalog-modal,.theme-modal,.confirm-modal,.date-modal,.food-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal{}
-.exercise-modal-content,.catalog-modal-content,.theme-modal-content,.confirm-modal-content,.date-modal-content,.food-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{width:min(100%,540px)!important;max-width:540px!important;padding:18px!important;border-radius:22px!important;background:var(--card-bg)!important;border:1px solid var(--border)!important;}
 .replace-exercise-sheet{display:flex!important;flex-direction:column!important;min-height:0!important;}
 .replace-exercise-list{min-height:120px!important;max-height:46dvh!important;overflow-y:auto!important;overscroll-behavior:contain!important;display:grid!important;gap:7px!important;}
 .replace-exercise-option{width:100%!important;min-height:54px!important;margin:0!important;padding:10px 12px!important;border-radius:13px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--text)!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto 24px!important;gap:8px!important;align-items:center!important;text-align:left!important;pointer-events:auto!important;}
@@ -1609,8 +1211,6 @@ input,select{border:1px solid var(--border)!important;background:var(--input-bg)
 .replace-create-exercise-btn,.replace-confirm-btn{width:100%!important;min-height:48px!important;margin:8px 0 0!important;border-radius:14px!important;}
 .replace-create-exercise-btn{background:var(--input-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;}
 .replace-confirm-btn{background:var(--accent-gradient)!important;color:#fff!important;}
-/* Food / body / history / programs */
-#foodScreen .card,#bodyScreen .card,#historyScreen .card,#progressScreen .card,#settingsScreen .card,#exerciseDirectoryScreen .card{margin-bottom:10px!important;}
 .day-copy-btns,.body-action-row,.chart-footer,.custom-date-range{min-width:0!important;}
 .day-copy-btns{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;}
 .day-copy-btns button{margin:0!important;}
@@ -1628,35 +1228,6 @@ input,select{border:1px solid var(--border)!important;background:var(--input-bg)
   #workoutScreen .set-done-btn,#workoutScreen .set-delete-btn{width:38px!important;height:38px!important;min-width:38px!important;}
   #workoutScreen .workout-set-inputs.horizontal{gap:5px!important;}
   #workoutScreen .workout-set-inputs input{height:42px!important;font-size:14px!important;padding:0 5px!important;}
-  .screen-header .title{font-size:22px!important;}
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* v42 — final green graphite system and interaction fixes */
-body{
-  --button-green:#34c759!important;
-  --positive:#34c759!important;
-  --toast-bg:#34c759!important;
-  --accent-gradient:linear-gradient(135deg,#2e7d32,#55b963)!important;
-}
-body.light-mode{
-  --button-green:#2e7d32!important;
-  --positive:#2e7d32!important;
-  --toast-bg:#2e7d32!important;
-  --accent-gradient:linear-gradient(135deg,#256b2b,#3f9b48)!important;
 }
 #workoutScreen .workout-head{
   display:grid!important;
@@ -1754,77 +1325,18 @@ body.light-mode{
   #workoutScreen .workout-time{font-size:14px!important;}
 }
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
 /* Custom date fields are contextual: hidden for week/month/year, visible only for Custom. */
 #chartCustomDateRange.hidden{display:none!important;}
-#chartModal .period-selector{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}
-#chartModal .period-selector button{width:100%!important;min-height:46px!important;margin:0!important;border-radius:13px!important;font-weight:800!important;}
-#chartModal .custom-date-range{grid-template-columns:1fr 1fr!important;gap:8px!important;}
-@media(max-width:430px){#chartModal .period-selector button{font-size:13px!important;padding:10px 6px!important;}#chartModal .custom-date-range{grid-template-columns:1fr!important;}#chartModal .custom-date-range .apply-period-btn{grid-column:1!important;}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* Unified section headers: same naming rhythm, icon slot and geometry on every screen. */
-.screen-header .section-title{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:0!important;}
+@media(max-width:430px){}
 .section-title-icon{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);font-size:14px;font-weight:900;color:var(--accent);line-height:1;}
-.screen-header-spacer{width:96px;height:40px;display:block;visibility:hidden;pointer-events:none;flex:0 0 96px;}
 /* Calories: one compact value line, visually equal to macro cards. */
 #foodScreen .food-calorie-main{min-width:0!important;width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;text-align:left!important;padding:13px 14px!important;line-height:1!important;}
 #foodScreen .food-calorie-main .food-calorie-label{display:inline!important;margin:0!important;font-size:13px!important;flex:0 0 auto!important;}
 #foodScreen .food-calorie-main strong{font-size:20px!important;white-space:nowrap!important;margin-left:auto!important;}
 #foodScreen .food-calorie-main>span:last-child{display:inline!important;margin:0!important;font-size:12px!important;white-space:nowrap!important;flex:0 0 auto!important;}
-/* Large exercise/detail modals start from the top so long content is readable without awkward centering. */
-#techniqueModal.technique-modal,#exerciseModal.exercise-modal,#catalogModal.catalog-modal,#chartModal.catalog-modal{}
-#techniqueModal .technique-modal-content,#exerciseModal .exercise-modal-content,#catalogModal .catalog-modal-content,#chartModal .chart-modal-content{}
-/* Compact structured editor rows: 1. [text], with textarea growing only as needed. */
-#techniqueModal .manual-field-card{padding:9px 10px!important;border-radius:14px!important;}
-#techniqueModal .manual-field-head{align-items:flex-start!important;gap:9px!important;}
-#techniqueModal .manual-field-number{flex:0 0 28px!important;width:28px!important;height:28px!important;margin-top:4px!important;border-radius:9px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:13px!important;font-weight:900!important;background:rgba(102,210,102,.12)!important;color:var(--accent)!important;}
-#techniqueModal .manual-field-card textarea,#techniqueModal .manual-step-input,#techniqueModal .manual-mistake-input,#techniqueModal .manual-recommendation-input{min-height:44px!important;height:44px;max-height:none!important;padding:8px 2px!important;line-height:1.35!important;overflow:hidden!important;}
-#techniqueModal .manual-field-remove{width:32px!important;height:32px!important;min-width:32px!important;margin-top:2px!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:9px!important;}
-#techniqueModal .manual-editor-scroll{gap:8px!important;max-height:none!important;overflow:visible!important;}
-#techniqueModal .manual-editor-note{margin-bottom:9px!important;}
-/* Replacement picker controls: fixed boxes so search/check/close icons never drift. */
-#replaceExerciseModal .replace-exercise-option{grid-template-columns:minmax(0,1fr) 28px 28px!important;gap:8px!important;}
-#replaceExerciseModal .replace-option-check{width:28px!important;height:28px!important;min-width:28px!important;border-radius:9px!important;display:flex!important;align-items:center!important;justify-content:center!important;margin:0!important;}
-#replaceExerciseModal .replace-exercise-option .replace-option-check{justify-self:end!important;}
-#replaceExerciseModal .replace-exercise-option .replace-option-remove,#replaceExerciseModal .replace-exercise-option .replace-option-close{width:28px!important;height:28px!important;min-width:28px!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:9px!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -1836,104 +1348,6 @@ body.light-mode{
 #foodScreen .food-calorie-main strong{font-size:19px!important;line-height:1!important;margin:0!important;color:var(--text)!important;white-space:nowrap!important;}
 #foodScreen .food-calorie-main>span:last-child{font-size:11px!important;color:var(--subtext)!important;white-space:nowrap!important;}
 @media(max-width:520px){#foodScreen .food-day-head{grid-template-columns:1fr!important;gap:8px!important;}#foodScreen .food-calorie-main{justify-content:space-between!important;min-width:0!important;width:100%!important;grid-template-columns:auto 1fr auto!important;}#foodScreen .food-calorie-main strong{text-align:center!important;}}
-/* A fixed header keeps the title centered without an oversized visible spacer. */
-.screen-header{grid-template-columns:auto minmax(0,1fr) auto!important;min-height:56px!important;}
-.screen-header-spacer{width:44px!important;height:40px!important;flex:0 0 44px!important;}
-.screen-header .title.section-title{min-width:0!important;width:100%!important;}
-/* All large sheets start near the safe top and scroll inside their own content. */
-.technique-modal,.exercise-modal,.catalog-modal,.food-modal,.confirm-modal,.date-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal{}
-.technique-modal-content,.exercise-modal-content,.catalog-modal-content,.food-modal-content,.confirm-modal-content,.date-modal-content,.workout-detail-content,.manual-workout-content,.achievements-content{}
-/* Compact, elegant confirmation/event sheets. */
-.confirm-modal-content{width:min(92%,360px)!important;max-width:360px!important;padding:18px!important;border-radius:18px!important;}
-.confirm-modal-content button{min-height:44px!important;border-radius:13px!important;}
-/* Manual exercise editor: number + growing text field + delete, without giant empty textareas. */
-#techniqueModal .manual-field-head{display:grid!important;grid-template-columns:28px minmax(0,1fr) 32px!important;align-items:start!important;gap:9px!important;}
-#techniqueModal .manual-field-card textarea,#techniqueModal .manual-step-input,#techniqueModal .manual-mistake-input,#techniqueModal .manual-recommendation-input{display:block!important;width:100%!important;min-width:0!important;min-height:40px!important;height:40px!important;max-height:none!important;margin:0!important;padding:8px 0!important;box-sizing:border-box!important;line-height:1.35!important;resize:none!important;overflow:hidden!important;}
-#techniqueModal .manual-field-card{padding:8px 10px!important;}
-#techniqueModal .manual-field-number{margin-top:5px!important;}
-#techniqueModal .manual-field-remove{margin-top:3px!important;}
-/* Replacement picker: search clear button is mathematically centered; type label has its own column. */
-#replaceExerciseModal .replace-search-wrap input{padding-right:50px!important;}
-#replaceExerciseModal .replace-search-clear{right:8px!important;top:50%!important;transform:translateY(-50%)!important;width:32px!important;height:32px!important;min-width:32px!important;}
-#replaceExerciseModal .replace-exercise-option{grid-template-columns:minmax(0,1fr) max-content 30px!important;align-items:center!important;column-gap:9px!important;}
-#replaceExerciseModal .replace-option-name{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:normal!important;}
-#replaceExerciseModal .replace-option-type{grid-column:2!important;align-self:center!important;margin:0!important;white-space:nowrap!important;max-width:90px!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-#replaceExerciseModal .replace-option-check{grid-column:3!important;justify-self:center!important;align-self:center!important;width:28px!important;height:28px!important;min-width:28px!important;}
-/* Friendlier nutrition chart controls and axes area. */
-#chartModal .chart-modal-content{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
-#chartModal .data-type-selector{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;}
-#chartModal .data-type-selector button{min-height:42px!important;border-radius:12px!important;text-align:center!important;font-size:13px!important;}
-#chartModal .chart-container{min-height:210px!important;height:min(40dvh,280px)!important;margin-bottom:14px!important;}
-#chartModal .legend{padding-bottom:18px!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* v55: final cascade cleanup — deliberately last so legacy CSS cannot override it. */
-/* Compact, consistent screen header. The old 88/96px phantom columns made the bar unnecessarily tall/wide. */
-.screen-header{
-  display:grid!important;
-  grid-template-columns:48px minmax(0,1fr) 48px!important;
-  align-items:center!important;
-  gap:8px!important;
-  min-height:48px!important;
-  height:48px!important;
-  padding:4px 0!important;
-  margin:0 0 10px!important;
-  box-sizing:border-box!important;
-}
-.screen-header>button.gray{
-  width:44px!important;
-  min-width:44px!important;
-  height:40px!important;
-  min-height:40px!important;
-  padding:7px 8px!important;
-  margin:0!important;
-  border-radius:11px!important;
-  justify-self:start!important;
-  font-size:13px!important;
-}
-.screen-header>.title.section-title{
-  grid-column:2!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:7px!important;
-  width:100%!important;
-  min-width:0!important;
-  height:40px!important;
-  margin:0!important;
-  padding:0!important;
-  font-size:22px!important;
-  line-height:1!important;
-  text-align:center!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  background:none!important;
-  -webkit-background-clip:border-box!important;
-  -webkit-text-fill-color:var(--text)!important;
-  color:var(--text)!important;
-}
-.screen-header::after{
-  content:""!important;
-  display:block!important;
-  width:44px!important;
-  height:40px!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
 /* The old .title applies transparent gradient text to children; explicitly restore icon paint. */
 .section-title-icon{
   width:28px!important;
@@ -1953,203 +1367,7 @@ body.light-mode{
   line-height:1!important;
 }
 @media(max-width:430px){
-  .screen-header{grid-template-columns:46px minmax(0,1fr) 46px!important;height:46px!important;min-height:46px!important;padding:3px 0!important;}
-  .screen-header>button.gray{width:42px!important;min-width:42px!important;height:38px!important;min-height:38px!important;padding:6px 7px!important;font-size:12px!important;}
-  .screen-header>.title.section-title{height:38px!important;font-size:20px!important;}
-  .screen-header::after{width:42px!important;height:38px!important;}
   .section-title-icon{width:26px!important;height:26px!important;min-width:26px!important;font-size:14px!important;}
-}
-
-/* Manual exercise editor: one-line fields by default; textarea grows only with content. */
-#techniqueModal .manual-editor-panel textarea,
-#techniqueModal .manual-field-card textarea,
-#techniqueModal .manual-step-input,
-#techniqueModal .manual-mistake-input,
-#techniqueModal .manual-recommendation-input{
-  min-height:40px!important;
-  height:40px!important;
-  max-height:none!important;
-  margin:0!important;
-  padding:8px 0!important;
-  box-sizing:border-box!important;
-  resize:none!important;
-  overflow:hidden!important;
-  line-height:1.35!important;
-  font-size:15px!important;
-}
-#techniqueModal .manual-field-card{
-  padding:8px 10px!important;
-  min-height:56px!important;
-}
-#techniqueModal .manual-field-head{
-  min-height:40px!important;
-  align-items:flex-start!important;
-  gap:8px!important;
-}
-#techniqueModal .manual-field-number{
-  width:28px!important;
-  height:28px!important;
-  min-width:28px!important;
-  margin-top:6px!important;
-  flex:0 0 28px!important;
-}
-#techniqueModal .manual-field-remove{
-  width:30px!important;
-  height:30px!important;
-  min-width:30px!important;
-  padding:0!important;
-  margin:5px 0 0!important;
-  border-radius:9px!important;
-  flex:0 0 30px!important;
-}
-#techniqueModal .manual-editor-scroll{gap:7px!important;max-height:none!important;overflow:visible!important;}
-
-/* Replace picker: reserve three columns so type never collides with the checkbox. */
-#replaceExerciseModal .replace-exercise-option{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto 30px!important;
-  align-items:center!important;
-  column-gap:8px!important;
-}
-#replaceExerciseModal .replace-option-name{grid-column:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-#replaceExerciseModal .replace-option-type{grid-column:2!important;margin:0!important;max-width:86px!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-#replaceExerciseModal .replace-option-check{grid-column:3!important;width:28px!important;height:28px!important;min-width:28px!important;margin:0!important;justify-self:center!important;align-self:center!important;}
-#replaceExerciseModal .replace-search-wrap{height:48px!important;}
-#replaceExerciseModal .replace-search-clear{right:7px!important;top:7px!important;width:34px!important;height:34px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;}
-
-/* Never show a second "Закрыть" when the modal already has an X. */
-.workout-detail-content:has(> .close-btn) > button:last-child,
-.achievements-content:has(> .close-btn) > button:last-child,
-.catalog-modal-content:has(> .close-btn) > button:last-child,
-.technique-modal-content:has(> .modal-close-btn) > button:last-child:not(.exercise-save-btn),
-.technique-modal-content:has(> .close-btn) > button:last-child:not(.exercise-save-btn){display:none!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* === v92: editor controls stay inside their own boxes === */
-#techniqueModal .exercise-save-btn{
-  display:flex!important;
-  position:sticky!important;
-  bottom:0!important;
-  z-index:50!important;
-  align-items:center!important;
-  justify-content:center!important;
-  width:100%!important;
-  min-height:52px!important;
-  margin:16px 0 0!important;
-  padding:0 16px!important;
-  box-sizing:border-box!important;
-  border:1px solid rgba(255,255,255,.08)!important;
-  border-radius:15px!important;
-  background:var(--button-green)!important;
-  color:#fff!important;
-  font-weight:900!important;
-  font-size:16px!important;
-  box-shadow:0 -10px 22px rgba(0,0,0,.18)!important;
-}
-#techniqueModal .exercise-editor-row{
-  position:relative;
-  display:grid;
-  grid-template-columns:30px minmax(0,1fr) 36px;
-  align-items:start;
-  gap:8px;
-  margin:0 0 9px;
-  padding:8px;
-  box-sizing:border-box;
-  border:1px solid var(--border);
-  border-radius:14px;
-  background:var(--input-bg);
-  overflow:visible;
-}
-#techniqueModal .exercise-editor-row textarea{
-  min-width:0;
-  width:100%;
-  box-sizing:border-box;
-}
-#techniqueModal .exercise-editor-remove{
-  position:relative;
-  width:36px;
-  height:36px;
-  min-width:36px;
-  margin:0;
-  align-self:start;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--card-bg);
-  color:var(--negative);
-  font-size:20px;
-  line-height:1;
-  z-index:5;
-  pointer-events:auto;
-  touch-action:manipulation;
-}
-#techniqueModal .exercise-editor-built-item{
-  position:relative;
-  overflow:hidden;
-  border-radius:14px;
-}
-#techniqueModal .exercise-editor-built-delete{
-  right:8px;
-  top:8px;
-  width:34px;
-  height:34px;
-  min-width:34px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(15,15,20,.88);
-  color:#fff;
-  font-size:22px;
-  line-height:1;
-  z-index:20;
-  pointer-events:auto;
-  touch-action:manipulation;
-}
-#techniqueModal .exercise-editor-media-row{
-  position:relative;
-  box-sizing:border-box;
-  padding:9px;
-  border:1px solid var(--border);
-  border-radius:13px;
-  margin:0 0 8px;
-  background:var(--card-bg);
-  overflow:hidden;
-}
-#techniqueModal .exercise-editor-media-actions{
-  align-self:center;
-  justify-content:flex-end;
-  flex-wrap:nowrap;
-}
-#techniqueModal .exercise-editor-media-actions button{
-  flex:0 0 32px;
-  width:32px;
-  height:32px;
-  min-width:32px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:0;
-  padding:0;
-}
-#techniqueModal .exercise-editor-media-actions button[data-delete]{
-  color:var(--negative);
 }
 
 /* === v92: directory action buttons are fully inside the row === */
@@ -2188,29 +1406,6 @@ body.light-mode{
   touch-action:manipulation!important;
 }
 
-/* Never let an old generic modal rule hide the Save button. */
-#techniqueModal .technique-modal-content.exercise-editor-unified > .exercise-save-btn{
-  display:flex;
-}
-
-/* Keep the modal itself scrollable; Save remains visible at the bottom while scrolling. */
-#techniqueModal .technique-modal-content.exercise-editor-unified{
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  padding-bottom:20px;
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
@@ -2224,93 +1419,16 @@ body.light-mode{
     margin-bottom:0 !important;
 }
 
-/* Settings / theme sheet: one consistent neutral button style.
-   Overrides the old green/gradient inline styles without touching behavior. */
-#themeModal .theme-modal-content button,
-#themeModal .theme-modal-content .ftracker-import-trigger{
-    background:var(--button-gray) !important;
-    background-image:none !important;
-    color:var(--text) !important;
-    border:1px solid var(--border) !important;
-    box-shadow:none !important;
-}
-#themeModal .theme-modal-content button:active,
-#themeModal .theme-modal-content .ftracker-import-trigger:active{
-    background:var(--input-bg) !important;
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* v66: Safe Area for regular screens only */
-.screen-header {
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
 .directory-item{display:flex;align-items:stretch;gap:6px}.directory-item-main{flex:1!important;width:auto!important;min-width:0!important;margin:0!important;padding:12px 10px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;text-align:left!important;background:transparent!important;border:0!important;color:var(--text)!important}.directory-item-name{white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.25}.directory-chevron{font-size:24px;color:var(--subtext);flex:none}.directory-edit{width:42px!important;flex:none!important;margin:6px 0!important}.picker-group{margin-bottom:12px}.picker-group-title{font-weight:800;font-size:13px;color:var(--accent);padding:7px 4px;text-transform:uppercase;letter-spacing:.03em}.catalog-choice{min-height:58px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto 22px;align-items:center;gap:8px;text-align:left!important}.catalog-choice-name{white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.2}.catalog-choice-group{font-size:11px;color:var(--subtext);white-space:nowrap}.program-v5-ex-name{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;line-height:1.2!important;padding:4px 0}.program-v5-ex{min-width:0!important;align-items:center}.workout-exercise-title{min-width:0!important}.workout-exercise-title>span:first-child,.workout-exercise-title .exercise-name,.workout-exercise-title .workout-exercise-name{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;line-height:1.12!important}.workout-exercise-title{display:flex!important;align-items:flex-start!important;gap:8px!important}.workout-exercise-title .workout-analytics-link{margin-left:auto!important}.program-delete-row{background:rgba(255,70,70,.035);border:1px solid rgba(255,70,70,.18);border-radius:14px;padding:12px;margin-top:14px}.program-delete-btn{border-radius:11px!important}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-#exerciseModal .exercise-modal-content{max-width:560px;width:94%;padding:18px 16px 16px;border-radius:24px;}
-#exerciseModal #exerciseModalTitle{font-size:20px!important;line-height:1.18;margin:2px 42px 14px 2px!important;overflow-wrap:anywhere;}
-#exerciseModal .tabs{gap:6px;margin:0 0 14px;padding:4px;background:var(--input-bg);border-radius:14px;}
-#exerciseModal .tabs .tab{padding:9px 6px;border-radius:10px;font-weight:800;font-size:13px;}
-#exerciseModal .tabs .tab.active{background:var(--card-bg);box-shadow:0 2px 10px rgba(0,0,0,.12);}
 .analytics-hero{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:16px;border-radius:18px;background:linear-gradient(135deg,rgba(52,199,89,.14),rgba(52,199,89,.035));border:1px solid rgba(52,199,89,.25);margin-bottom:14px;}
 .analytics-hero span,.analytics-hero small{display:block;color:var(--subtext);font-size:12px}.analytics-hero b{display:block;font-size:25px;margin:4px 0}.analytics-hero-badge{font-size:11px;font-weight:800;color:var(--button-green);padding:7px 9px;border-radius:10px;background:rgba(52,199,89,.12);white-space:nowrap}.analytics-section-title{font-size:13px;font-weight:850;margin:4px 2px 7px;text-transform:uppercase;letter-spacing:.04em;color:var(--subtext)}
 .analytics-history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 4px;border-bottom:1px solid var(--border)}.analytics-history-row>div{min-width:0}.analytics-history-row strong{display:block;font-size:13px}.analytics-history-row span{display:block;color:var(--subtext);font-size:13px;margin-top:3px;overflow-wrap:anywhere}.analytics-history-row i{font-style:normal;font-size:22px;color:var(--subtext)}
 .records-hero{padding:2px}.records-hero-kicker{font-size:11px;font-weight:850;color:var(--subtext);letter-spacing:.07em;margin:2px 2px 9px}.records-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.record-modern{padding:13px;border-radius:17px;background:var(--input-bg);min-width:0}.record-modern.record-work{grid-column:1/-1;background:linear-gradient(135deg,rgba(52,199,89,.13),rgba(52,199,89,.04));border:1px solid rgba(52,199,89,.2)}.record-modern-icon{font-size:18px;margin-bottom:8px}.record-modern-label{font-size:11px;color:var(--subtext);font-weight:750}.record-modern-value{font-size:18px;font-weight:850;margin-top:4px;overflow-wrap:anywhere}.record-modern-foot{margin-top:10px;padding:11px 12px;border-radius:13px;background:var(--input-bg);font-size:12px;color:var(--subtext)}.record-modern-foot b{color:var(--text)}
 #workoutScreen .workout-recommendation{border-radius:20px;padding:15px;background:linear-gradient(145deg,rgba(52,199,89,.15),rgba(52,199,89,.045));border:1px solid rgba(52,199,89,.28);box-shadow:0 8px 22px rgba(0,0,0,.10)}#workoutScreen .recommendation-rule{margin-top:9px;padding-top:8px;border-top:1px solid rgba(52,199,89,.16);font-size:11px;color:var(--subtext)}
-@media(max-width:430px){#exerciseModal .exercise-modal-content{width:96%;padding:16px 13px}.records-grid{gap:7px}.record-modern{padding:11px}.record-modern-value{font-size:16px}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
+@media(max-width:430px){.records-grid{gap:7px}.record-modern{padding:11px}.record-modern-value{font-size:16px}}
 
 
 
@@ -2328,59 +1446,16 @@ body.light-mode{
 .finish-confirm-text{color:var(--subtext);font-size:14px;line-height:1.45;margin-bottom:18px}
 .finish-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .finish-confirm-actions button{margin:0!important;min-width:0!important;width:100%!important}
-
-/* Exercise pickers: stable iPhone scrolling and touch handling */
-#replaceExerciseModal .replace-exercise-sheet,
-#exercisePickerModal .date-modal-content,
-#progressExercisePickerModal .date-modal-content,
-#exerciseOrderModal .date-modal-content{overscroll-behavior:contain}
-#replaceExerciseModal .replace-exercise-list,
-#exercisePickerList,
-#progressPickerList,
-#exerciseOrderList{touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}
-#replaceExerciseModal .replace-exercise-list{max-height:43dvh!important}
 #exercisePickerList{max-height:58dvh!important}
 #progressPickerList{max-height:58dvh!important}
 .catalog-choice,.replace-exercise-option{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent}
 
-/* Manual exercise card: the three editable tabs are the actual editor */
-#techniqueModal .manual-editor-tabs{margin-top:12px}
-#techniqueModal .manual-editor-panel{display:none}
-#techniqueModal .manual-editor-panel.active{display:block}
-#techniqueModal .manual-editor-label{display:block;font-size:13px;font-weight:800;color:var(--subtext);margin:0 0 7px}
-#techniqueModal .manual-editor-panel textarea{width:100%;min-height:150px;resize:vertical;box-sizing:border-box;border-radius:16px;padding:14px;font-size:16px;line-height:1.45;background:var(--input-bg);border:1px solid var(--border);color:var(--text)}
-#techniqueModal .manual-save-btn{width:100%;margin-top:12px!important}
-#techniqueModal .manual-empty-preview{padding:18px;border:1px dashed var(--border);border-radius:16px;color:var(--subtext);line-height:1.45;margin-bottom:10px}
-
 /* More specific muscle focus in workout */
 .workout-muscle-line{white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.25!important}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* v44: clean, touch-safe modal/picker surfaces */
-.catalog-modal-content,.workout-new-exercise-sheet{width:min(92vw,520px)!important;max-width:520px!important;overscroll-behavior:contain!important;border-radius:24px!important;padding:20px!important;box-sizing:border-box!important;}
-.catalog-modal-content input,.catalog-modal-content select,.workout-new-exercise-sheet input,.workout-new-exercise-sheet select{width:100%!important;box-sizing:border-box!important;min-height:50px!important;border-radius:14px!important;margin:6px 0 12px!important;font-size:16px!important;}
-.catalog-modal-content .field-label,.workout-new-exercise-sheet .field-label{display:block!important;font-size:13px!important;font-weight:800!important;color:var(--subtext)!important;}
-.catalog-modal-content button,.workout-new-exercise-sheet button{width:100%!important;min-height:52px!important;border-radius:15px!important;font-size:16px!important;font-weight:800!important;}
 .workout-new-title{font-size:24px!important;font-weight:900!important;line-height:1.1!important;margin-bottom:7px!important;}
 .workout-new-sub{font-size:13px!important;line-height:1.4!important;color:var(--subtext)!important;margin-bottom:14px!important;}
-.catalog-modal-list,.replace-exercise-list{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;}
 .catalog-choice,.replace-exercise-option{touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important;}
-#exercisePickerModal .date-modal-content{}
 #exercisePickerList{min-height:80px!important;max-height:55dvh!important;overflow-y:auto!important;padding:2px!important;}
-#replaceExerciseModal .replace-exercise-sheet{overflow:hidden!important;}
 #replaceExerciseList{min-height:100px!important;max-height:48dvh!important;overflow-y:auto!important;}
 .manual-editor-tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin:16px 0!important;}
 .manual-editor-tabs .tab{min-height:48px!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:13px!important;font-size:14px!important;font-weight:850!important;}
@@ -2388,17 +1463,6 @@ body.light-mode{
 .manual-editor-label{font-size:13px!important;font-weight:800!important;color:var(--subtext)!important;margin:0 0 7px!important;}
 #manualGuideExecution,#manualGuideMuscles,#manualGuideTips{width:100%!important;min-height:150px!important;box-sizing:border-box!important;border-radius:15px!important;padding:14px!important;font-size:16px!important;line-height:1.45!important;resize:vertical!important;}
 .manual-save-btn{width:100%!important;min-height:54px!important;border-radius:15px!important;margin-top:14px!important;background:var(--accent-gradient)!important;color:#fff!important;font-weight:900!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -2412,79 +1476,13 @@ body.light-mode{
 #workoutScreen .workout-time{display:block!important;color:var(--text)!important;font-size:16px!important;font-weight:800!important;min-width:48px!important;text-align:right!important;}
 #workoutScreen #workoutTitle{font-size:clamp(18px,5vw,22px)!important;font-weight:850!important;}
 
-/* Manual exercise cards use the same card shell as built-in exercises. */
-#techniqueModal{z-index:6000!important;}
-#techniqueModal .technique-modal-content{width:min(92vw,520px)!important;background:var(--card-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:24px!important;padding:20px!important;box-sizing:border-box!important;box-shadow:0 24px 80px rgba(0,0,0,.42)!important;}
-#techniqueModal .technique-title{font-size:23px!important;font-weight:900!important;line-height:1.12!important;padding-right:38px!important;overflow-wrap:anywhere!important;margin:0!important;}
-#techniqueModal .technique-group{margin-top:5px!important;color:var(--button-green)!important;font-size:15px!important;font-weight:850!important;}
-#techniqueModal .technique-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;padding:4px!important;background:var(--input-bg)!important;border-radius:16px!important;margin:16px 0!important;}
-#techniqueModal .technique-tabs .tab{min-height:48px!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:12px!important;font-size:14px!important;font-weight:850!important;color:var(--subtext)!important;}
-#techniqueModal .technique-tabs .tab.active{background:var(--button-green)!important;color:#fff!important;}
-#techniqueModal .manual-preview{padding:16px!important;border:1px dashed var(--border)!important;border-radius:16px!important;color:var(--subtext)!important;line-height:1.45!important;background:rgba(255,255,255,.018)!important;}
-#techniqueModal .manual-preview.has-content{border-style:solid!important;color:var(--text)!important;white-space:pre-wrap!important;background:var(--input-bg)!important;}
-#techniqueModal .manual-section-title{font-size:13px!important;font-weight:900!important;letter-spacing:.06em!important;text-transform:uppercase!important;color:var(--subtext)!important;margin:0 0 9px!important;}
-#techniqueModal .manual-edit-btn,#techniqueModal .manual-save-btn{width:100%!important;min-height:52px!important;border-radius:15px!important;margin-top:12px!important;font-weight:900!important;}
-#techniqueModal .manual-editor-tabs{margin:0 0 14px!important;}
-#techniqueModal .manual-editor-panel{display:none!important;}
-#techniqueModal .manual-editor-panel.active{display:block!important;}
-#techniqueModal .manual-editor-label{display:block!important;font-size:13px!important;font-weight:850!important;color:var(--subtext)!important;margin:0 0 7px!important;}
-#techniqueModal .manual-editor-panel textarea{width:100%!important;min-height:145px!important;box-sizing:border-box!important;resize:vertical!important;border-radius:15px!important;padding:14px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--text)!important;font:inherit!important;font-size:16px!important;line-height:1.45!important;}
-#techniqueModal .technique-close-btn{width:100%!important;min-height:50px!important;border-radius:15px!important;margin-top:10px!important;}
-
 /* Directory-only editing: the list remains visually identical for built-in/manual cards. */
 #exerciseDirectoryContent .directory-item{min-height:62px!important;align-items:stretch!important;}
 #exerciseDirectoryContent .directory-item-main{min-width:0!important;}
 
-/* iPhone-safe picker surfaces. */
-#replaceExerciseModal .replace-exercise-list,#exercisePickerList,#progressPickerList,#exerciseOrderList{touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
-#replaceExerciseModal .replace-exercise-option,#exercisePickerList [data-picker-name]{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;}
-
 @media(max-width:430px){
   #workoutScreen .workout-progress-caption span:first-child{font-size:12.5px!important;}
   #workoutScreen .workout-time{font-size:15px!important;min-width:46px!important;}
-  #techniqueModal .technique-modal-content{width:calc(100vw - 24px)!important;padding:17px!important;border-radius:22px!important;}
-}
-
-/* ===== V52.1 final visual consistency fixes ===== */
-#techniqueModal{
-  align-items:flex-start!important;
-  justify-content:center!important;
-  padding:clamp(84px,9dvh,150px) 12px max(18px,env(safe-area-inset-bottom,0px))!important;
-  overflow-y:auto!important;
-  box-sizing:border-box!important;
-}
-#techniqueModal .technique-modal-content{
-  margin:0 auto!important;
-  transform:none!important;
-}
-/* One header geometry across all normal sections. */
-.screen-header{
-  display:grid!important;
-  grid-template-columns:96px minmax(0,1fr) 96px!important;
-  align-items:center!important;
-  gap:10px!important;
-}
-.screen-header>button.gray{
-  width:96px!important;
-  min-width:96px!important;
-  box-sizing:border-box!important;
-  justify-self:start!important;
-}
-.screen-header>.title{
-  grid-column:2!important;
-  width:100%!important;
-  min-width:0!important;
-  margin:0!important;
-  text-align:center!important;
-  justify-self:stretch!important;
-}
-.screen-header::after{
-  content:"";
-  display:block;
-  width:96px;
-  height:40px;
-  visibility:hidden;
-  pointer-events:none;
 }
 /* Nutrition: calories are a proper metric card, visually matching macros. */
 #foodScreen .food-calorie-main{
@@ -2515,8 +1513,6 @@ body.light-mode{
   color:var(--subtext)!important;
   margin-top:4px!important;
 }
-/* Nothing should be rendered below the nutrition chart. */
-#chartModal .chart-footer{display:none!important;}
 /* History actions: fixed squares, no stray punctuation/ellipsis. */
 #historyScreen .history-date-btn{
   width:auto!important;
@@ -2548,20 +1544,7 @@ body.light-mode{
   color:var(--negative)!important;
 }
 @media(max-width:430px){
-  .screen-header{grid-template-columns:88px minmax(0,1fr) 88px!important;}
-  .screen-header>button.gray,.screen-header::after{width:88px!important;min-width:88px!important;}
   #foodScreen .food-calorie-main{min-width:98px!important;padding:10px 9px!important;}
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
 }
 
 
@@ -2585,17 +1568,6 @@ body.light-mode{
 .food-macro-card.protein strong{color:#34c759}.food-macro-card.fat strong{color:#ff9f0a}.food-macro-card.carbs strong{color:#5ac8fa}
 .food-calorie-limit{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px;padding:9px 10px;border-radius:12px;background:var(--input-bg);font-size:12px;color:var(--subtext);}
 .food-calorie-limit strong{color:var(--text)}.food-calorie-remaining{margin-left:auto;font-weight:750;color:var(--subtext);}
-#chartModal .period-selector{display:flex!important;grid-template-columns:none!important;overflow-x:auto!important;overflow-y:hidden!important;gap:6px!important;padding:4px!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important;}
-#chartModal .period-selector::-webkit-scrollbar{display:none}
-#chartModal .period-selector button{flex:0 0 92px!important;min-width:92px!important;min-height:44px!important;}
-#chartModal .data-type-selector button[data-type="calories"]{color:#34c759!important;border-color:rgba(52,199,89,.5)!important}
-#chartModal .data-type-selector button[data-type="protein"]{color:#5ac8fa!important;border-color:rgba(90,200,250,.5)!important}
-#chartModal .data-type-selector button[data-type="fat"]{color:#ff9f0a!important;border-color:rgba(255,159,10,.5)!important}
-#chartModal .data-type-selector button[data-type="carbs"]{color:#af52de!important;border-color:rgba(175,82,222,.5)!important}
-#chartModal .data-type-selector button[data-type="calories"].active{background:rgba(52,199,89,.14)!important}
-#chartModal .data-type-selector button[data-type="protein"].active{background:rgba(90,200,250,.14)!important}
-#chartModal .data-type-selector button[data-type="fat"].active{background:rgba(255,159,10,.14)!important}
-#chartModal .data-type-selector button[data-type="carbs"].active{background:rgba(175,82,222,.14)!important}
 #workoutScreen .workout-progress-caption{justify-content:center!important;text-align:center!important;margin:2px 0 8px!important;}
 #workoutScreen .workout-progress-caption span:first-child{font-size:14px!important;font-weight:900!important;letter-spacing:.01em!important;}
 #workoutScreen .workout-top-right{padding:4px 7px!important;border-radius:11px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;min-width:62px!important;box-sizing:border-box!important;}
@@ -2606,17 +1578,6 @@ body.light-mode{
  .food-macro-card strong{font-size:15px!important;}
  .food-day-title{font-size:15px!important;}
  .food-calorie-main strong{font-size:25px!important;}
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
 }
 
 
@@ -2641,32 +1602,6 @@ body.light-mode{
   font-weight:800!important;
 }
 #foodTabStats .stats-tab:last-child{grid-column:1 / -1!important;}
-#chartModal .period-selector{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  overflow:visible!important;
-  gap:8px!important;
-  padding:4px!important;
-}
-#chartModal .period-selector button{
-  width:100%!important;
-  min-width:0!important;
-  flex:none!important;
-  min-height:46px!important;
-  margin:0!important;
-  font-size:13px!important;
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -2684,17 +1619,6 @@ body.light-mode{
 #exerciseDirectoryContent .directory-item-main{position:relative!important;z-index:2!important;cursor:pointer!important;}
 #exerciseDirectoryContent .directory-guide-edit{display:flex!important;align-items:center!important;justify-content:center!important;width:40px!important;height:40px!important;min-width:40px!important;padding:0!important;border-radius:12px!important;flex:none!important;}
 #exerciseDirectoryContent .directory-edit{display:flex!important;align-items:center!important;justify-content:center!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -2772,17 +1696,6 @@ body.light-mode{
   z-index:1!important;
 }
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
@@ -2803,39 +1716,6 @@ body.light-mode{
 #progressScreen .progress-list-indicator::before{transform:translate(-6px,-4px);}
 #progressScreen .progress-list-indicator::after{transform:translate(5px,5px);opacity:.7;}
 #progressScreen .progress-selected-exercise-tap{flex:1!important;}
-#progressExercisePickerModal .progress-picker-row{position:relative!important;}
-#progressExercisePickerModal .progress-picker-list-indicator{flex:0 0 30px;width:30px;height:30px;border:1px solid var(--border);border-radius:9px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;color:var(--button-green);font-size:12px;font-weight:900;}
-#progressExercisePickerModal .progress-picker-row{gap:9px!important;}
-#replaceExerciseModal .replace-search-wrap{position:relative!important;display:flex!important;align-items:center!important;}
-#replaceExerciseModal #replaceExerciseSearch{padding-right:48px!important;min-width:0!important;}
-#replaceExerciseModal .replace-search-clear{right:8px!important;top:50%!important;transform:translateY(-50%)!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;z-index:20!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* v58: final interaction/layout repair */
-#foodScreen .screen-header{margin-bottom:12px!important;}
-
-/* Progress picker: workout count belongs ONLY to the dropdown list. */
-#progressExercisePickerModal .progress-picker-row-main small{display:none!important;}
-#progressExercisePickerModal .progress-picker-row-count{
-  flex:0 0 32px!important;width:32px!important;height:32px!important;
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  border:1px solid var(--border)!important;border-radius:9px!important;
-  background:var(--card-bg)!important;color:var(--text)!important;
-  font-size:13px!important;font-weight:900!important;
-}
 #progressScreen .progress-selected-exercise-count{display:none!important;}
 
 /* Directory edit action: always visible for manually created entries. */
@@ -2845,84 +1725,11 @@ body.light-mode{
 }
 #exerciseDirectoryContent .directory-item-main{z-index:5!important;pointer-events:auto!important;}
 
-/* Section icons: do not inherit transparent gradient text from .title. */
-.screen-header .section-title-icon{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
-  font-style:normal!important;font-weight:900!important;
-  color:var(--button-green)!important;
-  -webkit-text-fill-color:var(--button-green)!important;
-  background:var(--input-bg)!important;
-  -webkit-background-clip:border-box!important;
-}
-
 /* Exercise rows are real touch targets; do not let decorative children eat taps. */
 .directory-item-main,.progress-picker-row,.replace-exercise-option,.program-v5-ex,.workout-exercise-name-large{
   -webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;
 }
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-#techniqueModal .exercise-card-unified,#techniqueModal .exercise-editor-unified{width:min(100%,560px);max-width:560px}
-#techniqueModal .exercise-unified-media,#techniqueModal .exercise-media-gallery{display:grid;gap:10px;margin-bottom:14px}
-#techniqueModal .exercise-media-item{position:relative;border-radius:16px;overflow:hidden;background:var(--input-bg);border:1px solid var(--border)}
-#techniqueModal .exercise-media-view{width:100%;max-height:360px;display:block;object-fit:contain;background:var(--input-bg)}
-#techniqueModal .exercise-editor-media-box{margin-top:14px;padding:13px;border:1px solid var(--border);border-radius:16px;background:var(--input-bg)}
-#techniqueModal .exercise-editor-note{font-size:12px;line-height:1.4;color:var(--subtext);margin:5px 0 10px}
-#techniqueModal .exercise-editor-built-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0 12px}
-#techniqueModal .exercise-editor-built-item{position:relative;border-radius:14px;overflow:visible;background:var(--card-bg);border:1px solid var(--border)}
-#techniqueModal .exercise-editor-built-item img{display:block;width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:14px;background:var(--input-bg)}
-#techniqueModal .exercise-editor-built-delete{position:absolute;right:-8px;top:-8px;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:24px;display:flex;align-items:center;justify-content:center;z-index:4;box-shadow:0 4px 12px rgba(0,0,0,.25)}
-#techniqueModal .exercise-editor-media-row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
-#techniqueModal .exercise-editor-media-preview{width:72px;height:72px;border-radius:12px;overflow:hidden;background:var(--card-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
-#techniqueModal .exercise-editor-media-preview img,#techniqueModal .exercise-editor-media-preview video{width:100%;height:100%;object-fit:cover}
-#techniqueModal .exercise-editor-media-info{min-width:0;display:flex;flex-direction:column;gap:3px}
-#techniqueModal .exercise-editor-media-info b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#techniqueModal .exercise-editor-media-info small{font-size:11px;color:var(--subtext)}
-#techniqueModal .exercise-editor-media-actions{display:flex;gap:4px}
-#techniqueModal .exercise-editor-media-actions button{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--card-bg);color:var(--text)}
-#techniqueModal .exercise-editor-media-actions button[data-delete]{color:var(--negative)}
-#techniqueModal .exercise-editor-empty,#techniqueModal .exercise-card-empty{padding:16px;border:1px dashed var(--border);border-radius:14px;color:var(--subtext);text-align:center}
-#techniqueModal .exercise-editor-row{display:grid;grid-template-columns:30px minmax(0,1fr) 34px;gap:8px;align-items:start;margin-bottom:8px}
-#techniqueModal .exercise-editor-row textarea{width:100%;min-height:42px;box-sizing:border-box;border:1px solid var(--border);border-radius:12px;padding:9px;background:var(--card-bg);color:var(--text);font:inherit;resize:none}
-#techniqueModal .exercise-editor-num{width:30px;height:30px;border-radius:9px;background:rgba(102,210,102,.12);color:var(--button-green);display:flex;align-items:center;justify-content:center;font-weight:900;margin-top:5px}
-#techniqueModal .exercise-editor-remove{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--card-bg);color:var(--negative);font-size:20px}
-#techniqueModal .exercise-editor-add{width:100%;min-height:44px;margin:8px 0;border-radius:12px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-weight:800}
-#techniqueModal .exercise-save-btn,#techniqueModal .exercise-edit-btn{width:100%;min-height:48px;margin-top:14px;border-radius:14px;border:0;background:var(--button-green);color:#fff;font-weight:900;font-size:15px}
-#techniqueModal .exercise-muscle-grid{display:grid;gap:14px}
-#techniqueModal .exercise-muscle-options{display:flex;flex-wrap:wrap;gap:7px}
-#techniqueModal .exercise-muscle-option{border:1px solid var(--border);background:var(--input-bg);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px}
-#techniqueModal .exercise-muscle-option.active{background:rgba(52,199,89,.15);border-color:rgba(52,199,89,.45)}
-#techniqueModal .exercise-muscle-preview{padding:8px;border:1px solid var(--border);border-radius:14px;background:var(--input-bg);display:flex;justify-content:center}
-#techniqueModal .exercise-card-section-title{font-size:12px;font-weight:900;letter-spacing:.05em;margin:14px 0 7px}
-#techniqueModal .exercise-card-steps,#techniqueModal .exercise-card-list{padding-left:22px;margin:0}
-#techniqueModal .exercise-card-steps li,#techniqueModal .exercise-card-list li{margin:7px 0;line-height:1.4}
-#techniqueModal .exercise-card-muscles{display:grid;gap:12px}
-#techniqueModal .exercise-card-muscle-map{display:flex;justify-content:center;padding:10px;border:1px solid var(--border);border-radius:14px;background:var(--input-bg)}
-#techniqueModal .exercise-card-muscle-legend{font-size:13px;color:var(--subtext);line-height:1.5}
-@media(max-width:430px){#techniqueModal .exercise-editor-built-list{grid-template-columns:1fr}#techniqueModal .exercise-editor-media-row{grid-template-columns:62px minmax(0,1fr) auto}#techniqueModal .exercise-editor-media-preview{width:62px;height:62px}}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
+@media(max-width:430px){}
 
 
 
@@ -2968,17 +1775,6 @@ body.light-mode{
   grid-row:1!important;
 }
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
@@ -3017,536 +1813,14 @@ body.light-mode{
 /* The workout card is view-only by design. */
 #workoutScreen .exercise-edit-btn{display:none!important;}
 
-/* Built-in image delete button is always anchored to its own image. */
-#techniqueModal .exercise-editor-built-item{
-  position:relative;overflow:visible;
-}
-#techniqueModal .exercise-editor-built-delete{
-  position:absolute;right:-7px;top:-7px;
-  width:34px;height:34px;min-width:34px;
-  border-radius:50%;display:flex;
-  align-items:center;justify-content:center;
-  z-index:30;pointer-events:auto;touch-action:manipulation;
-}
-
 /* No legacy origin markers. */
 #exerciseDirectoryContent .directory-manual-badge,
 #exerciseDirectoryContent .directory-manual-pencil,
 #exerciseDirectoryContent .directory-universal-edit{display:none!important;}
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* =========================================================
-   v93 — one scroll container, stable editor geometry
-   ========================================================= */
-
-/* The backdrop must NOT scroll. On iOS nested scrolling was causing
-   the editor to stop at the media section. */
-#techniqueModal{
-  position:fixed!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  max-height:none!important;
-  padding:
-    max(12px, env(safe-area-inset-top, 0px))
-    12px
-    max(12px, env(safe-area-inset-bottom, 0px))
-    12px!important;
-  box-sizing:border-box!important;
-  display:flex!important;
-  align-items:flex-start!important;
-  justify-content:center!important;
-  overflow:hidden!important;
-  overscroll-behavior:none!important;
-  -webkit-overflow-scrolling:auto!important;
-}
-
-/* Exactly ONE scrolling element. */
-#techniqueModal .technique-modal-content.exercise-editor-unified{
-  width:min(100%,560px);
-  max-width:560px;
-  height:calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
-  min-height:0;
-  margin:0 auto;
-  padding:18px 16px calc(84px + env(safe-area-inset-bottom, 0px));
-  box-sizing:border-box;
-  overflow-x:hidden;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  scroll-behavior:auto;
-}
-
-/* Prevent late-loading media from changing the editor's geometry. */
-#techniqueModal .exercise-editor-built-list{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  margin:10px 0 12px;
-  align-items:start;
-}
-#techniqueModal .exercise-editor-built-item{
-  position:relative;
-  width:100%;
-  aspect-ratio:1/1;
-  min-width:0;
-  overflow:hidden;
-  box-sizing:border-box;
-}
-#techniqueModal .exercise-editor-built-item img{
-  display:block;
-  width:100%;
-  height:100%;
-  aspect-ratio:auto;
-  object-fit:contain;
-}
-
-/* Keep every editor section in normal document flow. */
-#techniqueModal .exercise-editor-unified > *{
-  box-sizing:border-box;
-  max-width:100%;
-}
-#techniqueModal .exercise-editor-unified .technique-title{
-  position:relative;
-  width:calc(100% - 42px);
-  margin:0 0 4px;
-  padding:0;
-  line-height:1.15;
-  overflow-wrap:anywhere;
-}
-#techniqueModal .exercise-editor-unified .technique-group{
-  margin:0 0 10px;
-}
-#techniqueModal .exercise-editor-unified .technique-tabs{
-  position:relative;
-  width:100%;
-  margin:10px 0 14px;
-  box-sizing:border-box;
-}
-
-/* Stable rows: number / field / remove button. */
-#techniqueModal .exercise-editor-unified .exercise-editor-row{
-  display:grid;
-  grid-template-columns:30px minmax(0,1fr) 36px;
-  gap:8px;
-  width:100%;
-  min-width:0;
-  align-items:start;
-  box-sizing:border-box;
-  margin:0 0 8px;
-  padding:7px;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-row > *{
-  min-width:0;
-  box-sizing:border-box;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-row textarea{
-  display:block;
-  width:100%;
-  min-height:42px;
-  max-width:100%;
-  margin:0;
-  padding:9px;
-  box-sizing:border-box;
-  line-height:1.35;
-}
-
-/* Media box cannot create a second scroll context. */
-#techniqueModal .exercise-editor-media-box{
-  width:100%;
-  max-width:100%;
-  box-sizing:border-box;
-  overflow:visible;
-}
-
-/* Added media rows have fixed preview geometry. */
-#techniqueModal .exercise-editor-media-row{
-  display:grid;
-  grid-template-columns:62px minmax(0,1fr) auto;
-  width:100%;
-  min-width:0;
-  box-sizing:border-box;
-  align-items:center;
-  gap:8px;
-  overflow:hidden;
-}
-#techniqueModal .exercise-editor-media-preview{
-  width:62px;
-  height:62px;
-  min-width:62px;
-  min-height:62px;
-  box-sizing:border-box;
-}
-
-/* Save is part of the same scroll container and remains reachable.
-   It is NOT fixed to the viewport, so it can never create a second layer. */
-#techniqueModal .exercise-editor-unified > .exercise-save-btn{
-  position:sticky;
-  left:auto;
-  right:auto;
-  bottom:0;
-  width:100%;
-  min-height:54px;
-  margin:18px 0 0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-sizing:border-box;
-  z-index:100;
-  flex:none;
-  border-radius:15px;
-  box-shadow:0 -10px 22px rgba(0,0,0,.22);
-}
-
-/* Close button remains in the header and cannot overlap the title. */
-
-/* Don't allow legacy manual-editor styles to affect the unified editor. */
-#techniqueModal .exercise-editor-unified .manual-editor-tabs,
-#techniqueModal .exercise-editor-unified .manual-editor-panel,
-#techniqueModal .exercise-editor-unified .manual-save-btn,
-#techniqueModal .exercise-editor-unified .manual-edit-btn{
-  all:revert;
-}
-
 @media (max-width:430px){
-  #techniqueModal{
-    padding-left:8px!important;
-    padding-right:8px!important;
-  }
-  #techniqueModal .technique-modal-content.exercise-editor-unified{
-    width:100%;
-    border-radius:20px;
-    padding-left:14px;
-    padding-right:14px;
-  }
-  #techniqueModal .exercise-editor-built-list{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* v94: the modal itself is never scrollable; only its content is. */
-#techniqueModal{
-  position:fixed!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  max-height:none!important;
-  padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px)) 12px!important;
-  box-sizing:border-box!important;
-  align-items:flex-start!important;
-  justify-content:center!important;
-  overflow:hidden!important;
-  overscroll-behavior:none!important;
-}
-
-/* CRITICAL: restore the application's .hidden contract.
-   v93 used display:flex!important on the modal, which defeated .hidden,
-   so after Save/Close the invisible modal could remain over the whole app. */
-#techniqueModal.hidden{
-  display:none!important;
-  pointer-events:none!important;
-}
-#techniqueModal:not(.hidden){
-  display:flex!important;
-  pointer-events:auto!important;
-}
-
-/* One scroll container. */
-#techniqueModal .technique-modal-content.exercise-editor-unified{
-  width:min(100%,560px);
-  height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px);
-  min-height:0;
-  margin:0 auto;
-  padding:18px 16px 22px;
-  box-sizing:border-box;
-  overflow-x:hidden;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-}
-
-/* Save button is NORMAL document flow. No sticky/fixed positioning. */
-#techniqueModal .exercise-editor-unified > .exercise-save-btn{
-  position:relative;
-  left:auto;
-  right:auto;
-  bottom:auto;
-  top:auto;
-  width:100%;
-  min-height:54px;
-  margin:18px 0 0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-sizing:border-box;
-  z-index:5;
-  flex:none;
-  border-radius:15px;
-  box-shadow:none;
-}
-
-/* Keep close button clickable and inside the modal header. */
-
-/* No media loading should create another scroll box. */
-#techniqueModal .exercise-editor-built-list,
-#techniqueModal .exercise-editor-media-box,
-#techniqueModal .exercise-editor-media-row,
-#techniqueModal .exercise-editor-row{
-  overflow:visible;
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* ===== v95: polished exercise editor ===== */
-#techniqueModal .exercise-editor-unified{
-  width:min(100%,560px);
-  max-width:560px;
-  background:var(--card-bg);
-  border:1px solid rgba(255,255,255,.07);
-  border-radius:24px;
-  box-shadow:0 20px 60px rgba(0,0,0,.38);
-  padding:20px 16px 24px;
-}
-#techniqueModal .exercise-editor-unified .technique-title{
-  width:calc(100% - 46px);
-  font-size:24px;
-  font-weight:900;
-  letter-spacing:-.02em;
-  line-height:1.12;
-  margin:2px 0 5px;
-}
-#techniqueModal .exercise-editor-unified .technique-group{
-  display:inline-flex;
-  min-height:28px;
-  align-items:center;
-  padding:5px 10px;
-  border-radius:999px;
-  background:rgba(102,210,102,.10);
-  color:var(--button-green);
-  font-size:12px;
-  font-weight:800;
-  margin:0 0 14px;
-}
-#techniqueModal .exercise-editor-unified .technique-tabs{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:5px;
-  padding:4px;
-  margin:0 0 16px;
-  background:var(--input-bg);
-  border:1px solid var(--border);
-  border-radius:15px;
-}
-#techniqueModal .exercise-editor-unified .technique-tabs .tab{
-  min-height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:7px 5px;
-  border-radius:11px;
-  font-size:12px;
-  font-weight:850;
-  white-space:nowrap;
-}
-#techniqueModal .exercise-editor-unified .technique-tabs .tab.active{
-  background:var(--card-bg);
-  color:var(--text);
-  box-shadow:0 2px 8px rgba(0,0,0,.16);
-}
-#techniqueModal .exercise-editor-unified .tab-content{
-  min-width:0;
-  animation:none;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-section-title{
-  display:flex;
-  align-items:center;
-  min-height:18px;
-  margin:16px 0 8px;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.08em;
-  color:var(--subtext);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-section-title:first-child{margin-top:0}
-#techniqueModal .exercise-editor-unified .exercise-editor-row{
-  display:grid;
-  grid-template-columns:32px minmax(0,1fr) 38px;
-  gap:8px;
-  width:100%;
-  min-height:54px;
-  align-items:start;
-  padding:7px;
-  margin:0 0 8px;
-  box-sizing:border-box;
-  border:1px solid var(--border);
-  border-radius:14px;
-  background:var(--input-bg);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-row textarea{
-  display:block;
-  width:100%;
-  min-width:0;
-  min-height:40px;
-  height:auto;
-  margin:0;
-  padding:9px 10px;
-  box-sizing:border-box;
-  border:1px solid transparent;
-  border-radius:10px;
-  background:var(--card-bg);
-  color:var(--text);
-  font-size:14px;
-  line-height:1.35;
-  resize:none;
-  overflow:hidden;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-row textarea:focus{
-  border-color:rgba(102,210,102,.5);
-  outline:none;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-num{
-  width:32px;height:32px;min-width:32px;
-  margin:5px 0 0;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(102,210,102,.12);color:var(--button-green);
-  font-size:13px;font-weight:900;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-remove{
-  width:38px;height:38px;min-width:38px;
-  margin:0;padding:0;border-radius:11px;
-  display:flex;align-items:center;justify-content:center;
-  box-sizing:border-box;
-  background:var(--card-bg);border:1px solid var(--border);
-  color:var(--negative);font-size:20px;line-height:1;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-add{
-  width:100%;min-height:44px;margin:7px 0 14px;
-  border-radius:13px;border:1px dashed rgba(102,210,102,.35);
-  background:rgba(102,210,102,.07);color:var(--button-green);
-  font-size:13px;font-weight:850;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-box{
-  margin:16px 0 0;padding:14px;
-  border:1px solid var(--border);border-radius:18px;
-  background:var(--input-bg);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-note{
-  margin:3px 0 10px;font-size:12px;line-height:1.45;color:var(--subtext);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-list{
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;margin:10px 0 12px;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-item{
-  position:relative;min-width:0;aspect-ratio:1/1;
-  border:1px solid var(--border);border-radius:15px;
-  background:var(--card-bg);overflow:hidden;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-item img{
-  display:block;width:100%;height:100%;
-  aspect-ratio:auto;object-fit:contain;background:var(--input-bg);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-delete{
-  right:7px;top:7px;width:34px;height:34px;min-width:34px;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:50%;background:rgba(16,16,20,.9);color:#fff;
-  border:1px solid rgba(255,255,255,.14);font-size:21px;line-height:1;
-  box-shadow:0 3px 10px rgba(0,0,0,.25);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-row{
-  display:grid;grid-template-columns:64px minmax(0,1fr) auto;
-  gap:9px;align-items:center;width:100%;
-  padding:9px 0;margin:0;border-bottom:1px solid var(--border);
-  box-sizing:border-box;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-preview{
-  width:64px;height:64px;min-width:64px;min-height:64px;
-  border-radius:12px;overflow:hidden;background:var(--card-bg);
-  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-preview img,
-#techniqueModal .exercise-editor-unified .exercise-editor-media-preview video{
-  width:100%;height:100%;object-fit:cover;display:block;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-info{min-width:0}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-info b{
-  display:block;max-width:100%;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-actions{
-  display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-actions button{
-  width:32px;height:32px;min-width:32px;padding:0;margin:0;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:9px;border:1px solid var(--border);background:var(--card-bg);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-actions button[data-delete]{color:var(--negative)}
-#techniqueModal .exercise-editor-unified .exercise-muscle-grid{
-  display:grid;grid-template-columns:1fr;gap:12px;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-options{
-  display:flex;flex-wrap:wrap;gap:7px;padding:9px;
-  border:1px solid var(--border);border-radius:14px;background:var(--input-bg);
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-option{
-  min-height:36px;padding:8px 10px;border-radius:10px;
-  font-size:12px;font-weight:750;box-sizing:border-box;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview{
-  min-height:180px;padding:10px;border:1px solid var(--border);
-  border-radius:16px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;
-}
-#techniqueModal .exercise-editor-unified .exercise-save-btn{
-  position:relative;left:auto;right:auto;bottom:auto;top:auto;
-  width:100%;min-height:52px;margin:18px 0 0;padding:0 16px;
-  display:flex;align-items:center;justify-content:center;
-  border:0;border-radius:15px;background:var(--button-green);color:#fff;
-  font-size:16px;font-weight:900;box-sizing:border-box;
-  box-shadow:0 7px 18px rgba(102,210,102,.18);
 }
 @media(max-width:430px){
-  #techniqueModal .exercise-editor-unified{padding:18px 13px 22px;border-radius:22px}
-  #techniqueModal .exercise-editor-unified .technique-title{font-size:22px}
-  #techniqueModal .exercise-editor-unified .exercise-editor-built-list{grid-template-columns:1fr 1fr}
-  #techniqueModal .exercise-editor-unified .exercise-editor-media-row{grid-template-columns:58px minmax(0,1fr) auto}
-  #techniqueModal .exercise-editor-unified .exercise-editor-media-preview{width:58px;height:58px;min-width:58px}
 }
 
 /* ===== v95: directory search + action geometry ===== */
@@ -3572,256 +1846,6 @@ body.light-mode{
 #exerciseDirectoryContent .directory-search-wrap{position:relative!important}
 #exerciseDirectoryContent .directory-search-clear.hidden{display:none!important}
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* =========================================================
-   v96 — final exercise card + truly growing text fields
-   ========================================================= */
-
-/* ---- VIEW CARD ---- */
-#techniqueModal .exercise-card-unified{
-  width:min(calc(100vw - 24px),560px)!important;
-  max-width:560px!important;
-  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  padding:0!important;
-  border-radius:26px!important;
-  border:1px solid rgba(255,255,255,.09)!important;
-  background:linear-gradient(180deg,rgba(35,35,45,.98),rgba(23,23,31,.99))!important;
-  box-shadow:0 24px 80px rgba(0,0,0,.48)!important;
-}
-#techniqueModal .exercise-card-header{
-  display:flex!important;
-  align-items:flex-start!important;
-  justify-content:space-between!important;
-  gap:12px!important;
-  padding:22px 20px 16px!important;
-}
-#techniqueModal .exercise-card-heading{
-  min-width:0!important;
-  flex:1 1 auto!important;
-}
-#techniqueModal .exercise-card-kicker{
-  font-size:11px!important;
-  font-weight:900!important;
-  letter-spacing:.12em!important;
-  color:var(--button-green)!important;
-  margin-bottom:5px!important;
-}
-#techniqueModal .exercise-card-title{
-  font-size:24px!important;
-  line-height:1.12!important;
-  font-weight:900!important;
-  letter-spacing:-.02em!important;
-  overflow-wrap:anywhere!important;
-  color:var(--text)!important;
-}
-#techniqueModal .exercise-card-group{
-  display:inline-flex!important;
-  align-items:center!important;
-  min-height:28px!important;
-  margin-top:9px!important;
-  padding:4px 10px!important;
-  border:1px solid rgba(102,210,102,.25)!important;
-  border-radius:999px!important;
-  background:rgba(102,210,102,.10)!important;
-  color:var(--button-green)!important;
-  font-size:12px!important;
-  font-weight:800!important;
-}
-#techniqueModal .exercise-card-tabs{
-  margin:0 16px 14px!important;
-  width:calc(100% - 32px)!important;
-  padding:4px!important;
-  border-radius:15px!important;
-  background:rgba(0,0,0,.20)!important;
-  border:1px solid rgba(255,255,255,.07)!important;
-  box-sizing:border-box!important;
-}
-#techniqueModal .exercise-card-tabs .tab{
-  min-height:42px!important;
-  border-radius:11px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-weight:800!important;
-}
-#techniqueModal .exercise-card-tabs .tab.active{
-  background:var(--button-green)!important;
-  color:#fff!important;
-  box-shadow:0 5px 16px rgba(70,180,80,.18)!important;
-}
-#techniqueModal .exercise-card-unified > .tab-content{
-  padding:0 16px 16px!important;
-}
-#techniqueModal .exercise-card-media-wrap,
-#techniqueModal .exercise-card-panel{
-  border:1px solid rgba(255,255,255,.08)!important;
-  background:rgba(255,255,255,.025)!important;
-  border-radius:18px!important;
-  padding:14px!important;
-  box-sizing:border-box!important;
-}
-#techniqueModal .exercise-card-media-wrap{
-  margin-bottom:12px!important;
-}
-#techniqueModal .exercise-card-section-title{
-  margin:0 0 10px!important;
-  font-size:11px!important;
-  font-weight:900!important;
-  letter-spacing:.10em!important;
-  color:var(--subtext)!important;
-}
-#techniqueModal .exercise-card-steps{
-  list-style:none!important;
-  padding:0!important;
-  margin:0!important;
-  display:grid!important;
-  gap:9px!important;
-}
-#techniqueModal .exercise-card-steps li{
-  display:grid!important;
-  grid-template-columns:30px minmax(0,1fr)!important;
-  gap:10px!important;
-  align-items:start!important;
-  margin:0!important;
-  padding:10px!important;
-  border-radius:13px!important;
-  background:rgba(255,255,255,.035)!important;
-  border:1px solid rgba(255,255,255,.055)!important;
-  line-height:1.45!important;
-}
-#techniqueModal .exercise-step-badge{
-  width:30px!important;
-  height:30px!important;
-  border-radius:9px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:rgba(102,210,102,.12)!important;
-  color:var(--button-green)!important;
-  font-weight:900!important;
-}
-#techniqueModal .exercise-card-muscles{
-  display:grid!important;
-  gap:14px!important;
-}
-#techniqueModal .exercise-card-muscle-map{
-  min-height:220px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  padding:12px!important;
-  border-radius:16px!important;
-  background:rgba(255,255,255,.025)!important;
-  border:1px solid rgba(255,255,255,.07)!important;
-  box-sizing:border-box!important;
-}
-#techniqueModal .exercise-card-muscle-chips{
-  display:grid!important;
-  gap:7px!important;
-}
-#techniqueModal .exercise-muscle-label{
-  font-size:11px!important;
-  font-weight:900!important;
-  letter-spacing:.07em!important;
-  color:var(--subtext)!important;
-  margin-top:2px!important;
-}
-#techniqueModal .exercise-chip-row{
-  display:flex!important;
-  flex-wrap:wrap!important;
-  gap:7px!important;
-}
-#techniqueModal .exercise-chip{
-  display:inline-flex!important;
-  align-items:center!important;
-  min-height:30px!important;
-  padding:5px 10px!important;
-  border-radius:999px!important;
-  background:rgba(255,255,255,.06)!important;
-  border:1px solid rgba(255,255,255,.08)!important;
-  font-size:12px!important;
-  font-weight:700!important;
-}
-#techniqueModal .exercise-chip-primary{
-  background:rgba(102,210,102,.12)!important;
-  border-color:rgba(102,210,102,.25)!important;
-  color:var(--button-green)!important;
-}
-#techniqueModal .exercise-card-list{
-  margin:0!important;
-  padding-left:22px!important;
-}
-#techniqueModal .exercise-card-list li{
-  margin:0 0 10px!important;
-  line-height:1.45!important;
-}
-#techniqueModal .exercise-card-footer{
-  padding:0 16px calc(16px + env(safe-area-inset-bottom,0px))!important;
-}
-#techniqueModal .exercise-card-footer .exercise-edit-btn{
-  margin:0!important;
-  min-height:52px!important;
-  border-radius:15px!important;
-  font-size:16px!important;
-  box-shadow:0 8px 20px rgba(70,180,80,.18)!important;
-}
-
-/* ---- EDITOR TEXT FIELDS ---- */
-/* These rules deliberately come last and override the old 38/40/44px
-   legacy rules still present in the historical CSS. */
-#techniqueModal .exercise-editor-unified .exercise-editor-row textarea,
-#techniqueModal .exercise-editor-unified textarea.exercise-step-input,
-#techniqueModal .exercise-editor-unified textarea.exercise-mistake-input,
-#techniqueModal .exercise-editor-unified textarea.exercise-recommendation-input{
-  display:block;
-  width:100%;
-  min-width:0;
-  min-height:48px;
-  height:auto;
-  max-height:none;
-  padding:11px 12px;
-  box-sizing:border-box;
-  border:1px solid var(--border);
-  border-radius:13px;
-  background:var(--card-bg);
-  color:var(--text);
-  font:inherit;
-  font-size:15px;
-  line-height:1.45;
-  resize:none;
-  overflow:hidden;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-row{
-  grid-template-columns:30px minmax(0,1fr) 36px;
-  align-items:start;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-num,
-#techniqueModal .exercise-editor-unified .exercise-editor-remove{
-  margin-top:7px;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-remove{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
 /* Give the editor a little more horizontal room on iPhone. */
 @media(max-width:430px){
   #techniqueModal .exercise-card-title{font-size:21px!important}
@@ -3830,478 +1854,7 @@ body.light-mode{
   #techniqueModal .exercise-card-header{padding-left:16px!important;padding-right:16px!important}
   #techniqueModal .exercise-card-footer{padding-left:12px!important;padding-right:12px!important}
 }
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* =========================================================
-   v97 — unified visual system for EVERY editor tab
-   ========================================================= */
-#techniqueModal .exercise-editor-unified{
-  background:linear-gradient(180deg,rgba(35,35,45,.985),rgba(23,23,31,.995));
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:26px;
-  box-shadow:0 24px 80px rgba(0,0,0,.48);
-}
-#techniqueModal .exercise-editor-unified .technique-title{
-  font-size:24px;
-  line-height:1.12;
-  font-weight:900;
-  letter-spacing:-.02em;
-  padding-right:48px;
-  overflow-wrap:anywhere;
-}
-#techniqueModal .exercise-editor-unified .technique-group{
-  display:inline-flex;
-  align-items:center;
-  min-height:28px;
-  padding:4px 10px;
-  border-radius:999px;
-  background:rgba(102,210,102,.10);
-  border:1px solid rgba(102,210,102,.25);
-  color:var(--button-green);
-  font-size:12px;
-  font-weight:800;
-}
-#techniqueModal .exercise-editor-unified .technique-tabs{
-  padding:4px;
-  border-radius:15px;
-  background:rgba(0,0,0,.20);
-  border:1px solid rgba(255,255,255,.07);
-}
-#techniqueModal .exercise-editor-unified .technique-tabs .tab{
-  min-height:42px;
-  border-radius:11px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
-}
-#techniqueModal .exercise-editor-unified .technique-tabs .tab.active{
-  background:var(--button-green);
-  color:#fff;
-}
-#techniqueModal .exercise-editor-unified .tab-content{
-  padding:14px;
-  margin:0 0 12px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.025);
-  border-radius:18px;
-  box-sizing:border-box;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-section-title{
-  margin:0 0 11px;
-  font-size:11px;
-  line-height:1.2;
-  font-weight:900;
-  letter-spacing:.10em;
-  color:var(--subtext);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-note{
-  margin:0 0 9px;
-  font-size:12px;
-  line-height:1.4;
-  color:var(--subtext);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-row{
-  margin:0 0 9px;
-  padding:8px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:14px;
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-num{
-  width:30px;
-  height:30px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-top:6px;
-  border-radius:9px;
-  background:rgba(102,210,102,.10);
-  color:var(--button-green);
-  font-weight:900;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-remove{
-  width:36px;
-  height:36px;
-  min-width:36px;
-  margin-top:3px;
-  border-radius:10px;
-  background:rgba(255,255,255,.045);
-  border:1px solid rgba(255,255,255,.08);
-  color:var(--negative);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-add{
-  width:100%;
-  min-height:44px;
-  margin:4px 0 14px;
-  border-radius:12px;
-  background:rgba(255,255,255,.045);
-  border:1px dashed rgba(255,255,255,.13);
-  color:var(--text);
-  font-weight:800;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-box{
-  margin-top:12px;
-  padding:14px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  background:rgba(0,0,0,.10);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-list{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  margin:10px 0;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-item{
-  aspect-ratio:1/1;
-  position:relative;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.03);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-item img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-built-delete{
-  position:absolute;
-  top:8px;
-  right:8px;
-  width:34px;
-  height:34px;
-  min-width:34px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(10,10,14,.90);
-  border:1px solid rgba(255,255,255,.14);
-  color:#fff;
-  z-index:20;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-grid{
-  display:grid;
-  gap:12px;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-grid > div:not(.exercise-muscle-preview){
-  padding:12px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:15px;
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-options{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-option{
-  min-height:34px;
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.045);
-  border:1px solid rgba(255,255,255,.08);
-  color:var(--text);
-  font-size:12px;
-  font-weight:750;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-option.active{
-  background:rgba(102,210,102,.12);
-  border-color:rgba(102,210,102,.30);
-  color:var(--button-green);
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview{
-  min-height:250px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:12px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  background:rgba(255,255,255,.025);
-  overflow:hidden;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview svg{
-  width:100%;
-  height:240px;
-  max-width:240px;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-row{
-  margin:0 0 8px;
-  padding:8px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:13px;
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-actions button{
-  border-radius:9px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.045);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-media-actions [data-delete]{
-  color:var(--negative);
-}
-#techniqueModal .exercise-editor-unified .exercise-save-btn{
-  margin-top:14px;
-  min-height:54px;
-  border-radius:15px;
-  font-size:16px;
-  font-weight:900;
-}
-
-/* Restore the silhouette in the new card layout: the old CSS only targeted
-   .ex-guide-map svg, while v96 moved the SVG into .exercise-card-muscle-map. */
-#techniqueModal .exercise-card-muscle-map{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:18px!important;
-  width:100%!important;
-  min-height:240px!important;
-}
-#techniqueModal .exercise-card-muscle-map svg{
-  display:block!important;
-  width:auto!important;
-  height:220px!important;
-  max-width:46%!important;
-  min-width:0!important;
-}
-#techniqueModal .exercise-card-muscle-map .ex-muscle{
-  fill:rgba(142,142,147,.28)!important;
-  stroke:none!important;
-}
-#techniqueModal .exercise-card-muscle-map .ex-muscle.m-primary{
-  fill:var(--button-green)!important;
-}
-#techniqueModal .exercise-card-muscle-map .ex-muscle.m-secondary{
-  fill:color-mix(in srgb,var(--button-green) 45%,rgba(142,142,147,.3))!important;
-}
-#techniqueModal .exercise-card-muscle-map .ex-body-base{
-  fill:rgba(142,142,147,.13)!important;
-  stroke:none!important;
-}
-
-/* The user-facing name is never allowed to inherit accidental lowercase
-   transformations from search/filter styles. */
-#techniqueModal .exercise-card-title,
-#techniqueModal .exercise-editor-unified .technique-title,
-#exerciseDirectoryContent .directory-item-name{
-  text-transform:none;
-}
 @media(max-width:430px){
-  #techniqueModal .exercise-muscle-preview svg{height:210px!important}
-  #techniqueModal .exercise-card-muscle-map{gap:8px!important}
-  #techniqueModal .exercise-card-muscle-map svg{height:200px!important}
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* =========================================================
-   v98 — no whitespace stripping + one visual language
-   ========================================================= */
-
-/* Display text NEVER gets technical normalization. */
-#techniqueModal .exercise-card-unified,
-#techniqueModal .exercise-editor-unified{
-  text-transform:none;
-}
-
-/* Every editor tab uses the same panel/card geometry. */
-#techniqueModal .exercise-editor-unified .tab-content{
-  width:100%;
-  box-sizing:border-box;
-  margin:0 0 12px;
-  padding:14px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-section,
-#techniqueModal .exercise-editor-unified .exercise-editor-advice,
-#techniqueModal .exercise-editor-unified .exercise-editor-recommendations,
-#techniqueModal .exercise-editor-unified .exercise-editor-mistakes{
-  width:100%;
-  box-sizing:border-box;
-  padding:14px;
-  margin:0 0 12px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  background:rgba(255,255,255,.025);
-}
-
-/* All textarea cells occupy the full available width. */
-#techniqueModal .exercise-editor-unified textarea{
-  display:block;
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  box-sizing:border-box;
-  min-height:48px;
-  height:auto;
-  padding:11px 12px;
-  margin:0;
-  border-radius:13px;
-  border:1px solid var(--border);
-  background:var(--card-bg);
-  color:var(--text);
-  font:inherit;
-  font-size:15px;
-  line-height:1.45;
-  text-align:left;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-  word-break:normal;
-  resize:none;
-  overflow:hidden;
-}
-
-/* Each advice/recommendation/mistake row has identical dimensions and alignment. */
-#techniqueModal .exercise-editor-unified .exercise-editor-row{
-  width:100%;
-  display:grid;
-  grid-template-columns:30px minmax(0,1fr) 36px;
-  align-items:start;
-  gap:8px;
-  box-sizing:border-box;
-  padding:8px;
-  margin:0 0 9px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:14px;
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-row > *{
-  min-width:0;
-  box-sizing:border-box;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-num{
-  width:30px;
-  height:30px;
-  margin-top:6px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:9px;
-  background:rgba(102,210,102,.10);
-  color:var(--button-green);
-  font-weight:900;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-remove{
-  width:36px;
-  height:36px;
-  min-width:36px;
-  margin-top:3px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
-  box-sizing:border-box;
-}
-
-/* Add buttons are the same style everywhere. */
-#techniqueModal .exercise-editor-unified button.exercise-editor-add,
-#techniqueModal .exercise-editor-unified .exercise-editor-add{
-  width:100%;
-  min-height:44px;
-  box-sizing:border-box;
-  border-radius:13px;
-  margin:4px 0 14px;
-  font-weight:800;
-}
-
-/* Section headings have identical typography. */
-#techniqueModal .exercise-editor-unified .exercise-editor-section-title,
-#techniqueModal .exercise-editor-unified .exercise-card-section-title{
-  width:100%;
-  box-sizing:border-box;
-  margin:0 0 10px;
-  font-size:11px;
-  line-height:1.2;
-  font-weight:900;
-  letter-spacing:.10em;
-  color:var(--subtext);
-}
-
-/* Muscles editor: same panel language as every other tab. */
-#techniqueModal .exercise-editor-unified .exercise-muscle-grid{
-  width:100%;
-  display:grid;
-  gap:12px;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview{
-  width:100%;
-  min-height:240px;
-  box-sizing:border-box;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:12px;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview svg{
-  width:100%;
-  max-width:240px;
-  height:230px;
-}
-
-/* Advice/recommendation view cards match execution cards. */
-#techniqueModal .exercise-card-unified .exercise-card-panel,
-#techniqueModal .exercise-card-unified .exercise-card-media-wrap{
-  width:100%!important;
-  box-sizing:border-box!important;
-}
-#techniqueModal .exercise-card-unified .exercise-card-list,
-#techniqueModal .exercise-card-unified .exercise-card-steps{
-  width:100%!important;
-  box-sizing:border-box!important;
-}
-#techniqueModal .exercise-card-unified .exercise-card-list li{
-  width:100%!important;
-  box-sizing:border-box!important;
-  padding:10px!important;
-  margin:0 0 9px!important;
-  border:1px solid rgba(255,255,255,.055)!important;
-  border-radius:13px!important;
-  background:rgba(255,255,255,.035)!important;
-  line-height:1.45!important;
-}
-
-/* No CSS transformation may change exercise names. */
-#techniqueModal .exercise-card-title,
-#techniqueModal .exercise-card-heading,
-#techniqueModal .exercise-editor-unified .technique-title,
-#techniqueModal .exercise-editor-unified input,
-#exerciseDirectoryContent .directory-item-name{
-  text-transform:none;
 }
 
 /* Mobile: keep every cell inside the viewport. */
@@ -4316,294 +1869,8 @@ body.light-mode{
     min-width:34px;
   }
 }
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* =========================================================
-   v99 — ONE DATA/TYPE/VISUAL STANDARD FOR EXERCISE CARDS
-   ========================================================= */
-#techniqueModal .exercise-card-unified,
-#techniqueModal .exercise-editor-unified{
-  font-family:inherit;
-  font-size:15px;
-  line-height:1.45;
-  letter-spacing:0;
-  text-transform:none;
-}
-#techniqueModal .exercise-card-unified *,
-#techniqueModal .exercise-editor-unified *{
-  box-sizing:border-box;
-  text-transform:none;
-}
-#techniqueModal .exercise-card-unified .exercise-card-title,
-#techniqueModal .exercise-editor-unified .technique-title{
-  font-size:24px;
-  line-height:1.12;
-  font-weight:900;
-  letter-spacing:-.02em;
-  color:var(--text);
-}
-#techniqueModal .exercise-card-unified .exercise-card-section-title,
-#techniqueModal .exercise-editor-unified .exercise-editor-section-title{
-  font-size:11px;
-  line-height:1.2;
-  font-weight:900;
-  letter-spacing:.10em;
-  color:var(--subtext);
-}
-#techniqueModal .exercise-card-unified .exercise-card-panel,
-#techniqueModal .exercise-card-unified .exercise-card-media-wrap,
-#techniqueModal .exercise-editor-unified .tab-content,
-#techniqueModal .exercise-editor-unified .exercise-editor-media-box{
-  width:100%;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-card-unified .exercise-card-panel,
-#techniqueModal .exercise-card-unified .exercise-card-media-wrap{
-  padding:14px!important;
-}
-#techniqueModal .exercise-card-unified .exercise-card-list,
-#techniqueModal .exercise-card-unified .exercise-card-steps,
-#techniqueModal .exercise-card-unified .exercise-card-numbered-list{
-  width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  list-style:none!important;
-  display:grid!important;
-  gap:9px!important;
-}
-#techniqueModal .exercise-card-unified .exercise-card-steps li,
-#techniqueModal .exercise-card-unified .exercise-card-numbered-list li{
-  width:100%!important;
-  min-width:0!important;
-  display:grid!important;
-  grid-template-columns:30px minmax(0,1fr)!important;
-  gap:10px!important;
-  align-items:start!important;
-  margin:0!important;
-  padding:10px!important;
-  border-radius:13px!important;
-  border:1px solid rgba(255,255,255,.055)!important;
-  background:rgba(255,255,255,.035)!important;
-  font-size:15px!important;
-  line-height:1.45!important;
-}
-#techniqueModal .exercise-card-unified .exercise-step-badge,
-#techniqueModal .exercise-card-unified .exercise-card-number{
-  width:30px!important;
-  height:30px!important;
-  min-width:30px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  border-radius:9px!important;
-  background:rgba(102,210,102,.12)!important;
-  color:var(--button-green)!important;
-  font-size:12px!important;
-  font-weight:900!important;
-}
-#techniqueModal .exercise-card-unified .exercise-card-numbered-list li > span:last-child,
-#techniqueModal .exercise-card-unified .exercise-card-steps li > span:last-child{
-  min-width:0!important;
-  width:100%!important;
-  overflow-wrap:anywhere!important;
-  word-break:normal!important;
-  text-align:left!important;
-}
-
-/* Editor rows: same number / text / delete geometry in ALL tabs. */
-#techniqueModal .exercise-editor-unified .exercise-editor-row{
-  width:100%;
-  display:grid;
-  grid-template-columns:30px minmax(0,1fr) 36px;
-  gap:8px;
-  align-items:start;
-  padding:8px;
-  margin:0 0 9px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.025);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-num{
-  width:30px;
-  height:30px;
-  min-width:30px;
-  margin-top:6px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:9px;
-  background:rgba(102,210,102,.12);
-  color:var(--button-green);
-  font-size:12px;
-  font-weight:900;
-}
-#techniqueModal .exercise-editor-unified textarea{
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  min-height:48px;
-  height:auto;
-  margin:0;
-  padding:11px 12px;
-  border-radius:13px;
-  border:1px solid var(--border);
-  background:var(--card-bg);
-  color:var(--text);
-  font:inherit;
-  font-size:15px;
-  line-height:1.45;
-  text-align:left;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-  resize:none;
-  overflow:hidden;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-remove{
-  width:36px;
-  height:36px;
-  min-width:36px;
-  margin-top:3px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
-  color:var(--negative);
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-add{
-  width:100%;
-  min-height:44px;
-  margin:4px 0 14px;
-  border-radius:13px;
-  font-size:14px;
-  font-weight:800;
-}
-#techniqueModal .exercise-editor-unified .exercise-editor-note{
-  width:100%;
-  font-size:12px;
-  line-height:1.4;
-  color:var(--subtext);
-}
-
-/* Unified media and muscle panels. */
-#techniqueModal .exercise-editor-unified .exercise-editor-media-box,
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview{
-  padding:14px;
-  border-radius:16px;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview{
-  min-height:250px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-#techniqueModal .exercise-editor-unified .exercise-muscle-preview svg{
-  display:block;
-  width:100%;
-  max-width:240px;
-  height:230px;
-}
-
-/* Recommendations and mistakes are not allowed to fall back to the legacy
-   "plain text block" look. */
-#techniqueModal .exercise-card-unified #exerciseViewTips .exercise-card-panel{
-  display:grid!important;
-  gap:12px!important;
-}
-#techniqueModal .exercise-card-unified #exerciseViewTips .exercise-card-section-title{
-  margin-top:2px!important;
-}
 @media(max-width:430px){
-  #techniqueModal .exercise-card-unified .exercise-card-title,
-  #techniqueModal .exercise-editor-unified .technique-title{
-    font-size:21px;
-  }
-  #techniqueModal .exercise-editor-unified .exercise-editor-row{
-    grid-template-columns:28px minmax(0,1fr) 34px;
-    gap:7px;
-    padding:7px;
-  }
-  #techniqueModal .exercise-editor-unified .exercise-editor-num{
-    width:28px;height:28px;min-width:28px;
-  }
-  #techniqueModal .exercise-editor-unified .exercise-editor-remove{
-    width:34px;min-width:34px;
-  }
 }
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-#techniqueModal .exercise-card-unified .exercise-card-numbered-list{
-  width:100%!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr)!important;
-  gap:9px!important;
-}
-#techniqueModal .exercise-card-unified .exercise-card-numbered-list li{
-  width:100%!important;
-  display:grid!important;
-  grid-template-columns:30px minmax(0,1fr)!important;
-  align-items:start!important;
-  gap:10px!important;
-  padding:10px!important;
-  margin:0!important;
-  min-height:50px!important;
-  border:1px solid rgba(255,255,255,.055)!important;
-  border-radius:13px!important;
-  background:rgba(255,255,255,.035)!important;
-}
-#techniqueModal .exercise-card-unified .exercise-card-number{
-  width:30px!important;height:30px!important;min-width:30px!important;
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  border-radius:9px!important;
-  background:rgba(102,210,102,.12)!important;
-  color:var(--button-green)!important;
-  font-size:12px!important;font-weight:900!important;
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-#exerciseDuplicateModal{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 14px)!important;background:rgba(0,0,0,.78)!important;isolation:isolate!important;}
-#exerciseDuplicateModal.hidden{display:none!important;pointer-events:none!important;}
-#exerciseDuplicateModal .exercise-dup-sheet{position:relative!important;width:min(100%,380px)!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;background:var(--card-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:18px!important;padding:17px!important;box-shadow:0 18px 55px rgba(0,0,0,.5)!important;}
 .exercise-dup-close{position:absolute!important;right:10px!important;top:10px!important;width:34px!important;height:34px!important;min-width:34px!important;margin:0!important;padding:0!important;border-radius:10px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--subtext)!important;font-size:21px!important;}
 .exercise-dup-title{font-size:16px!important;font-weight:800!important;line-height:1.25!important;padding-right:42px!important;}
 .exercise-dup-sub,.exercise-dup-reason{font-size:12px!important;line-height:1.4!important;color:var(--subtext)!important;}
@@ -4620,33 +1887,11 @@ body.light-mode{
 .exercise-dup-actions .dup-cancel{background:var(--button-gray)!important;color:var(--text)!important;}
 .exercise-dup-actions .dup-add{background:var(--accent-gradient)!important;color:#fff!important;}
 
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
 
 
 
 #foodScreen>.food-main-tabs,#foodScreen>.tab-content{scroll-margin-top:calc(58px + env(safe-area-inset-top,0px))!important;}
 .exercise-edit-btn{display:none!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -4659,118 +1904,8 @@ body.light-mode{
 .food-preset-list{max-height:260px!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
 .food-preset-item{min-height:44px!important;display:flex!important;align-items:center!important;box-sizing:border-box!important;}
 .directory-manual-badge{display:inline-flex!important;align-items:center!important;margin-left:7px!important;padding:2px 6px!important;border-radius:7px!important;background:rgba(52,199,89,.12)!important;color:var(--button-green)!important;font-size:10px!important;font-weight:800!important;white-space:nowrap!important;vertical-align:middle!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* Final calibration: every search clear button is centered inside its own input. */
-#foodNameSearchWrap,
-#exercisePickerSearchWrap,
-#progressExercisePickerSearchWrap,
-#replaceExerciseModal .replace-search-wrap,
-#exerciseDirectoryScreen .directory-search-wrap{
-  position:relative!important;
-  width:100%!important;
-  display:flex!important;
-  align-items:center!important;
-  box-sizing:border-box!important;
-}
-#foodNameSearchWrap input,
-#exercisePickerSearchWrap input,
-#progressExercisePickerSearchWrap input,
-#replaceExerciseModal #replaceExerciseSearch,
-#exerciseDirectoryScreen .directory-search{
-  width:100%!important;
-  min-width:0!important;
-  box-sizing:border-box!important;
-  padding-right:50px!important;
-}
-#foodNameSearchWrap .v66-search-clear,
-#exercisePickerSearchWrap .v66-search-clear,
-#progressExercisePickerSearchWrap .v66-search-clear,
-#replaceExerciseModal .replace-search-clear,
-#exerciseDirectoryScreen .directory-search-clear{
-  position:absolute!important;
-  right:7px!important;
-  top:50%!important;
-  transform:translateY(-50%)!important;
-  width:32px!important;
-  height:32px!important;
-  min-width:32px!important;
-  min-height:32px!important;
-  margin:0!important;
-  padding:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  line-height:1!important;
-  font-size:20px!important;
-  border-radius:9px!important;
-  z-index:100!important;
-  box-sizing:border-box!important;
-}
 #exerciseDirectoryScreen .directory-search-clear{right:7px!important;}
-#replaceExerciseModal .replace-search-clear{border:0!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-#techniqueModal .manual-media-editor{margin-top:12px;padding:13px;border:1px solid var(--border);border-radius:16px;background:var(--input-bg);}
-#techniqueModal .manual-media-title{font-size:13px;font-weight:900;letter-spacing:.04em;color:var(--text);margin-bottom:5px;}
-#techniqueModal .manual-media-note{font-size:11.5px;color:var(--subtext);line-height:1.35;margin-bottom:9px;}
-#techniqueModal .manual-media-add{width:100%;min-height:44px;margin:0!important;border-radius:12px!important;background:var(--card-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;font-size:13px!important;font-weight:800!important;}
-#techniqueModal .manual-media-input{display:none!important;}
-#techniqueModal .manual-media-list{display:grid;gap:8px;margin-top:9px;}
-#techniqueModal .manual-media-row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:9px;padding:8px;border-radius:13px;background:var(--card-bg);border:1px solid var(--border);}
-#techniqueModal .manual-media-preview{width:72px;height:54px;border-radius:9px;overflow:hidden;background:var(--input-bg);display:flex;align-items:center;justify-content:center;}
-#techniqueModal .manual-media-preview img,#techniqueModal .manual-media-preview video{display:block;width:100%;height:100%;object-fit:cover;}
-#techniqueModal .manual-media-meta{min-width:0;}
-#techniqueModal .manual-media-name{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#techniqueModal .manual-media-type{font-size:10px;color:var(--subtext);margin-top:3px;}
-#techniqueModal .manual-media-actions{display:flex;gap:4px;}
-#techniqueModal .manual-media-action{width:31px!important;height:31px!important;min-width:31px!important;margin:0!important;padding:0!important;border-radius:9px!important;background:var(--input-bg)!important;color:var(--text)!important;font-size:13px!important;}
-#techniqueModal .manual-media-action.delete{color:var(--negative)!important;}
-#techniqueModal .manual-media-view-list{display:grid;gap:10px;margin-bottom:12px;}
-#techniqueModal .manual-media-view-item{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--input-bg);}
-#techniqueModal .manual-media-view-item img,#techniqueModal .manual-media-view-item video{display:block;width:100%;max-height:54dvh;object-fit:contain;background:transparent;}
-#techniqueModal .manual-media-view-caption{padding:8px 10px;color:var(--subtext);font-size:11px;}
-#techniqueModal .manual-media-empty{padding:12px;border:1px dashed var(--border);border-radius:12px;color:var(--subtext);font-size:12px;text-align:center;}
 @media(max-width:430px){
-  #techniqueModal .manual-media-row{grid-template-columns:64px minmax(0,1fr) auto;}
-  #techniqueModal .manual-media-preview{width:64px;height:50px;}
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
 }
 
 
@@ -4805,21 +1940,6 @@ body.light-mode{
 }
 #exerciseDirectoryContent .directory-item .directory-edit{font-size:13px!important;}
 #exerciseDirectoryContent .directory-item .directory-chevron{font-size:19px!important;}
-
-/* Built-in + custom media can coexist. */
-#techniqueModal .manual-built-in-media{
-  position:relative!important;display:grid!important;gap:8px!important;
-  margin:0 0 12px!important;padding:0!important;
-}
-#techniqueModal .manual-built-in-media .tech-phase{position:relative;}
-#techniqueModal .manual-built-in-media .tech-phase img{
-  width:100%;display:block;border-radius:16px;
-  object-fit:contain;background:var(--input-bg);
-}
-#techniqueModal .manual-built-in-media-label{
-  font-size:12px!important;font-weight:800!important;color:var(--subtext)!important;
-  margin-bottom:0!important;
-}
 .v82-media-remove{
   position:absolute!important;right:8px!important;top:8px!important;
   width:30px!important;height:30px!important;min-width:30px!important;
@@ -4828,15 +1948,6 @@ body.light-mode{
   background:rgba(20,20,24,.78)!important;color:#fff!important;
   font-size:19px!important;line-height:1!important;font-weight:800!important;
   z-index:4!important;box-shadow:0 3px 10px rgba(0,0,0,.25)!important;
-}
-#techniqueModal .manual-editor-built-in-media{
-  position:relative!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:8px!important;margin:8px 0 12px!important;
-}
-#techniqueModal .manual-editor-built-in-media .v82-editor-media-item{position:relative!important;}
-#techniqueModal .manual-editor-built-in-media img{
-  width:100%!important;aspect-ratio:1/1!important;object-fit:contain!important;
-  border-radius:14px!important;background:var(--input-bg)!important;display:block!important;
 }
 
 /* Workout carousel: centered two-line names, no clipping/ellipsis. */
@@ -4878,32 +1989,10 @@ body.light-mode{
 #exerciseDirectoryContent .directory-item .universal-directory-edit{grid-column:2!important;font-size:16px!important;}
 #exerciseDirectoryContent .directory-item .directory-edit{grid-column:3!important;font-size:13px!important;}
 #exerciseDirectoryContent .directory-item .directory-delete{grid-column:4!important;font-size:17px!important;}
-#techniqueModal .manual-media-note::after{content:' Новые материалы добавляются к уже существующим, а не заменяют их.';color:var(--text)!important;font-weight:700!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
 #workoutScreen #exerciseStrip .exercise-dot-label span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere!important;text-align:center!important;}
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -4920,45 +2009,11 @@ body.light-mode{
   border:1px solid var(--border)!important;box-shadow:0 10px 30px rgba(0,0,0,.32)!important;
   font-size:12px!important;line-height:1.35!important;font-weight:650!important;text-align:center!important;
 }
-.confirm-modal,.date-modal,.catalog-modal,.food-modal,.manual-workout-modal,.achievements-modal,.workout-detail-modal,.theme-modal,.exercise-modal{
-}
-.confirm-modal-content,.date-modal-content,.catalog-modal-content,.food-modal-content,.manual-workout-content,.achievements-content,.workout-detail-content,.theme-modal-content,.exercise-modal-content{
-  width:min(94%,380px)!important;max-width:380px!important;
-  box-sizing:border-box!important;padding:18px!important;border-radius:18px!important;
-  background:var(--card-bg)!important;color:var(--text)!important;
-  border:1px solid var(--border)!important;box-shadow:0 18px 55px rgba(0,0,0,.42)!important;
-}
-.confirm-modal-content button,.date-modal-content button,.catalog-modal-content button,.food-modal-content button,.manual-workout-content button,.achievements-content button,.workout-detail-content button,.theme-modal-content button{
-  min-height:42px!important;height:auto!important;padding:9px 11px!important;
-  border-radius:11px!important;font-size:13px!important;line-height:1.2!important;font-weight:700!important;
-}
-.confirm-modal-content [style*="font-size:22px"],.confirm-modal-content [style*="font-size:21px"],.confirm-modal-content [style*="font-size:20px"],
-.date-modal-content [style*="font-size:22px"],.date-modal-content [style*="font-size:21px"],.date-modal-content [style*="font-size:20px"],
-.catalog-modal-content [style*="font-size:22px"],.catalog-modal-content [style*="font-size:21px"],.catalog-modal-content [style*="font-size:20px"],
-.food-modal-content [style*="font-size:22px"],.food-modal-content [style*="font-size:21px"],.food-modal-content [style*="font-size:20px"],
-.manual-workout-content [style*="font-size:22px"],.manual-workout-content [style*="font-size:21px"],.manual-workout-content [style*="font-size:20px"],
-.achievements-content [style*="font-size:22px"],.achievements-content [style*="font-size:21px"],.achievements-content [style*="font-size:20px"]{
-  font-size:17px!important;line-height:1.2!important;font-weight:800!important;
-}
-.confirm-modal-content [style*="font-size:14px"],.confirm-modal-content [style*="font-size:13px"],.confirm-modal-content [style*="font-size:12px"]{
-  font-size:12px!important;line-height:1.4!important;
-}
 /* Finish-workout confirmation follows exactly the same compact typography. */
 .finish-confirm-title{font-size:17px!important;line-height:1.2!important;font-weight:800!important;}
 .finish-confirm-text{font-size:12px!important;line-height:1.4!important;}
 .finish-confirm-actions{gap:7px!important;}
 .finish-confirm-actions button{min-height:42px!important;font-size:13px!important;border-radius:11px!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -4969,24 +2024,6 @@ body.light-mode{
 .system-confirm-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:13px!important;}
 .system-confirm-actions button{min-height:42px!important;height:42px!important;margin:0!important;padding:8px 10px!important;border-radius:11px!important;font-size:13px!important;font-weight:700!important;}
 .finish-confirm-icon{display:none!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* V126: single interaction contract. No focus/touch/overlay patching.
-   Safari owns focus, keyboard, click synthesis and scrolling. */
-#app>div.hidden,[id$="Modal"].hidden,.theme-modal.hidden,.exercise-modal.hidden,.date-modal.hidden,.confirm-modal.hidden,.workout-detail-modal.hidden,.manual-workout-modal.hidden,.achievements-modal.hidden,.food-modal.hidden,.catalog-modal.hidden,.technique-modal.hidden{pointer-events:none!important;visibility:hidden!important;}
 /* Workout controls use native iOS hit-testing. No synthetic z-index/touch hacks. */
 #workoutScreen input,#workoutScreen button{pointer-events:auto!important;touch-action:auto!important;}
 #workoutScreen .workout-action-grid button,#workoutScreen .workout-bottom-action,#workoutScreen .workout-close,#workoutScreen .set-done-btn,#workoutScreen .set-delete-btn{position:static!important;z-index:auto!important;}
@@ -4996,17 +2033,6 @@ body.light-mode{
 #workoutScreen .workout-action-grid button{grid-template-columns:30px minmax(0,1fr) 16px!important;min-height:68px!important;overflow:visible!important;}
 /* Native file-picker activation on iOS: label -> input, no synthetic .click(). */
 .ftracker-import-trigger{width:100%!important;border-radius:14px!important;background:var(--button-gray)!important;color:var(--text)!important;font-size:17px!important;font-weight:600!important;padding:14px!important;}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -5121,86 +2147,8 @@ body.light-mode{
   overflow-wrap:normal!important;
   word-break:normal!important;
 }
-
-/* FTracker PWA VIEWPORT CLEAN 02 */
-html, body {
-  margin:0;
-  padding:0;
-  width:100%;
-  min-height:100%;
-  overflow-x:hidden;
-  -webkit-text-size-adjust:100%;
-}
-body {
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-}
-#app, #app.container {
-  position:relative !important;
-  width:100% !important;
-  max-width:600px !important;
-  min-height:100dvh !important;
-  min-height:100dvh !important;
-  height:auto !important;
-  overflow:visible !important;
-  display:flex;
-  flex-direction:column;
-}
-#app>div.hidden { display:none !important; }
-#app>div>.screen-header {
-  position:sticky !important;
-  top:0 !important;
-  z-index:5000 !important;
-  background:var(--bg,#000) !important;
-}
-#app [id$="Modal"]:not(.hidden),
-#app .theme-modal:not(.hidden),
-#app .exercise-modal:not(.hidden),
-#app .date-modal:not(.hidden),
-#app .confirm-modal:not(.hidden),
-#app .workout-detail-modal:not(.hidden),
-#app .manual-workout-modal:not(.hidden),
-#app .achievements-modal:not(.hidden),
-#app .food-modal:not(.hidden),
-#app .catalog-modal:not(.hidden),
-#app .technique-modal:not(.hidden) {
-  height:100% !important;
-  max-height:100% !important;
-}
-@media (display-mode:standalone){
-  html, body, #app { height:auto !important; min-height:100% !important; }
-}
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
-
-
-
-
-/* v62: active layer owns scrolling */
-body.modal-open, body.layer-locked { overflow:hidden !important; }
-[data-modal], .modal-layer, .food-modal, .exercise-modal, .catalog-modal, .workout-detail-modal { overscroll-behavior:contain; }
 .active-window-layer { z-index:9999 !important; pointer-events:auto !important; }
 .background-locked { pointer-events:none !important; overflow:hidden !important; }
-
-/* v67 header alignment only: safe area + stable header layout */
-.screen-header {
-  box-sizing: border-box;
-  min-height: 56px;
-  padding: calc(env(safe-area-inset-top, 20px) + 8px) 0 8px 0 !important;
-  align-items: center;
-}
-.screen-header button {
-  align-self: center;
-}
 
 
 
@@ -5215,164 +2163,11 @@ body.modal-open, body.layer-locked { overflow:hidden !important; }
   --safe-left: env(safe-area-inset-left, 0px);
 }
 
-html{
-  width:100%;
-  min-height:100%;
-  background:var(--bg, #000);
-  overscroll-behavior:none;
-}
-
-body{
-  width:100%;
-  min-height:100dvh;
-  margin:0;
-  padding:0;
-  overflow-x:hidden;
-}
-
-.safe-area{
-  width:100%;
-  min-height:100dvh;
-  padding:
-    var(--safe-top)
-    var(--safe-right)
-    var(--safe-bottom)
-    var(--safe-left);
-}
-
-.safe-area > #app{
-  width:100%;
-  max-width:600px;
-  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom));
-  margin:0 auto;
-  padding:16px;
-  position:relative;
-}
-
-#app > [id$="Screen"]{
-  width:100%;
-  min-width:0;
-}
-
-/* One AppBar geometry for all ordinary screens. */
-.screen-header{
-  position:sticky !important;
-  top:var(--safe-top) !important;
-  z-index:100 !important;
-  width:100%;
-  min-height:52px;
-  margin:0 0 12px !important;
-  padding:6px 0 !important;
-  display:grid !important;
-  grid-template-columns:minmax(76px,1fr) auto minmax(76px,1fr) !important;
-  align-items:center !important;
-  gap:8px !important;
-  background:var(--bg) !important;
-  box-shadow:none !important;
-}
-
-.screen-header > .title,
-.screen-header .section-title{
-  grid-column:2;
-  grid-row:1;
-  justify-self:center;
-  min-width:0;
-  max-width:min(68vw,420px);
-  margin:0 !important;
-  font-size:24px !important;
-  line-height:1.15 !important;
-  text-align:center !important;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.screen-header > button:first-child{
-  grid-column:1;
-  grid-row:1;
-  justify-self:start;
-  width:auto !important;
-  min-width:76px;
-  min-height:44px;
-  margin:0 !important;
-  padding:10px 14px !important;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.screen-header .screen-header-spacer{
-  grid-column:3;
-  grid-row:1;
-  display:block;
-  width:100%;
-  min-width:76px;
-}
-
-/* Cards use one spacing system. */
-#app .card{
-  width:100%;
-  min-width:0;
-  padding:16px !important;
-  margin:0 !important;
-  border-radius:16px;
-}
-
-#app > [id$="Screen"] > .card,
-#app > [id$="Screen"] > * + .card{
-  margin-top:12px !important;
-}
-
-#app > #homeScreen .card,
-#app > #workoutScreen .card{
-  margin-bottom:0 !important;
-}
-
-/* Keep list rows in normal flow; use flex/grid rather than absolute placement. */
-.directory-list,
-.measurement-manager-list,
-.exercise-dup-list,
-.order-position-list,
-.progress-picker-list,
-.replace-exercise-list,
-.catalog-modal-list,
-.body-comparison-list{
-  width:100%;
-  min-width:0;
-  flex-direction:column !important;
-  gap:8px !important;
-}
-
-.directory-list > *,
-.measurement-manager-list > *,
-.exercise-dup-list > *,
-.order-position-list > *,
-.progress-picker-list > *,
-.replace-exercise-list > *,
-.catalog-modal-list > *,
-.body-comparison-list > *{
-  min-width:0;
-  width:100%;
-}
-
 .exercise-editor-built-list{
   position:static ;
   display:grid ;
   grid-template-columns:repeat(2,minmax(0,1fr)) ;
   gap:10px ;
-}
-
-/* Center controls consistently. */
-#app button,
-#app label,
-#app .set-row,
-#app .food-item,
-#app .measurement-item,
-#app .directory-row,
-#app .directory-item,
-#app .program-row,
-#app .exercise-row{
-  min-width:0;
 }
 
 .set-row,
@@ -5432,39 +2227,7 @@ input[type="checkbox"],
   gap:12px;
 }
 
-/* Prevent horizontal overflow from long labels or controls. */
-#app img,
-#app video,
-#app canvas,
-#app svg{
-  max-width:100%;
-}
-
-#app input,
-#app select,
-#app textarea{
-  max-width:100%;
-}
-
 @media (max-width:600px){
-  .safe-area > #app{
-    padding:12px;
-  }
-
-  .screen-header{
-    grid-template-columns:minmax(72px,1fr) auto minmax(72px,1fr) !important;
-  }
-
-  .screen-header > .title,
-  .screen-header .section-title{
-    font-size:22px !important;
-    max-width:62vw;
-  }
-
-  .screen-header > button:first-child{
-    min-width:72px;
-    padding-inline:10px !important;
-  }
 
   .exercise-editor-built-list{
     grid-template-columns:1fr ;
@@ -5488,58 +2251,8 @@ input[type="checkbox"],
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
 }
-html{
-  min-height:100%;
-  background:var(--bg);
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-}
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-#app::-webkit-scrollbar,
-*::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
 *{scrollbar-width:none;-ms-overflow-style:none}
-body{
-  min-height:100dvh;
-  padding:0!important;
-  margin:0!important;
-  background:var(--bg)!important;
-  overflow-x:hidden!important;
-}
-.safe-area{
-  min-height:100dvh;
-  padding:var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background:var(--bg);
-  box-sizing:border-box;
-}
-.safe-area>.container,#app.container{
-  width:100%;
-  max-width:600px;
-  min-height:calc(100dvh - var(--safe-top) - var(--safe-bottom));
-  margin:0 auto;
-  padding:16px;
-  box-sizing:border-box;
-}
-#app>[id$="Screen"]{width:100%;min-width:0}
 .card{margin-bottom:12px}
-.screen-header{
-  display:grid!important;
-  grid-template-columns:minmax(72px,1fr) minmax(0,auto) minmax(72px,1fr)!important;
-  align-items:center!important;
-  gap:8px!important;
-  min-height:52px;
-  padding:8px 0!important;
-  margin-bottom:12px!important;
-}
-.screen-header>.title,.screen-header>.section-title{
-  min-width:0;
-  margin:0!important;
-  text-align:center!important;
-  justify-self:center;
-  overflow-wrap:anywhere;
-}
-.screen-header>button:first-child{justify-self:start}
-.screen-header>.screen-header-spacer{display:block;width:100%;min-width:0}
 .program-v5-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin-top:10px!important}
 .program-v5-actions>.program-v5-add{min-width:0!important;min-height:46px!important;margin:0!important}
 .program-v5-actions>.program-delete-btn{
@@ -5645,67 +2358,10 @@ body{
 
 
 <style id="ftracker-pwa-clean-v1.0.10">
-#homeScreen{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  position:relative;
-  padding-top:env(safe-area-inset-top, 20px);
-  padding-bottom:env(safe-area-inset-bottom, 20px);
-  box-sizing:border-box;
-}
 #programList{
   flex:1;
   overflow-y:auto;
   min-height:0;
-}
-
-#techniqueModal,
-#exerciseModal,
-#workoutDetailModal{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:200;
-  background:var(--modal-overlay);
-}
-
-.theme-modal,
-.exercise-modal,
-.date-modal,
-.confirm-modal,
-.workout-detail-modal,
-.manual-workout-modal,
-.achievements-modal,
-.food-modal,
-.catalog-modal,
-.technique-modal,
-.modal{
-  position:fixed;
-  inset:0;
-  z-index:200;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:var(--modal-overlay);
-}
-
-.theme-modal-content,
-.exercise-modal-content,
-.date-modal-content,
-.confirm-modal-content,
-.workout-detail-content,
-.manual-workout-content,
-.achievements-content,
-.food-modal-content,
-.catalog-modal-content,
-.technique-modal-content{
-  position:relative;
-  max-height:85dvh;
-  overflow-y:auto;
 }
 
 .close-btn,
@@ -5717,19 +2373,88 @@ body{
   z-index:100;
 }
 
-#techniqueModal .exercise-unified-media,
-#techniqueModal .exercise-media-gallery,
-#techniqueModal .exercise-media-view,
-#techniqueModal .exercise-photo,
-#techniqueModal .exercise-animation,
-#techniqueModal .exercise-media-view img,
-#techniqueModal .exercise-media-view video,
-#techniqueModal .tech-phase img{
-  display:block;
-  width:100%;
-  max-height:54dvh;
-  object-fit:contain;
+
+/* === ГЛОБАЛЬНЫЙ ФИКС ДЛЯ iOS PWA === */
+
+html, body {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: #000 !important;
 }
+
+#app {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
+  background: #000 !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+#app > div {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 20px 16px 30px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+#app > .hidden {
+  display: none !important;
+}
+
+#app .screen-header {
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  min-height: 50px !important;
+  margin: 0 0 15px !important;
+  padding: 15px 0 10px !important;
+  background: #000 !important;
+  z-index: 100 !important;
+}
+
+#app [id$="Modal"]:not(.hidden),
+#app .theme-modal:not(.hidden),
+#app .exercise-modal:not(.hidden),
+#app .date-modal:not(.hidden),
+#app .confirm-modal:not(.hidden),
+#app .workout-detail-modal:not(.hidden),
+#app .manual-workout-modal:not(.hidden),
+#app .achievements-modal:not(.hidden),
+#app .food-modal:not(.hidden),
+#app .catalog-modal:not(.hidden),
+#app .technique-modal:not(.hidden) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 20px 16px !important;
+  background: #000 !important;
+  z-index: 99999 !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
 </style>
 </head>
 <body>
