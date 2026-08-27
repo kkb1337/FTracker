@@ -64,9 +64,9 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .comparison .positive { color: var(--positive); } .comparison .negative { color: var(--negative); }
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
-#deleteConfirmModal { z-index: 1000 !important; }
+#deleteConfirmModal { z-index: 2001 !important; }
 #deleteConfirmModal .confirm-modal-content { position: relative; z-index: 1001; }
-.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; padding-top: 47px; padding-bottom: 34px; box-sizing: border-box; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; inset: 0; padding-top: 47px; padding-bottom: 34px; box-sizing: border-box; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 2001; overscroll-behavior: contain; }
 .theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
 .theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
 .close-btn, .modal-close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--subtext); cursor: pointer; background: none; border: none; }
@@ -220,12 +220,12 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .summary-improvement{font-size:13px;color:var(--subtext);margin-top:3px}.summary-program-name{font-weight:800;font-size:16px;margin-bottom:4px}.summary-overall{padding:15px}.overall-result{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}.overall-result span{color:var(--subtext)}.overall-result b{font-weight:800}.overall-diff{margin-top:11px;padding:10px 12px;border-radius:12px;font-weight:800;text-align:center}.overall-diff.positive{background:rgba(52,199,89,.12);color:var(--positive)}.overall-diff.negative{background:rgba(255,59,48,.10);color:var(--negative)}.overall-diff.same{background:var(--card-bg);color:var(--subtext)}.analysis-subtitle{font-size:12px;color:var(--subtext);line-height:1.35;margin:-2px 0 8px}.best-compare-row{padding:11px 0;border-top:1px solid var(--border)}.best-compare-name{font-weight:800;font-size:14px;margin-bottom:6px}.best-compare-values{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:12px;color:var(--subtext)}.best-compare-values span{background:var(--card-bg);border-radius:10px;padding:8px}.best-compare-values b{display:block;color:var(--text);font-size:13px;margin-top:2px}.best-compare-values em{grid-column:1/-1;font-style:normal;font-weight:800;padding-top:3px}.best-compare-values em.positive{color:var(--positive)}.best-compare-values em.negative{color:var(--negative)}.best-compare-values em.same{color:var(--subtext)}.summary-record{display:flex;justify-content:space-between;align-items:center;gap:10px}.summary-record b{color:var(--positive);font-size:13px;text-align:right}.final-insight-card .analysis-line b{color:var(--text)}
 @media(max-width:420px){.smart-summary-grid{grid-template-columns:repeat(2,1fr)}}
 
-#measurementManagerModal { z-index: 200 !important; }
-#measurementFieldModal { z-index: 300 !important; }
-#deleteConfirmModal { z-index: 1000 !important; }
-#measurementSaveConfirmModal { z-index: 1000 !important; }
-#newMeasurementModal, #editMeasurementModal, #historicalMeasurementEditModal { z-index: 400 !important; }
-#foodCopyConfirmModal { z-index: 1000 !important; }
+#measurementManagerModal { z-index: 1200 !important; }
+#measurementFieldModal { z-index: 1300 !important; }
+#deleteConfirmModal { z-index: 2001 !important; }
+#measurementSaveConfirmModal { z-index: 2001 !important; }
+#newMeasurementModal, #editMeasurementModal, #historicalMeasurementEditModal { z-index: 1400 !important; }
+#foodCopyConfirmModal { z-index: 2001 !important; }
 /* Новый CSS для графика в прогрессе */
 .progress-chart-container {
     position: relative;
@@ -422,7 +422,7 @@ body { padding-top: env(safe-area-inset-top); }
 .body-hero-card .measurement-summary{background:var(--input-bg);border-radius:16px;padding:6px 14px}
 .body-hero-card .measurement-item{padding:12px 0}
 .body-action-row button{min-height:46px}
-#newMeasurementModal, #editMeasurementModal{z-index:400!important}
+#newMeasurementModal, #editMeasurementModal{z-index:1400!important}
 
 /* v67 header alignment only: safe area + stable header layout */
 .screen-header {
@@ -707,7 +707,7 @@ body { padding-top: env(safe-area-inset-top); }
 #bodyScreen .body-empty-icon{width:52px;height:52px;margin:0 auto 10px;border-radius:16px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:25px}
 #bodyScreen .body-empty-title{font-size:19px;font-weight:850}
 #bodyScreen .body-empty-sub{font-size:12px;color:var(--subtext);margin:5px auto 14px;max-width:300px;line-height:1.4}
-#measurementHistoryModal{z-index:450!important}
+#measurementHistoryModal{z-index:1450!important}
 #measurementHistoryModal .body-history-modal-content{max-height:88vh;padding:20px;border-radius:22px}
 #measurementHistoryModal .body-history-modal-title{font-size:21px;font-weight:900}
 #measurementHistoryModal .body-history-modal-sub{color:var(--subtext);font-size:12px;margin-top:3px}
@@ -1079,7 +1079,7 @@ body { padding-top: env(safe-area-inset-top); }
 
 
 /* ===== Мышцы и техника v3: модальная карточка, статичные фазы ===== */
-.technique-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--modal-overlay);display:flex;align-items:center;justify-content:center;z-index:200;}
+.technique-modal{position:fixed;inset:0;background:var(--modal-overlay);display:flex;align-items:center;justify-content:center;z-index:2001;overscroll-behavior:contain;}
 .technique-modal.hidden{display:none;}
 .technique-modal-content{background:var(--card-bg);border-radius:20px;padding:20px;max-max-height:86vh;overflow-y:auto;position:relative;-webkit-overflow-scrolling:touch;}
 .technique-modal-sub{font-size:13px;font-weight:700;color:var(--button-green);margin:-12px 0 14px;}
@@ -6397,6 +6397,8 @@ body{
 
 <script id="ftracker-app">
 function lockModalScroll(){
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
   document.body.style.overflow = 'hidden';
 }
 function syncModalScroll(){
@@ -6414,7 +6416,15 @@ function syncModalScroll(){
       cls.contains('catalog-modal') || cls.contains('technique-modal');
     if (isModalRoot && !cls.contains('hidden')) { open = true; break; }
   }
-  if (!open) document.body.style.overflow = '';
+  if (!open) {
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.overflow = '';
+  } else {
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+  }
 }
 const modalScrollObserver = new MutationObserver(syncModalScroll);
 modalScrollObserver.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class']});
