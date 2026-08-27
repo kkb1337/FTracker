@@ -5816,6 +5816,20 @@ body{
 
 
 
+<style id="ftracker-autobackup-ui">
+.auto-backup-panel{margin-top:16px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--input-bg);}
+.auto-backup-panel-title{font-size:15px;font-weight:800;margin-bottom:5px;}
+.auto-backup-status{font-size:12px;color:var(--subtext);line-height:1.4;}
+.auto-backup-status.ok{color:var(--positive);}
+.auto-backup-list{display:grid;gap:7px;margin-top:10px;}
+.auto-backup-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 10px;border-radius:11px;background:var(--card-bg);border:1px solid var(--border);}
+.auto-backup-row-main{min-width:0;}
+.auto-backup-row-time{font-size:12px;font-weight:750;}
+.auto-backup-row-reason{font-size:11px;color:var(--subtext);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.auto-backup-restore{width:auto!important;min-width:0!important;margin:0!important;padding:7px 9px!important;min-height:34px!important;font-size:11px!important;border-radius:9px!important;}
+.auto-backup-actions{display:flex;gap:7px;margin-top:10px;}
+.auto-backup-actions button{flex:1;}
+</style>
 <style id="ftracker-toast-final">
 /* v1.0.10 — compact import/export notifications */
 .toast{
@@ -5992,6 +6006,14 @@ body{
         <button onclick="exportData()">💾 Экспортировать</button>
         <button type="button" class="gray ftracker-import-trigger" style="margin-top:8px;min-height:48px;" onclick="document.getElementById('importFile').click()">📥 Импортировать</button><input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display:none">
         <div id="lastExportInfo" style="color:var(--subtext); margin-top:12px; font-size:14px;"></div>
+        <div class="auto-backup-panel" aria-live="polite">
+            <div class="auto-backup-panel-title">🛡️ Автоматические копии</div>
+            <div id="autoBackupStatus" class="auto-backup-status">Проверяю состояние…</div>
+            <div class="auto-backup-actions">
+                <button type="button" class="gray" onclick="refreshAutoBackupPanel()">↻ Обновить</button>
+            </div>
+            <div id="autoBackupList" class="auto-backup-list"></div>
+        </div>
     </div>
 </div>
 <div id="renameExerciseModal" class="catalog-modal hidden" onclick="if(event.target===this)closeRenameExerciseModal()">
@@ -6791,6 +6813,7 @@ function openThemeModal() {
     } else {
         info.textContent = 'Экспорт ещё не выполнялся';
     }
+    if (typeof refreshAutoBackupPanel === 'function') refreshAutoBackupPanel();
 }
 function closeThemeModal() { document.getElementById('themeModal').classList.add('hidden'); }
 function setTheme(theme) { applyTheme(theme); closeThemeModal(); }
@@ -6909,7 +6932,7 @@ function migrateFTrackerState(state){
 function applyExerciseKnowledgeMigration(){
   try{
     if(!data || typeof data!=='object') return;
-    const VERSION=2;
+    const VERSION=3;
     if(Number(data.exerciseKnowledgeVersion||0)>=VERSION) return;
     if(!Array.isArray(data.exerciseDirectory)) data.exerciseDirectory=[];
     const archived=new Set((data.exerciseDirectoryArchived||[]).map(e=>normalizeExerciseKey(e?.name)).filter(Boolean));
@@ -7028,9 +7051,8 @@ function loadData() {
 }
 
 /* ---------- Automatic safety backups ----------
-   Manual Import / Export remains completely unchanged.
-   This is an internal rolling backup only: it never opens a system save dialog.
-   The backup is written to a separate IndexedDB store after a successful data save.
+   Manual Import / Export remains unchanged.
+   Internal rolling backups are stored in IndexedDB and never open a system dialog.
 */
 const AUTO_BACKUP_DB = 'FTrackerAutoBackupV1';
 const AUTO_BACKUP_STORE = 'snapshots';
@@ -7055,6 +7077,16 @@ function openAutoBackupDB(){
   return autoBackupDbPromise;
 }
 
+async function readAutoBackups(){
+  const db=await openAutoBackupDB();
+  return await new Promise((resolve,reject)=>{
+    const tx=db.transaction(AUTO_BACKUP_STORE,'readonly');
+    const req=tx.objectStore(AUTO_BACKUP_STORE).index('createdAt').getAll();
+    req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>b.createdAt-a.createdAt));
+    req.onerror=()=>reject(req.error);
+  });
+}
+
 async function createAutoBackup(reason='Изменение данных'){
   try{
     const db = await openAutoBackupDB();
@@ -7064,6 +7096,7 @@ async function createAutoBackup(reason='Изменение данных'){
       tx.objectStore(AUTO_BACKUP_STORE).add({
         createdAt:Date.now(),
         reason:String(reason||'Изменение данных'),
+        schemaVersion:Number(data?.exerciseKnowledgeVersion||0),
         data:snapshot
       });
       tx.oncomplete=resolve;
@@ -7071,13 +7104,7 @@ async function createAutoBackup(reason='Изменение данных'){
       tx.onabort=()=>reject(tx.error||new Error('Auto backup transaction aborted'));
     });
 
-    const rows = await new Promise((resolve,reject)=>{
-      const tx=db.transaction(AUTO_BACKUP_STORE,'readonly');
-      const req=tx.objectStore(AUTO_BACKUP_STORE).index('createdAt').getAll();
-      req.onsuccess=()=>resolve(req.result||[]);
-      req.onerror=()=>reject(req.error);
-    });
-    rows.sort((a,b)=>b.createdAt-a.createdAt);
+    const rows=await readAutoBackups();
     if(rows.length>AUTO_BACKUP_LIMIT){
       await new Promise((resolve,reject)=>{
         const tx=db.transaction(AUTO_BACKUP_STORE,'readwrite');
@@ -7087,8 +7114,9 @@ async function createAutoBackup(reason='Изменение данных'){
         tx.onerror=()=>reject(tx.error);
       });
     }
+    localStorage.setItem('ftracker_auto_backup_last',JSON.stringify({createdAt:Date.now(),reason:String(reason||'Изменение данных')}));
+    if(document.getElementById('themeModal') && !document.getElementById('themeModal').classList.contains('hidden')) refreshAutoBackupPanel();
   }catch(e){
-    /* Automatic backup must never break or interrupt the main save. */
     console.warn('FTracker automatic backup skipped:',e);
   }
 }
@@ -7102,16 +7130,55 @@ function scheduleAutoBackup(reason='Изменение данных'){
 }
 
 window.getAutoBackups=async function(){
-  try{
-    const db=await openAutoBackupDB();
-    return await new Promise((resolve,reject)=>{
-      const tx=db.transaction(AUTO_BACKUP_STORE,'readonly');
-      const req=tx.objectStore(AUTO_BACKUP_STORE).index('createdAt').getAll();
-      req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>b.createdAt-a.createdAt));
-      req.onerror=()=>reject(req.error);
-    });
-  }catch(e){ return []; }
+  try{return await readAutoBackups();}
+  catch(e){return [];}
 };
+
+function formatAutoBackupDate(ts){
+  try{return new Date(ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+  catch(e){return '—';}
+}
+
+async function refreshAutoBackupPanel(){
+  const status=document.getElementById('autoBackupStatus');
+  const list=document.getElementById('autoBackupList');
+  if(!status||!list) return;
+  status.className='auto-backup-status';
+  status.textContent='Проверяю состояние…';
+  list.innerHTML='';
+  try{
+    const rows=await readAutoBackups();
+    if(!rows.length){
+      status.textContent='Автосохранение включено. Копий пока нет — первая появится после следующего сохранения данных.';
+      return;
+    }
+    status.className='auto-backup-status ok';
+    status.textContent=`Работает · сохранено ${rows.length} из ${AUTO_BACKUP_LIMIT} копий · последняя: ${formatAutoBackupDate(rows[0].createdAt)}`;
+    list.innerHTML=rows.map(row=>`<div class="auto-backup-row"><div class="auto-backup-row-main"><div class="auto-backup-row-time">${escapeHtml(formatAutoBackupDate(row.createdAt))}</div><div class="auto-backup-row-reason">${escapeHtml(row.reason||'Изменение данных')}</div></div><button type="button" class="gray auto-backup-restore" onclick="restoreAutoBackup(${Number(row.id)})">Восстановить</button></div>`).join('');
+  }catch(e){
+    status.textContent='Автосохранение недоступно на этом устройстве.';
+    console.warn('FTracker auto backup panel error',e);
+  }
+}
+
+async function restoreAutoBackup(id){
+  try{
+    const rows=await readAutoBackups();
+    const row=rows.find(x=>Number(x.id)===Number(id));
+    if(!row?.data) throw new Error('Копия не найдена');
+    const ok=window.confirm('Восстановить данные из этой автоматической копии? Текущие данные будут заменены.');
+    if(!ok) return;
+    data=migrateFTrackerState(JSON.parse(JSON.stringify(row.data)));
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    renderAll();
+    await createAutoBackup('Восстановление из автокопии');
+    closeThemeModal();
+    showToast('Данные восстановлены из автокопии');
+  }catch(e){
+    console.error('FTracker auto backup restore failed',e);
+    showToast('Не удалось восстановить автокопию');
+  }
+}
 
 function saveData(showError=true, autoBackupReason='Изменение данных') {
   try {
@@ -12413,6 +12480,7 @@ const NEW_EXERCISE_GUIDES = [
   },
   {
     name:'Ягодичный мост со штангой', match:['ягодичныймостсоштангой','хиптраст','hipthrust'],
+    remoteMedia:[{src:'https://exercise-dataset.com/images/flat/hip-thrust-peak.webp',type:'image',credit:'RepDB Exercise Dataset · free for personal and commercial in-app use with attribution'}],
     primary:['glutes'], secondary:['hamstrings','quads'],
     steps:['Лопатки опираются на край скамьи, гриф лежит на тазу через мягкую защиту; стопы примерно на ширине таза.','Подними таз разгибанием в тазобедренном суставе, сохраняя рёбра и таз подконтрольными.','Вверху достигни полного разгибания таза без переразгибания поясницы и опускайся плавно.'],
     mistakes:['Переразгибание поясницы вместо разгибания таза.','Стопы слишком далеко или близко, из-за чего меняется ощущение упражнения.','Рывок грифом вверх.'],
@@ -12426,7 +12494,8 @@ const NEW_EXERCISE_GUIDES = [
     recommendations:['Угол корпуса выбирай по способности стабильно выполнять тягу; чем горизонтальнее корпус, тем больше требований к удержанию положения.','Не обязательно максимально сводить лопатки в каждом повторе — движение должно соответствовать выбранной траектории локтей.','Если поясница устаёт раньше спины, снизь вес или используй грудную опору в другом варианте тяги.']
   },
   {
-    name:'Жим штанги стоя', match:['жимштангистоя','армейскийжим','жимстоя'], img:'ohp',
+    name:'Жим штанги стоя', match:['жимштангистоя','армейскийжим','жимстоя'],
+    remoteMedia:[{src:'https://upload.wikimedia.org/wikipedia/commons/2/25/How_to_do_an_Overhead_Press.jpg',type:'image',credit:'RangerJim · Wikimedia Commons · CC BY-SA 4.0'}],
     primary:['delts'], secondary:['triceps','upperback','abs'],
     steps:['Стой с грифом на верхней части груди, ягодицы и пресс напряжены.','Выжми гриф вверх, пропуская голову под гриф после прохождения лба.','Вверху руки выпрямлены комфортно, гриф находится над серединой стоп; опускай подконтрольно.'],
     mistakes:['Сильный прогиб поясницы.','Гриф уходит далеко вперёд от тела.','Толчок ногами в строгом жиме.'],

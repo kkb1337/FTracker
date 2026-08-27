@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v1.0.12';
+const CACHE_VERSION = 'ftracker-v1.0.13';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = [
   './',
@@ -21,7 +21,7 @@ function isSameOrigin(request) {
 }
 
 function isExerciseRemoteMedia(request) {
-  try { return new URL(request.url).origin === 'https://upload.wikimedia.org'; }
+  try { const origin = new URL(request.url).origin; return origin === 'https://upload.wikimedia.org' || origin === 'https://exercise-dataset.com'; }
   catch (_) { return false; }
 }
 
