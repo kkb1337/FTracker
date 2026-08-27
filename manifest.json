@@ -1,32 +1,12 @@
 {
-  "name": "FTracker — фитнес-дневник",
+  "name": "FTracker",
   "short_name": "FTracker",
-  "description": "Дневник тренировок, замеров тела и питания. Работает офлайн.",
   "start_url": "./",
   "scope": "./",
+  "id": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
-  "lang": "ru",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ]
+  "_build": "ftracker-v1.0.7"
 }
