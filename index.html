@@ -5657,9 +5657,6 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 .theme-modal,.exercise-modal,.date-modal,.confirm-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.food-modal,.catalog-modal,.technique-modal{padding-top:calc(var(--safe-top) + 8px)!important;padding-bottom:calc(var(--safe-bottom) + 8px)!important;}
 .toast{top:auto!important;bottom:calc(var(--safe-bottom) + 18px)!important;left:50%!important;width:min(calc(100vw - 28px),360px)!important;max-width:360px!important;transform:translateX(-50%)!important;z-index:6000!important;}
 .modal-universal-close{position:absolute!important;top:8px!important;right:10px!important;width:38px!important;height:38px!important;min-width:38px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:12px!important;background:transparent!important;color:var(--subtext)!important;font-size:26px!important;line-height:1!important;}
-
-/* v1.0.6 universal navigation */
-[data-universal-modal-close]{box-sizing:border-box!important}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5736,6 +5733,11 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 
 
 
+
+<style id="deep-modal-navigation-fix">
+.catalog-modal-content{position:relative!important;}
+.catalog-modal .close-btn{position:absolute!important;top:10px!important;right:10px!important;z-index:1000!important;font-size:28px!important;line-height:1!important;padding:10px!important;cursor:pointer!important;display:block!important;visibility:visible!important;pointer-events:auto!important;}
+</style>
 </head>
 <body>
 <div class="safe-area"><div class="container" id="app">
@@ -5777,15 +5779,15 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
         </div>
     </div>
     <div id="progressScreen" class="hidden">
-        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">↗</span><span>Прогресс</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">↗</span><span>Прогресс</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="progressContent"></div>
     </div>
     <div id="bodyScreen" class="hidden">
-        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">⌁</span><span>Замеры</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">⌁</span><span>Замеры</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="measurementForm"></div>
     </div>
     <div id="confirmScreen" class="hidden">
-        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▶</span><span>Подтверждение</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▶</span><span>Подтверждение</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div class="card centered-card">
             <div style="font-size:22px; font-weight:600; margin-bottom:12px;" id="confirmTitle"></div>
             <div style="color:#8e8e93; margin-bottom:20px;">Начать тренировку?</div>
@@ -5809,12 +5811,12 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
         <div id="exerciseContainer"></div>
     </div>
     <div id="settingsScreen" class="hidden">
-        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">ϟ</span><span>Программы</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">ϟ</span><span>Программы</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="programsEditor"></div>
         <button onclick="addProgram()" style="margin-top:12px;">➕ Новая программа</button>
     </div>
     <div id="exerciseDirectoryScreen" class="hidden">
-        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▤</span><span>Справочник</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▤</span><span>Справочник</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div class="directory-tabs">
             <button type="button" id="directoryActiveTab" class="directory-tab active" onclick="setDirectoryView('active')">Упражнения</button>
             <button type="button" id="directoryArchiveTab" class="directory-tab" onclick="setDirectoryView('archive')">Архив</button>
@@ -5827,12 +5829,12 @@ body.modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
         <div id="exerciseDirectoryContent"></div>
     </div>
     <div id="historyScreen" class="hidden">
-        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">◷</span><span>История</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">◷</span><span>История</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <button onclick="openManualWorkoutModal()" class="outline" style="margin-bottom:12px;">➕ Добавить тренировку</button>
         <div id="historyList"></div>
     </div>
     <div id="foodScreen" class="hidden">
-        <div class="screen-header"><button onclick="goBack()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▦</span><span>Питание</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">▦</span><span>Питание</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div class="tabs food-main-tabs">
             <div class="tab active" data-tab="today" onclick="switchFoodTab('today')">Сегодня</div>
             <div class="tab" data-tab="stats" onclick="switchFoodTab('stats')">Статистика</div>
@@ -6686,33 +6688,29 @@ function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EX
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
 const screenScrollPositions = Object.create(null);
-const screenHistory = [];
 function resetAppViewport(screenId){
   const screen=screenId ? document.getElementById(screenId) : null;
   if(!screen) return;
   const saved=screenScrollPositions[screenId];
   if(saved){ screen.scrollTop=saved.top||0; screen.scrollLeft=saved.left||0; }
 }
-function getActiveScreen(){ return [...document.querySelectorAll('#app > div')].find(el=>!el.classList.contains('hidden'))||null; }
-function showScreen(id, options={}) {
+function showScreen(id) {
+  // Close transient overlays before changing app screens.
   if (typeof closeBackupExportPrompt === 'function') closeBackupExportPrompt();
-  const current=getActiveScreen();
-  if(current && current.id!==id){
-    screenScrollPositions[current.id]={top:current.scrollTop,left:current.scrollLeft};
-    if(options.push!==false) screenHistory.push(current.id);
-  }
-  document.querySelectorAll('#app > div').forEach(el => { el.classList.add('hidden'); el.style.pointerEvents='none'; });
+  document.querySelectorAll('#app > div').forEach(el => {
+    if(!el.classList.contains('hidden')) screenScrollPositions[el.id]={top:el.scrollTop,left:el.scrollLeft};
+    el.classList.add('hidden'); el.style.pointerEvents='none';
+  });
   const screen=document.getElementById(id);
   if(!screen) return;
-  screen.classList.remove('hidden'); screen.style.pointerEvents='auto';
-  requestAnimationFrame(()=>{ resetAppViewport(id); if(typeof window.__syncScreenHeader==='function') window.__syncScreenHeader(screen); });
+  screen.classList.remove('hidden');
+  screen.style.pointerEvents='auto';
+  requestAnimationFrame(()=>{
+    resetAppViewport(id);
+    if(typeof window.__syncScreenHeader==='function') window.__syncScreenHeader(screen);
+  });
 }
-function goBack(){
-  const previous=screenHistory.pop();
-  if(previous){ showScreen(previous,{push:false}); return; }
-  showScreen('homeScreen',{push:false}); renderHome(); checkDraft(); checkExportReminder();
-}
-function goHome() { screenHistory.length=0; showScreen('homeScreen',{push:false}); renderHome(); checkDraft(); checkExportReminder(); }
+function goHome() { showScreen('homeScreen'); renderHome(); checkDraft(); checkExportReminder(); }
 
 function renderHome() {
     const list = document.getElementById('programList');
@@ -9754,8 +9752,11 @@ let chartCustomEnd = '';
 
 let __lastModalTrigger = null;
 const __modalSelector = '.theme-modal,.confirm-modal,.exercise-modal,.date-modal,.catalog-modal,.technique-modal,.food-modal,.manual-workout-modal,.achievements-modal,.workout-detail-modal';
-function __openModal(id){ const m=document.getElementById(id); if(!m)return null; __lastModalTrigger=document.activeElement; m.classList.remove('hidden'); document.body.classList.add('modal-open'); m.setAttribute('aria-modal','true'); m.setAttribute('role','dialog'); requestAnimationFrame(()=>m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus()); return m; }
-function __closeModal(id){ const m=document.getElementById(id); if(!m)return; m.classList.add('hidden'); if(!document.querySelector(__modalSelector.split(',').map(x=>x.trim()+':not(.hidden)').join(','))) document.body.classList.remove('modal-open'); __lastModalTrigger?.focus?.(); __lastModalTrigger=null; }
+const __historyModalIds=new Set(['chartModal','bodyGraphModal','measurementManagerModal','measurementFieldModal','measurementHistoryModal','progressExercisePickerModal','exercisePickerModal','exerciseOrderModal']);
+let __historyModalClosing=false;
+function __openModal(id){ const m=document.getElementById(id); if(!m)return null; __lastModalTrigger=document.activeElement; m.classList.remove('hidden'); document.body.classList.add('modal-open'); m.setAttribute('aria-modal','true'); m.setAttribute('role','dialog'); if(__historyModalIds.has(id)&&history.state?.modalId!==id) history.pushState({...(history.state||{}),modalId:id},''); requestAnimationFrame(()=>m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')?.focus()); return m; }
+function __closeModal(id,fromPopstate=false){ const m=document.getElementById(id); if(!m)return; if(__historyModalIds.has(id)&&!fromPopstate&&history.state?.modalId===id){ __historyModalClosing=true; history.back(); return; } m.classList.add('hidden'); if(!document.querySelector(__modalSelector.split(',').map(x=>x.trim()+':not(.hidden)').join(','))) document.body.classList.remove('modal-open'); __lastModalTrigger?.focus?.(); __lastModalTrigger=null; }
+window.addEventListener('popstate',()=>{ const open=[...__historyModalIds].find(id=>{const m=document.getElementById(id);return m&&!m.classList.contains('hidden');}); if(open){ __historyModalClosing=false; __closeModal(open,true); } });
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape')return; const m=[...document.querySelectorAll(__modalSelector)].find(x=>!x.classList.contains('hidden')); if(m){ e.preventDefault(); const b=m.querySelector('.close-btn,.modal-close-btn,[aria-label*=Закрыть],[data-close-modal]'); if(b) b.click(); else __closeModal(m.id); }});
 function openChartModal() {
     const modal=document.getElementById('chartModal'); if(!modal) return;
@@ -10441,7 +10442,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.6', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.0.4', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -14582,271 +14583,5 @@ window.closeImportConfirm=function(){
   new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
-
-<script>
-(function(){
-  function isModal(el){ return /(^|\s)(theme-modal|exercise-modal|date-modal|confirm-modal|workout-detail-modal|manual-workout-modal|achievements-modal|food-modal|catalog-modal|chart-modal)(\s|$)/.test(el.className||''); }
-  function closeModalElement(modal){
-    const known=[['themeModal','closeThemeModal'],['chartModal','closeChartModal'],['deleteConfirmModal','closeDeleteConfirm']];
-    const match=known.find(x=>modal.id===x[0]);
-    if(match && typeof window[match[1]]==='function'){ window[match[1]](); return; }
-    modal.classList.add('hidden'); document.body.classList.remove('modal-open');
-  }
-  function ensureModalCloseButtons(){
-    document.querySelectorAll('[class*="modal"]').forEach(modal=>{
-      if(!isModal(modal) || modal.querySelector('[data-universal-modal-close]')) return;
-      const content=[...modal.children].find(c=>/content/.test(c.className||'')) || modal.firstElementChild;
-      if(!content) return;
-      const btn=document.createElement('button'); btn.type='button'; btn.setAttribute('data-universal-modal-close','1'); btn.setAttribute('aria-label','Закрыть'); btn.textContent='×';
-      btn.style.cssText='position:absolute;top:10px;right:10px;width:38px;height:38px;margin:0;padding:0;border-radius:50%;background:var(--input-bg);color:var(--text);font-size:26px;line-height:1;z-index:10';
-      btn.onclick=(e)=>{e.stopPropagation();closeModalElement(modal)}; content.appendChild(btn);
-    });
-  }
-  document.addEventListener('DOMContentLoaded',ensureModalCloseButtons);
-  new MutationObserver(ensureModalCloseButtons).observe(document.documentElement,{childList:true,subtree:true});
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const m=[...document.querySelectorAll('[class*="modal"]')].reverse().find(x=>isModal(x)&&!x.classList.contains('hidden')); if(m){e.preventDefault();closeModalElement(m);} else if(getActiveScreen()?.id!=='homeScreen') goBack(); } });
-  document.addEventListener('click',e=>{ if(e.target===e.currentTarget){} });
-})();
-</script>
-
-<style id="v106-navigation-fix">
-/* v1.0.6: точечные исправления навигации и шапки */
-#homeScreen .app-header,
-#homeScreen .header,
-#homeScreen header {
-  position: relative !important;
-}
-
-/* Не даём кнопке настроек улетать в центр/абсолютную область */
-#homeScreen .settings-btn,
-#homeScreen .settings-button,
-#homeScreen [aria-label*="Настро"],
-#homeScreen [title*="Настро"] {
-  position: absolute !important;
-  top: 50% !important;
-  right: max(16px, env(safe-area-inset-right)) !important;
-  left: auto !important;
-  bottom: auto !important;
-  transform: translateY(-50%) !important;
-  margin: 0 !important;
-  z-index: 50 !important;
-}
-
-/* Универсальная кнопка назад на вложенных экранах */
-#app .v106-back-button {
-  position: fixed !important;
-  top: calc(env(safe-area-inset-top) + 8px) !important;
-  left: max(10px, env(safe-area-inset-left)) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  min-height: 40px !important;
-  padding: 8px 12px !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,.16) !important;
-  background: rgba(20,20,24,.92) !important;
-  color: inherit !important;
-  font: inherit !important;
-  cursor: pointer !important;
-  z-index: 2147483000 !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,.18) !important;
-}
-#app .hidden > .v106-back-button,
-#app .v106-back-button[hidden] {
-  display: none !important;
-}
-
-/* Универсальный крестик модалки */
-.v106-modal-close {
-  position: absolute !important;
-  top: calc(env(safe-area-inset-top) + 8px) !important;
-  right: max(10px, env(safe-area-inset-right)) !important;
-  width: 42px !important;
-  height: 42px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 0 !important;
-  border-radius: 50% !important;
-  background: rgba(20,20,24,.92) !important;
-  color: inherit !important;
-  font-size: 28px !important;
-  line-height: 1 !important;
-  z-index: 2147483001 !important;
-  cursor: pointer !important;
-}
-
-/* Внутренние экраны: уменьшаем верхний отступ, главную не трогаем */
-#app > [id]:not(#homeScreen):not(.hidden) {
-  padding-top: calc(env(safe-area-inset-top) + 12px) !important;
-}
-</style>
-
-<script id="v106-navigation-runtime">
-(function () {
-  'use strict';
-
-  var HOME_ID = 'homeScreen';
-  var stack = [];
-  var currentId = HOME_ID;
-
-  function isVisible(el) {
-    if (!el || el.classList.contains('hidden')) return false;
-    var s = getComputedStyle(el);
-    return s.display !== 'none' && s.visibility !== 'hidden';
-  }
-
-  function getAppScreens() {
-    var app = document.getElementById('app');
-    if (!app) return [];
-    return Array.prototype.filter.call(app.children, function (el) {
-      return el && el.id && el.id !== 'homeScreen' && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE';
-    });
-  }
-
-  function visibleScreen() {
-    var app = document.getElementById('app');
-    if (!app) return null;
-    var children = Array.prototype.filter.call(app.children, function (el) {
-      return el && el.id && isVisible(el);
-    });
-    return children.length ? children[children.length - 1] : null;
-  }
-
-  function addBack(screen) {
-    if (!screen || screen.id === HOME_ID || screen.querySelector(':scope > .v106-back-button')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'v106-back-button';
-    btn.setAttribute('aria-label', 'Назад');
-    btn.textContent = '← Назад';
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      goBack();
-    });
-    screen.insertBefore(btn, screen.firstChild);
-  }
-
-  function ensureBackButtons() {
-    getAppScreens().forEach(addBack);
-  }
-
-  function syncCurrent(push) {
-    ensureBackButtons();
-    var v = visibleScreen();
-    if (!v) return;
-    if (v.id !== currentId) {
-      if (push && currentId && currentId !== v.id) stack.push(currentId);
-      currentId = v.id;
-    }
-  }
-
-  function goBack() {
-    var target = stack.pop() || HOME_ID;
-    if (typeof window.showScreen === 'function') {
-      window.showScreen(target, true);
-    } else {
-      getAppScreens().forEach(function (s) { s.classList.add('hidden'); });
-      var t = document.getElementById(target);
-      if (t) t.classList.remove('hidden');
-    }
-    currentId = target;
-    setTimeout(function(){ syncCurrent(false); }, 0);
-  }
-
-  function findOpenModal() {
-    var candidates = document.querySelectorAll(
-      '[role="dialog"], .modal, .theme-modal, .exercise-modal, .date-modal, .confirm-modal, .food-modal, [id$="Modal"]'
-    );
-    for (var i = candidates.length - 1; i >= 0; i--) {
-      var el = candidates[i];
-      if (isVisible(el)) return el;
-    }
-    return null;
-  }
-
-  function ensureModalClose(modal) {
-    if (!modal || modal.querySelector('.v106-modal-close')) return;
-    var hasNative = modal.querySelector('.close-btn, .modal-close, [aria-label="Закрыть"], [data-close]');
-    if (hasNative) return;
-
-    var cs = getComputedStyle(modal);
-    if (cs.position === 'static') modal.style.position = 'relative';
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'v106-modal-close';
-    btn.setAttribute('aria-label', 'Закрыть');
-    btn.textContent = '×';
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      modal.classList.add('hidden');
-      document.body.classList.remove('modal-open');
-    });
-    modal.appendChild(btn);
-  }
-
-  function ensureModals() {
-    document.querySelectorAll(
-      '[role="dialog"], .modal, .theme-modal, .exercise-modal, .date-modal, .confirm-modal, .food-modal, [id$="Modal"]'
-    ).forEach(ensureModalClose);
-  }
-
-  // Wrap showScreen after all existing app code has loaded.
-  function wrapShowScreen() {
-    if (typeof window.showScreen !== 'function' || window.showScreen.__v106wrapped) return;
-    var original = window.showScreen;
-    function wrapped(id) {
-      var before = visibleScreen();
-      var result = original.apply(this, arguments);
-      setTimeout(function () {
-        var after = document.getElementById(id) || visibleScreen();
-        if (after && before && after.id !== before.id && before.id !== HOME_ID) {
-          if (stack[stack.length - 1] !== before.id) stack.push(before.id);
-        }
-        currentId = after ? after.id : currentId;
-        ensureBackButtons();
-        ensureModals();
-      }, 0);
-      return result;
-    }
-    wrapped.__v106wrapped = true;
-    wrapped.__v106original = original;
-    window.showScreen = wrapped;
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    ensureBackButtons();
-    ensureModals();
-    currentId = (visibleScreen() || {id: HOME_ID}).id;
-    wrapShowScreen();
-
-    // MutationObserver catches dynamically rendered screens/modals.
-    new MutationObserver(function () {
-      ensureBackButtons();
-      ensureModals();
-    }).observe(document.body, { childList: true, subtree: true });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      var modal = findOpenModal();
-      if (modal) {
-        modal.classList.add('hidden');
-        document.body.classList.remove('modal-open');
-        return;
-      }
-      if (currentId && currentId !== HOME_ID) goBack();
-    });
-
-    // Capture clicks: after existing onclick handlers run, sync current screen.
-    document.addEventListener('click', function () {
-      setTimeout(function(){ syncCurrent(true); ensureModals(); }, 0);
-    }, true);
-  });
-})();
-</script>
-
 </body>
 </html>
