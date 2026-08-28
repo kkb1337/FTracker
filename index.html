@@ -95,6 +95,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .food-preset-item { padding: 8px; cursor: pointer; border-bottom: 1px solid var(--border); }
 .food-preset-item:last-child { border-bottom: none; }
 .food-preset-item:hover { background: var(--button-gray); }
+.food-preset-empty{display:flex!important;align-items:center!important;justify-content:center!important;min-height:44px!important;padding:10px 14px!important;box-sizing:border-box!important;white-space:normal!important;}
 .day-copy-btns { display: flex; gap: 8px; margin-top: 8px; }
 .day-copy-btns button { flex: 1; font-size: 14px; padding: 8px; }
 .food-mode-switch { display: flex; gap: 8px; margin: 8px 0; }
@@ -10849,16 +10850,26 @@ function calcFrom100() {
 
 function filterFoodPresets() {
     const input = document.getElementById('foodName');
-    const filter = input.value.trim().toLowerCase();
+    const filter = input ? input.value.trim().toLowerCase() : '';
     const list = document.getElementById('foodPresetList');
-    if (!filter) { list.classList.add('hidden'); return; }
+    if (!list) return;
+    /* The picker is a contextual dropdown: it must not occupy the form when the
+       user has not entered a search term yet. */
+    if (!filter) {
+        list.innerHTML = '';
+        list.classList.add('hidden');
+        return;
+    }
     const unique = {};
     data.foodDiary.entries.forEach(e => { if (e.name && !unique[e.name]) unique[e.name] = e; });
     data.productCatalog.forEach(prod => { if (!unique[prod.name]) unique[prod.name] = prod; });
     const filtered = Object.values(unique).filter(item => item.name.toLowerCase().startsWith(filter));
-    if (!filtered.length) { list.classList.add('hidden'); return; }
+    if (!filtered.length) {
+        list.innerHTML = '<div class="food-preset-item food-preset-empty" aria-live="polite">Ничего не найдено</div>';
+        list.classList.remove('hidden');
+        return;
+    }
     list.innerHTML = filtered.slice(0, 10).map(item => {
-        const isCatalog = item.cal100 !== undefined || item.calories !== undefined;
         let info = '';
         if (item.type === 'dish') {
             info = ` (блюдо: ${item.calories} ккал)`;
@@ -14130,8 +14141,11 @@ function getSavedFoodProducts(){
 function renderFoodPresetList(){
   const input=$('foodName'), list=$('foodPresetList'); if(!input||!list)return;
   const q=norm(input.value);
-  const items=getSavedFoodProducts().filter(item=>!q||norm(item.name).includes(q));
-  if(!items.length){list.innerHTML='<div class="food-preset-item" style="justify-content:center;color:var(--subtext);">Ничего не найдено</div>';list.classList.remove('hidden');return;}
+  /* Do not show an empty/search-state dropdown on initial open or while the
+     field is blank. This was the source of the fixed "Ничего не найдено" box. */
+  if(!q){list.innerHTML='';list.classList.add('hidden');return;}
+  const items=getSavedFoodProducts().filter(item=>norm(item.name).includes(q));
+  if(!items.length){list.innerHTML='<div class="food-preset-item food-preset-empty" aria-live="polite">Ничего не найдено</div>';list.classList.remove('hidden');return;}
   list.innerHTML=items.map(item=>`<div class="food-preset-item" data-food-preset-name="${esc(item.name)}" role="button" tabindex="0"><span style="min-width:0;overflow-wrap:anywhere;">${esc(item.name)}</span><span style="margin-left:auto;padding-left:10px;color:var(--subtext);font-size:12px;white-space:nowrap;">(${productTypeLabel(item)})</span></div>`).join('');
   list.classList.remove('hidden');
 }
