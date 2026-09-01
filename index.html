@@ -4659,6 +4659,10 @@ body.light-mode{
 
 #exerciseDuplicateModal{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 14px)!important;background:rgba(0,0,0,.78)!important;isolation:isolate!important;}
 #exerciseDuplicateModal.hidden{display:none!important;pointer-events:none!important;}
+#foodDuplicateModal{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 14px)!important;background:rgba(0,0,0,.78)!important;isolation:isolate!important;}
+#foodDuplicateModal.hidden{display:none!important;pointer-events:none!important;}
+#foodDuplicateModal .exercise-dup-sheet{position:relative!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;background:var(--card-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:18px!important;padding:17px!important;box-shadow:0 18px 55px rgba(0,0,0,.5)!important;}
+
 #exerciseDuplicateModal .exercise-dup-sheet{position:relative!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;background:var(--card-bg)!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:18px!important;padding:17px!important;box-shadow:0 18px 55px rgba(0,0,0,.5)!important;}
 .exercise-dup-close{position:absolute!important;right:10px!important;top:10px!important;width:34px!important;height:34px!important;min-width:34px!important;margin:0!important;padding:0!important;border-radius:10px!important;background:var(--input-bg)!important;border:1px solid var(--border)!important;color:var(--subtext)!important;font-size:21px!important;}
 .exercise-dup-title{font-size:16px!important;font-weight:800!important;line-height:1.25!important;padding-right:42px!important;}
@@ -6534,8 +6538,9 @@ body{
             </div>
         </div>
         <div id="foodTabCatalog" class="tab-content">
+            <button onclick="openAddToCatalog()" style="margin-bottom:12px;">➕ Добавить продукт в каталог</button>
+            <div class="food-catalog-search card" style="padding:12px;margin-bottom:12px;"><input id="catalogSearch" type="search" placeholder="🔍 Поиск продукта или блюда" autocomplete="off" oninput="renderCatalogList()"></div>
             <div id="catalogContainer" class="card"></div>
-            <button onclick="openAddToCatalog()" style="margin-top:12px;">➕ Добавить продукт в каталог</button>
         </div>
     </div>
 </div></div>
@@ -7316,6 +7321,29 @@ function getMeasurementFieldMap() {
     return Object.fromEntries(getMeasurementFields().map(f => [f.key, f.label]));
 }
 
+// ===== FTracker v1.3.2 — встроенная базовая база продуктов =====
+// Усреднённые значения на 100 г. Пользовательские продукты не перезаписываются.
+const BUILTIN_PRODUCT_CATALOG = [
+['Куриная грудка',165,31,3.6,0],['Куриное бедро без кожи',177,24,8,0],['Индейка филе',135,29,1,0],['Говядина постная',187,26,10,0],['Свинина постная',242,27,14,0],['Фарш говяжий',250,26,15,0],
+['Лосось',208,20,13,0],['Тунец консервированный в собственном соку',116,26,1,0],['Треска',82,18,0.7,0],['Креветки',99,24,0.3,0],
+['Яйцо куриное',143,13,9.5,0.7],['Яичный белок',52,11,0.2,0.7],
+['Творог 0%',72,16,0.5,1.8],['Творог 5%',121,17,5,3],['Творог 9%',159,16,9,3],['Греческий йогурт',73,9,2,4],['Йогурт натуральный',61,3.5,3.3,4.7],['Молоко 2.5%',52,2.8,2.5,4.7],['Кефир 2.5%',53,2.9,2.5,4],['Сыр твёрдый',350,25,27,0],
+['Рис варёный',130,2.7,0.3,28],['Гречка варёная',110,4.2,1.1,21.3],['Макароны варёные',131,5,1.1,25],['Картофель варёный',82,2,0.4,17],['Овсянка сухая',366,12,6,60],['Булгур варёный',83,3.1,0.2,18.6],
+['Хлеб пшеничный',265,8,3.2,49],['Хлеб цельнозерновой',247,13,4.2,41],['Лаваш',274,9,1.2,57],
+['Банан',89,1.1,0.3,23],['Яблоко',52,0.3,0.2,14],['Апельсин',47,0.9,0.1,12],['Ягоды',50,1,0.5,10],
+['Огурец',15,0.7,0.1,3.6],['Помидор',18,0.9,0.2,3.9],['Брокколи',34,2.8,0.4,7],['Морковь',41,0.9,0.2,10],['Перец сладкий',31,1,0.3,6],
+['Арахис',567,26,49,16],['Миндаль',579,21,50,22],['Арахисовая паста',588,25,50,20],['Оливковое масло',884,0,100,0],['Сливочное масло',717,0.9,81,0.1],
+['Шоколад молочный',535,7,30,59],['Шоколад тёмный',598,8,43,46],['Мёд',304,0.3,0,82],['Сахар',387,0,0,100]
+].map(([name,cal100,protein100,fat100,carbs100])=>({
+ id:'builtin_food_'+name.toLowerCase().replace(/[^a-zа-яё0-9]+/gi,'_'),name,type:'per100',cal100,protein100,fat100,carbs100,builtin:true
+}));
+
+function mergeBuiltinProductCatalog(state){
+ if(!state || !Array.isArray(state.productCatalog)) return;
+ const existing=new Set(state.productCatalog.map(p=>normalizeExerciseKey(p?.name)).filter(Boolean));
+ BUILTIN_PRODUCT_CATALOG.forEach(p=>{ if(!existing.has(normalizeExerciseKey(p.name))) state.productCatalog.push({...p}); });
+}
+
 let data = {
     programs: [
         { name: 'Сплит 1: Грудь + Бицепс', exercises: ['Кардио','Жим лёжа','Бицепс с EZ-грифом стоя','Жим в тренажёре под углом','Бицепс сидя под углом','Бабочка в тренажёре','Бицепс обратным хватом','Пресс'], active: [true,true,true,true,true,true,true,true], types: ['cardio','strength','strength','strength','strength','strength','strength','bodyweight'], programActive: true },
@@ -7326,7 +7354,7 @@ let data = {
     measurements: [],
     measurementFields: DEFAULT_MEASURE_FIELDS.map(f => ({...f})),
     foodDiary: { limits: {}, entries: [] },
-    productCatalog: [],
+    productCatalog: BUILTIN_PRODUCT_CATALOG.map(p=>({...p})),
     exerciseDirectory: [],
     exerciseDirectoryHidden: [],
     fscoreGoal: 'cut'
@@ -7453,6 +7481,7 @@ function migrateFTrackerState(state){
     if(!state.foodDiary.limits || typeof state.foodDiary.limits!=='object') state.foodDiary.limits={};
     if(!Array.isArray(state.foodDiary.limitHistory)) state.foodDiary.limitHistory=[];
     if(!Array.isArray(state.productCatalog)) state.productCatalog=[];
+    mergeBuiltinProductCatalog(state);
     if(!Array.isArray(state.exerciseDirectory)) state.exerciseDirectory=[];
     if(!Array.isArray(state.exerciseDirectoryArchived)) state.exerciseDirectoryArchived=[];
     if(!Array.isArray(state.exerciseDirectoryHidden)) state.exerciseDirectoryHidden=[];
@@ -11592,8 +11621,9 @@ function saveCatalogProduct() {
 
     // Не допускаем одинаковые названия в каталоге. Сравнение точное после trim.
     // При редактировании текущая запись исключается из проверки.
+    const normalizeFoodCatalogName = (v) => String(v || '').normalize('NFKC').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u2010-\u2015]/g,'-').replace(/[«»„“”\"'`]/g,'').replace(/[^a-zа-я0-9]+/gi,' ').trim().replace(/\s+/g,' ');
     const duplicateIndex = data.productCatalog.findIndex((p, i) =>
-        i !== editingCatalogProduct && String(p.name || '').trim() === name
+        i !== editingCatalogProduct && normalizeFoodCatalogName(p.name) === normalizeFoodCatalogName(name)
     );
     if (duplicateIndex !== -1) {
         showToast('Продукт с таким названием уже есть в каталоге');
@@ -11837,26 +11867,15 @@ function addFoodEntry() {
         showToast('Запись обновлена');
     } else {
         data.foodDiary.entries.push(entryData);
-        const existingInCatalog = data.productCatalog.find(p => String(p.name || '').trim() === name);
+        const normalizeFoodCatalogName = (v) => String(v || '').normalize('NFKC').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u2010-\u2015]/g,'-').replace(/[«»„“”\"'`]/g,'').replace(/[^a-zа-я0-9]+/gi,' ').trim().replace(/\s+/g,' ');
+        // Каталог идентифицирует продукт только по нормализованному названию.
+        // «Йогурт за порцию» и «Йогурт на 100 г» не становятся двумя карточками.
+        const existingInCatalog = data.productCatalog.find(p => normalizeFoodCatalogName(p.name) === normalizeFoodCatalogName(name));
         if (!existingInCatalog) {
             if (currentFoodMode === '100') {
-                data.productCatalog.push({
-                    name,
-                    type: 'per100',
-                    cal100,
-                    protein100,
-                    fat100,
-                    carbs100
-                });
+                data.productCatalog.push({ name, type: 'per100', cal100, protein100, fat100, carbs100 });
             } else {
-                data.productCatalog.push({
-                    name,
-                    type: 'dish',
-                    calories,
-                    protein,
-                    fat,
-                    carbs
-                });
+                data.productCatalog.push({ name, type: 'dish', calories, protein, fat, carbs });
             }
         }
         showToast('Продукт добавлен');
@@ -11960,7 +11979,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.3.0', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.3.2', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -15027,121 +15046,226 @@ const $=(id)=>document.getElementById(id);
 const esc=(v)=>typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'');
 const norm=(v)=>typeof normalizeExerciseKey==='function'?normalizeExerciseKey(v):String(v||'').toLocaleLowerCase('ru').replace(/[\s\p{P}\p{S}]+/gu,'');
 
-/* ---------- Generic similarity / duplicate protection ---------- */
-function editDistance(a,b){
-  a=String(a||''); b=String(b||'');
+/* ---------- Canonical food duplicate protection: exact = block, similar = user choice ---------- */
+function foodNorm(v){
+  return String(v??'').normalize('NFKC').toLocaleLowerCase('ru')
+    .replace(/ё/g,'е')
+    .replace(/[\u2010-\u2015]/g,'-')
+    .replace(/[«»„“”"'`]/g,'')
+    .replace(/[^a-zа-я0-9]+/gi,' ')
+    .trim()
+    .replace(/\s+/g,' ');
+}
+function foodFullKey(v){ return foodNorm(v).replace(/ /g,''); }
+function foodWords(v){
+  return [...new Set(foodNorm(v).split(' ').filter(Boolean))];
+}
+function foodEditDistance(a,b){
+  a=String(a);b=String(b);
   if(a===b)return 0;
-  if(!a)return b.length; if(!b)return a.length;
-  const prev=Array.from({length:b.length+1},(_,i)=>i);
+  if(!a)return b.length;if(!b)return a.length;
+  let prev=Array.from({length:b.length+1},(_,i)=>i);
   for(let i=1;i<=a.length;i++){
-    let cur=[i];
-    for(let j=1;j<=b.length;j++) cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
-    for(let j=0;j<cur.length;j++) prev[j]=cur[j];
+    const cur=[i];
+    for(let j=1;j<=b.length;j++){
+      cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    }
+    prev=cur;
   }
   return prev[b.length];
 }
-function similarProductNames(a,b){
-  const x=norm(a), y=norm(b); if(!x||!y)return false;
-  if(x===y)return true;
-  const d=editDistance(x,y);
-  const min=Math.min(x.length,y.length);
-  return d<=2 || (min>=8 && d<=Math.floor(min*0.2));
+function foodCatalogList(){
+  const result=[],seen=new Set();
+  (data.productCatalog||[]).forEach((p,i)=>{
+    if(!p?.name)return;
+    const key=foodFullKey(p.name);
+    if(!key)return;
+    result.push({index:i,name:String(p.name).trim(),type:p.type||'per100',key});
+    seen.add(key);
+  });
+  return result;
 }
-window.findSimilarCatalogProduct=function(name,excludeIndex=null){
-  return (data.productCatalog||[]).find((p,i)=>i!==excludeIndex && similarProductNames(p?.name,name))||null;
+window.findFoodDuplicate=function(name,excludeIndex=null){
+  const inputKey=foodFullKey(name);
+  const inputWords=foodWords(name);
+  const exact=[],similar=[];
+  for(const item of foodCatalogList()){
+    if(item.index===excludeIndex)continue;
+    if(item.key===inputKey){
+      exact.push({...item,reason:'Название совпадает после приведения регистра, пробелов, знаков и е/ё.'});
+      continue;
+    }
+    let reason='';
+    const words=foodWords(item.name);
+    outer: for(const a of inputWords){
+      for(const b of words){
+        if(a===b || (Math.min(a.length,b.length)>=4 && (a.includes(b)||b.includes(a)))){
+          reason=`Совпадает или частично совпадает слово «${b}».`;break outer;
+        }
+        const min=Math.min(a.length,b.length);
+        if(min>=4 && foodEditDistance(a,b)<=1){
+          reason=`Найдено очень близкое по написанию слово «${b}».`;break outer;
+        }
+      }
+    }
+    if(!reason){
+      const min=Math.min(inputKey.length,item.key.length);
+      const d=foodEditDistance(inputKey,item.key);
+      if(min>=5 && (d<=2 || (min>=10 && d<=Math.floor(min*0.2)))) reason='Название очень похоже по написанию.';
+    }
+    if(reason)similar.push({...item,reason});
+  }
+  return {exact,similar};
+};
+function foodEsc(v){return typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&#39;'}[m]));}
+window.showFoodDuplicateModal=function(name,matches,exact,onAllow){
+  let modal=$('foodDuplicateModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='foodDuplicateModal';
+    modal.className='hidden';
+    modal.innerHTML=`<div class="exercise-dup-sheet">
+      <button type="button" class="exercise-dup-close" id="foodDupClose">×</button>
+      <div id="foodDupTitle" class="exercise-dup-title"></div>
+      <div id="foodDupSub" class="exercise-dup-sub"></div>
+      <div id="foodDupList" class="exercise-dup-list"></div>
+      <div id="foodDupNote" class="exercise-dup-note"></div>
+      <div id="foodDupActions" class="exercise-dup-actions">
+        <button type="button" class="dup-cancel gray" id="foodDupCancel"></button>
+        <button type="button" class="dup-add" id="foodDupAdd">Всё равно добавить</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+  }
+  modal.querySelector('#foodDupTitle').textContent=exact?'Продукт уже существует':'Найдены похожие продукты';
+  modal.querySelector('#foodDupSub').textContent=exact?'Точную копию создать нельзя.':`Для «${name}» найдены похожие названия.`;
+  modal.querySelector('#foodDupList').innerHTML=matches.slice(0,8).map(x=>
+    `<div class="exercise-dup-item"><div class="exercise-dup-name">${foodEsc(x.name)}</div><div class="exercise-dup-meta">${x.type==='dish'?'Блюдо':'На 100 г'}</div><div class="exercise-dup-reason">${foodEsc(x.reason||'Похожее название.')}</div></div>`
+  ).join('');
+  modal.querySelector('#foodDupNote').textContent=exact
+    ?'Создание второй записи запрещено.'
+    :'Если это действительно другой продукт, его можно добавить отдельно.';
+  const actions=modal.querySelector('#foodDupActions');
+  const cancel=modal.querySelector('#foodDupCancel');
+  const add=modal.querySelector('#foodDupAdd');
+  actions.classList.toggle('single',!!exact);
+  add.style.display=exact?'none':'';
+  cancel.textContent=exact?'Закрыть':'Нет, отменить';
+  const close=()=>{modal.classList.add('hidden');modal._onAllow=null;};
+  modal.querySelector('#foodDupClose').onclick=close;
+  cancel.onclick=close;
+  modal.onclick=e=>{if(e.target===modal)close();};
+  if(!exact){
+    modal._onAllow=onAllow;
+    add.onclick=()=>{const fn=modal._onAllow;close();if(typeof fn==='function')fn();};
+  }else add.onclick=null;
+  lockModalScroll();modal.classList.remove('hidden');
+  modal.querySelector('.exercise-dup-sheet')?.scrollTo(0,0);
 };
 
-/* ---------- Nutrition product picker: saved items, alphabetic, click, clear ---------- */
-function productTypeLabel(item){
-  return item?.type==='dish' ? 'блюдо' : 'за 100 грамм';
-}
+/* ---------- Nutrition product picker ---------- */
+function productTypeLabel(item){return item?.type==='dish' ? 'блюдо' : 'за 100 грамм';}
 function getSavedFoodProducts(){
   const map=new Map();
   (data.productCatalog||[]).forEach(p=>{
     if(!p?.name)return;
-    const k=norm(p.name); if(!map.has(k)) map.set(k,{...p,source:'catalog'});
+    const k=foodFullKey(p.name);if(!map.has(k))map.set(k,{...p,source:'catalog'});
   });
-  /* Older diary entries are also selectable if they were never put into the catalog. */
   (data.foodDiary?.entries||[]).forEach(e=>{
     if(!e?.name)return;
-    const k=norm(e.name); if(map.has(k))return;
+    const k=foodFullKey(e.name);if(map.has(k))return;
     map.set(k,{...e,type:e.cal100!=null?'per100':'dish',source:'history'});
   });
   return [...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru',{sensitivity:'base'}));
 }
 function renderFoodPresetList(){
-  const input=$('foodName'), list=$('foodPresetList'); if(!input||!list)return;
-  const q=norm(input.value);
-  /* Do not show an empty/search-state dropdown on initial open or while the
-     field is blank. This was the source of the fixed "Ничего не найдено" box. */
+  const input=$('foodName'), list=$('foodPresetList');if(!input||!list)return;
+  const q=foodNorm(input.value);
   if(!q){list.innerHTML='';list.classList.add('hidden');return;}
-  const items=getSavedFoodProducts().filter(item=>norm(item.name).includes(q));
+  const items=getSavedFoodProducts().filter(item=>foodNorm(item.name).includes(q));
   if(!items.length){list.innerHTML='<div class="food-preset-item food-preset-empty" aria-live="polite">Ничего не найдено</div>';list.classList.remove('hidden');return;}
-  list.innerHTML=items.map(item=>`<div class="food-preset-item" data-food-preset-name="${esc(item.name)}" role="button" tabindex="0"><span style="min-width:0;overflow-wrap:anywhere;">${esc(item.name)}</span><span style="margin-left:auto;padding-left:10px;color:var(--subtext);font-size:12px;white-space:nowrap;">(${productTypeLabel(item)})</span></div>`).join('');
+  list.innerHTML=items.map(item=>`<div class="food-preset-item" data-food-preset-name="${foodEsc(item.name)}" role="button" tabindex="0"><span style="min-width:0;overflow-wrap:anywhere;">${foodEsc(item.name)}</span><span style="margin-left:auto;padding-left:10px;color:var(--subtext);font-size:12px;white-space:nowrap;">(${productTypeLabel(item)})</span></div>`).join('');
   list.classList.remove('hidden');
 }
 window.filterFoodPresets=renderFoodPresetList;
 window.openAddFoodModal=function(){
   editingFoodEntryIndex=null;
-  const modal=$('addFoodModal'); if(!modal)return;
-  lockModalScroll(); modal.classList.remove('hidden');
+  const modal=$('addFoodModal');if(!modal)return;
+  lockModalScroll();modal.classList.remove('hidden');
   ['foodName','foodPortion','foodCalories','foodProtein','foodFat','foodCarbs','foodWeight','foodCal100','foodProtein100','foodFat100','foodCarbs100'].forEach(id=>{if($(id))$(id).value='';});
   if($('calcResult'))$('calcResult').textContent='';
-  switchFoodMode('portion');
-  renderFoodPresetList();
-  setTimeout(()=>$('foodName')?.focus(),50);
+  switchFoodMode('portion');renderFoodPresetList();setTimeout(()=>$('foodName')?.focus(),50);
 };
 window.clearFoodSearch=function(){const i=$('foodName');if(i){i.value='';renderFoodPresetList();i.focus();}};
 function ensureFoodSearchClear(){
-  const input=$('foodName'); if(!input||$('v66FoodSearchClear'))return;
-  const parent=input.parentElement; if(!parent)return;
+  const input=$('foodName');if(!input||$('v66FoodSearchClear'))return;
+  const parent=input.parentElement;if(!parent)return;
   parent.classList.add('v66-search-wrap');
   const b=document.createElement('button');b.id='v66FoodSearchClear';b.type='button';b.className='v66-search-clear hidden';b.textContent='×';b.setAttribute('aria-label','Очистить поиск');
-  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.clearFoodSearch();}); parent.appendChild(b);
-  const sync=()=>b.classList.toggle('hidden',!String(input.value||'').trim()); input.addEventListener('input',sync);sync();
+  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.clearFoodSearch();});parent.appendChild(b);
+  const sync=()=>b.classList.toggle('hidden',!String(input.value||'').trim());input.addEventListener('input',sync);sync();
 }
 ensureFoodSearchClear();
 
-/* ---------- Stronger catalog duplicate protection ---------- */
+/* ---------- Catalog creation: exact block, similar = explicit choice ---------- */
 window.saveCatalogProduct=function(){
   const name=String($('catalogName')?.value||'').trim().replace(/\s+/g,' ');
   if(!name){showToast('Введите название');return;}
-  const type=$('catalogType')?.value||'per100'; let product={name,type};
+  const type=$('catalogType')?.value||'per100';let product={name,type};
   if(type==='dish'){
-    product.calories=parseFloat($('catalogDishCalories')?.value)||0; product.protein=parseFloat($('catalogDishProtein')?.value)||0; product.fat=parseFloat($('catalogDishFat')?.value)||0; product.carbs=parseFloat($('catalogDishCarbs')?.value)||0;
+    product.calories=parseFloat($('catalogDishCalories')?.value)||0;product.protein=parseFloat($('catalogDishProtein')?.value)||0;product.fat=parseFloat($('catalogDishFat')?.value)||0;product.carbs=parseFloat($('catalogDishCarbs')?.value)||0;
     if(!product.calories){showToast('Введите калории блюда');return;}
   }else{
-    product.cal100=parseFloat($('catalogCal100')?.value)||0; product.protein100=parseFloat($('catalogProtein100')?.value)||0; product.fat100=parseFloat($('catalogFat100')?.value)||0; product.carbs100=parseFloat($('catalogCarbs100')?.value)||0;
+    product.cal100=parseFloat($('catalogCal100')?.value)||0;product.protein100=parseFloat($('catalogProtein100')?.value)||0;product.fat100=parseFloat($('catalogFat100')?.value)||0;product.carbs100=parseFloat($('catalogCarbs100')?.value)||0;
     if(!product.cal100){showToast('Введите калории на 100 г');return;}
   }
-  const similar=findSimilarCatalogProduct(name,editingCatalogProduct);
-  if(similar){showToast(`Похожий продукт уже есть: «${similar.name}»`);return;}
-  if(editingCatalogProduct!==null)data.productCatalog[editingCatalogProduct]=product; else data.productCatalog.push(product);
-  saveData();closeCatalogEdit();renderCatalogList();showToast('Продукт сохранён в каталоге');
+  const commit=()=>{
+    if(editingCatalogProduct!==null)data.productCatalog[editingCatalogProduct]=product;else data.productCatalog.push(product);
+    saveData();closeCatalogEdit();renderCatalogList();showToast('Продукт сохранён в каталоге');
+  };
+  const dup=window.findFoodDuplicate(name,editingCatalogProduct);
+  if(dup.exact.length){window.showFoodDuplicateModal(name,dup.exact,true);return;}
+  if(dup.similar.length){window.showFoodDuplicateModal(name,dup.similar,false,commit);return;}
+  commit();
 };
+
+/* ---------- Day entries: unified catalog identity ---------- */
 window.addFoodEntry=function(){
-  const date=$('foodDate')?.value, name=String($('foodName')?.value||'').trim().replace(/\s+/g,' ');
+  const date=$('foodDate')?.value,name=String($('foodName')?.value||'').trim().replace(/\s+/g,' ');
   if(!name){showToast('Введите название');return;}
   let portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100;
   if(currentFoodMode==='portion'){
-    portion=$('foodPortion')?.value.trim()||'—'; calories=parseFloat($('foodCalories')?.value)||0; protein=parseFloat($('foodProtein')?.value)||0; fat=parseFloat($('foodFat')?.value)||0; carbs=parseFloat($('foodCarbs')?.value)||0; cal100=protein100=fat100=carbs100=null;
+    portion=$('foodPortion')?.value.trim()||'—';calories=parseFloat($('foodCalories')?.value)||0;protein=parseFloat($('foodProtein')?.value)||0;fat=parseFloat($('foodFat')?.value)||0;carbs=parseFloat($('foodCarbs')?.value)||0;cal100=protein100=fat100=carbs100=null;
     if(!calories){showToast('Введите калории');return;}
   }else{
-    const weight=parseFloat($('foodWeight')?.value)||0; cal100=parseFloat($('foodCal100')?.value)||0; protein100=parseFloat($('foodProtein100')?.value)||0; fat100=parseFloat($('foodFat100')?.value)||0; carbs100=parseFloat($('foodCarbs100')?.value)||0;
+    const weight=parseFloat($('foodWeight')?.value)||0;cal100=parseFloat($('foodCal100')?.value)||0;protein100=parseFloat($('foodProtein100')?.value)||0;fat100=parseFloat($('foodFat100')?.value)||0;carbs100=parseFloat($('foodCarbs100')?.value)||0;
     if(!weight||!cal100){showToast('Введите вес порции и калории на 100 г');return;}
-    portion=weight+' г'; calories=Math.round(cal100*weight/100); protein=Math.round(protein100*weight/100); fat=Math.round(fat100*weight/100); carbs=Math.round(carbs100*weight/100);
+    portion=weight+' г';calories=Math.round(cal100*weight/100);protein=Math.round(protein100*weight/100);fat=Math.round(fat100*weight/100);carbs=Math.round(carbs100*weight/100);
   }
   const entryData={date,name,portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100};
-  if(editingFoodEntryIndex!==null){data.foodDiary.entries[editingFoodEntryIndex]=entryData;showToast('Запись обновлена');}
-  else{
-    /* Prevent near-duplicate catalog entries before adding a new product. The day entry itself is still allowed. */
-    const similar=findSimilarCatalogProduct(name);
-    if(similar && norm(similar.name)!==norm(name)){showToast(`Похожий продукт уже есть в каталоге: «${similar.name}»`);return;}
-    data.foodDiary.entries.push(entryData);
-    if(!similar){data.productCatalog.push(currentFoodMode==='100'?{name,type:'per100',cal100,protein100,fat100,carbs100}:{name,type:'dish',calories,protein,fat,carbs});}
-    showToast(similar?'Продукт добавлен в день':'Продукт добавлен');
+  const commit=(catalogProduct=null)=>{
+    if(editingFoodEntryIndex!==null){data.foodDiary.entries[editingFoodEntryIndex]=entryData;showToast('Запись обновлена');}
+    else{
+      if(!catalogProduct){
+        const product=currentFoodMode==='100'
+          ? {name,type:'per100',cal100,protein100,fat100,carbs100}
+          : {name,type:'dish',calories,protein,fat,carbs};
+        data.productCatalog.push(product);
+      }
+      data.foodDiary.entries.push(entryData);showToast('Продукт добавлен и сохранён в каталог');
+    }
+    saveData();closeAddFoodModal();editingFoodEntryIndex=null;renderFoodDiary();if($('foodTabCatalog')?.classList.contains('active'))renderCatalogList();
+  };
+  if(editingFoodEntryIndex!==null){commit();return;}
+  const dup=typeof window.findFoodDuplicate==='function'?window.findFoodDuplicate(name):{exact:[],similar:[]};
+  if(dup.exact?.length){
+    /* Exact identity already exists: do not create a second catalog card, add only today's entry. */
+    commit(dup.exact[0].product);return;
   }
-  saveData();closeAddFoodModal();editingFoodEntryIndex=null;renderFoodDiary();if($('foodTabCatalog')?.classList.contains('active'))renderCatalogList();
+  if(dup.similar?.length){
+    window.showFoodDuplicateModal(name,dup.similar,false,()=>commit());return;
+  }
+  commit();
 };
 
 /* ---------- Confirmation when adding exercise to a split ---------- */
@@ -16568,6 +16692,69 @@ window.closeImportConfirm=function(){
 })();
 /* ===== END v1.2.4 PROGRESS PICKER ===== */
 
+
+/* ===== v1.3.5 FOOD CATALOG IDENTITY ===== */
+(function(){
+  'use strict';
+  const normalize=function(v){return String(v||'').normalize('NFKC').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u2010-\u2015]/g,'-').replace(/[«»„“”"'`]/g,'').replace(/[^a-zа-я0-9]+/gi,' ').trim().replace(/\s+/g,' ');};
+  window.normalizeFoodCatalogName=normalize;
+  // Final guard: one catalog identity per normalized product name, independent of portion/per-100 mode.
+  const originalSave=window.saveCatalogProduct;
+  if(typeof originalSave==='function'){
+    window.saveCatalogProduct=function(){
+      const input=document.getElementById('catalogName');
+      const name=input?input.value.trim():'';
+      if(!name)return originalSave.apply(this,arguments);
+      const exclude=typeof editingCatalogProduct!=='undefined'?editingCatalogProduct:null;
+      const exact=(data.productCatalog||[]).findIndex((p,i)=>i!==exclude && normalize(p&&p.name)===normalize(name));
+      if(exact!==-1){showToast('Продукт с таким названием уже есть в каталоге');return;}
+      if(typeof window.findFoodDuplicate==='function' && typeof window.showFoodDuplicateModal==='function'){
+        const found=window.findFoodDuplicate(name,exclude);
+        if(found && found.similar && found.similar.length){
+          window.showFoodDuplicateModal(name,found.similar,false,()=>originalSave.apply(this,arguments));
+          return;
+        }
+      }
+      return originalSave.apply(this,arguments);
+    };
+  }
+})();
+/* ===== END v1.3.5 FOOD CATALOG IDENTITY ===== */
+
 </script>
+
+<style>
+.catalog-section{margin:0 0 10px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.catalog-section-title{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;background:var(--card-bg);color:var(--text);padding:14px!important;margin:0!important;min-height:52px!important}
+.catalog-section-items{padding:0 8px 8px}.catalog-section-items.hidden{display:none!important}
+.catalog-empty{color:var(--subtext);text-align:center;padding:18px 8px}
+</style>
+<script>
+/* v1.3.2: searchable grouped food catalog */
+(function(){
+ const categoryFor=name=>{const n=String(name||'').toLowerCase();
+  if(/кур|индей|говя|свинин|фарш|тефтел|кордон|мяс/.test(n))return '🥩 Мясо и птица';
+  if(/лосос|тун|треск|рыб|кревет/.test(n))return '🐟 Рыба и морепродукты';
+  if(/яйц/.test(n))return '🥚 Яйца';
+  if(/творог|йогурт|молок|кефир|сыр/.test(n))return '🥛 Молочные продукты';
+  if(/рис|греч|макарон|картоф|овся|булгур|паст/.test(n))return '🍚 Крупы и гарниры';
+  if(/хлеб|лаваш|блин|наполеон/.test(n))return '🍞 Хлеб и выпечка';
+  if(/огур|помидор|броккол|морков|перец|овощ/.test(n))return '🥦 Овощи';
+  if(/банан|яблок|апельсин|ягод|фрукт/.test(n))return '🍌 Фрукты';
+  if(/арахис|миндал|масло/.test(n))return '🥜 Орехи и жиры';
+  if(/шоколад|мёд|сахар|пикник|батон/.test(n))return '🍫 Перекусы и сладкое';
+  return '🍲 Блюда и другое';};
+ window.renderCatalogList=function(){
+  const c=document.getElementById('catalogContainer');if(!c)return;
+  const q=String(document.getElementById('catalogSearch')?.value||'').trim().toLowerCase();
+  const items=(data.productCatalog||[]).map((p,i)=>({...p,_idx:i})).filter(p=>!q||String(p.name||'').toLowerCase().includes(q));
+  if(!items.length){c.innerHTML='<div class="catalog-empty">Ничего не найдено</div>';return;}
+  const groups={};items.forEach(p=>{const g=p.builtin?categoryFor(p.name):'⭐ Мои продукты';(groups[g]||(groups[g]=[])).push(p)});
+  const order=['⭐ Мои продукты','🥩 Мясо и птица','🐟 Рыба и морепродукты','🥚 Яйца','🥛 Молочные продукты','🍚 Крупы и гарниры','🍞 Хлеб и выпечка','🥦 Овощи','🍌 Фрукты','🥜 Орехи и жиры','🍫 Перекусы и сладкое','🍲 Блюда и другое'];
+  c.innerHTML=order.filter(g=>groups[g]?.length).map((g,gi)=>`<div class="catalog-section"><button type="button" class="catalog-section-title" onclick="this.nextElementSibling.classList.toggle('hidden')"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span><span>⌄</span></button><div class="catalog-section-items ${q?'':'hidden'}">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
+ };
+
+</script>
+
 </body>
 </html>

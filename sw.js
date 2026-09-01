@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v1.3.0-offline-fixed';
+const CACHE_VERSION = 'ftracker-v1.3.5-food-unified-catalog';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = [
   './',
