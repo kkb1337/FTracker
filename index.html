@@ -6549,7 +6549,9 @@ body{
         <div style="height:1px; background:var(--border); margin:16px 0;"></div>
         <div style="font-size:20px; font-weight:600; margin-bottom:16px;">Данные</div>
         <button onclick="exportData()">💾 Экспортировать</button>
-        <button type="button" class="gray ftracker-import-trigger" style="margin-top:8px;min-height:48px;" onclick="document.getElementById('importFile').click()">📥 Импортировать</button><input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display:none">
+        <label for="importFile" id="importFileTrigger" class="gray ftracker-import-trigger" style="margin-top:8px;min-height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;">📥 Импортировать</label>
+        <input type="file" id="importFile" accept=".json,application/json,text/json" onchange="importData(event)" aria-label="Выбрать файл бэкапа FTracker" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;">
+        <!-- iOS/PWA: input intentionally remains in the DOM (not display:none) so the native Files picker can open reliably. -->
         <div class="data-history-status" aria-live="polite">
             <div id="lastImportInfo" class="data-history-row"><span>Последний импорт</span><strong>Не выполнялся</strong></div>
             <div id="lastExportInfo" class="data-history-row"><span>Последний экспорт</span><strong>Не выполнялся</strong></div>
@@ -16386,6 +16388,30 @@ window.closeImportConfirm=function(){
 
 (function(){
   'use strict';
+  /* iOS standalone/PWA import bridge.
+     File inputs hidden with display:none can fail to open the native Files picker.
+     Keep the input visually hidden and trigger it synchronously from a real user tap. */
+  function bindPwaImport(){
+    const trigger=document.getElementById('importFileTrigger');
+    const input=document.getElementById('importFile');
+    if(!trigger||!input||trigger.dataset.pwaImportBound==='1') return;
+    trigger.dataset.pwaImportBound='1';
+    trigger.addEventListener('click',function(e){
+      // The label association handles normal browsers. This direct call is the
+      // reliable fallback for iOS standalone mode and stays inside the tap gesture.
+      e.preventDefault();
+      try{ input.click(); }catch(err){ console.error('FTracker PWA import picker error',err); }
+    },false);
+    input.addEventListener('click',function(){
+      // allow choosing the same file again after a previous cancelled/imported attempt
+    },false);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindPwaImport,{once:true});
+  else bindPwaImport();
+})();
+
+(function(){
+  'use strict';
   /* No global focus, blur, pointerdown or click interception. */
   function closeThemeForImport(){
     const input=document.getElementById('importFile');
@@ -16499,6 +16525,126 @@ window.closeImportConfirm=function(){
     }
   });
 })();
+
+
+/* ===== v1.2.4 PROGRESS PICKER: DIRECT DIRECTORY STRUCTURE ===== */
+(function(){
+  function esc(v){
+    return String(v==null?'':v).replace(/[&<>"']/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function key(v){
+    try { return typeof normalizeExerciseKey==='function' ? normalizeExerciseKey(v) : String(v||'').toLocaleLowerCase('ru').trim(); }
+    catch(e){ return String(v||'').toLocaleLowerCase('ru').trim(); }
+  }
+  function progressNames(){
+    try { return (typeof getProgressExerciseNames==='function' ? getProgressExerciseNames() : []).filter(Boolean); }
+    catch(e){ return []; }
+  }
+  function progressGroupMap(names){
+    const map=new Map();
+    try{
+      const directory=(typeof getDirectoryExercises==='function' ? getDirectoryExercises() : []);
+      directory.forEach(function(item){ map.set(key(item.name), item.group||'Другое'); });
+    }catch(e){}
+    names.forEach(function(name){
+      if(!map.has(key(name))){
+        let group='Другое';
+        try{ if(typeof inferExerciseGroup==='function') group=inferExerciseGroup(name, typeof getExerciseTypeByName==='function'?getExerciseTypeByName(name):'strength')||'Другое'; }catch(e){}
+        map.set(key(name),group);
+      }
+    });
+    return map;
+  }
+
+  // This renderer deliberately copies the DIRECTORY layout: group heading -> exercise rows -> next group.
+  // No selector, no dropdown and no "Все группы мышц" control exists here.
+  window.renderProgressExercisePicker=function(){
+    const root=document.getElementById('progressPickerList');
+    const input=document.getElementById('progressExercisePickerSearch');
+    if(!root) return;
+
+    const query=key(input&&input.value||'');
+    const current=window.progressSelectedExercise||'';
+    const names=progressNames().filter(function(name){ return !query || key(name).includes(query); });
+
+    if(!names.length){
+      root.innerHTML='<div class="card" style="text-align:center;color:var(--subtext);">Упражнений с сохранённым прогрессом не найдено</div>';
+      return;
+    }
+
+    const groups=(typeof DIRECTORY_GROUPS!=='undefined' && Array.isArray(DIRECTORY_GROUPS))
+      ? DIRECTORY_GROUPS.slice() : ['Грудь','Бицепс','Спина','Трицепс','Плечи','Ноги','Пресс','Кардио','Другое'];
+    const groupMap=progressGroupMap(names);
+    const grouped=new Map(groups.map(function(g){return [g,[]];}));
+
+    names.forEach(function(name){
+      const group=groupMap.get(key(name))||'Другое';
+      if(!grouped.has(group)) grouped.set(group,[]);
+      grouped.get(group).push(name);
+    });
+
+    const ordered=[];
+    groups.forEach(function(g){ if((grouped.get(g)||[]).length) ordered.push(g); });
+    Array.from(grouped.keys()).filter(function(g){return !groups.includes(g) && grouped.get(g).length;})
+      .sort(function(a,b){return a.localeCompare(b,'ru');}).forEach(function(g){ordered.push(g);});
+
+    root.innerHTML=ordered.map(function(group){
+      const items=(grouped.get(group)||[]).slice().sort(function(a,b){return a.localeCompare(b,'ru');});
+      return '<section class="directory-group progress-directory-group">'
+        +'<div class="directory-group-title">'+esc(group)+'</div>'
+        +'<div class="directory-list">'
+        +items.map(function(name){
+          let count=0;
+          try{
+            count=(typeof getExerciseSeries==='function' && typeof getHistoryInPeriod==='function')
+              ? (getExerciseSeries(name,getHistoryInPeriod('all'))||[]).length : 0;
+          }catch(e){}
+          const selected=name===current;
+          return '<button type="button" class="directory-item-main progress-directory-row '+(selected?'selected':'')+'" data-progress-pick="'+esc(name)+'">'
+            +'<span class="directory-item-name">'+esc(name)+'</span>'
+            +'<span class="progress-picker-row-count" aria-label="'+count+' тренировок">'+count+'</span>'
+            +'<span class="directory-chevron">'+(selected?'✓':'›')+'</span>'
+            +'</button>';
+        }).join('')
+        +'</div></section>';
+    }).join('');
+
+    root.querySelectorAll('[data-progress-pick]').forEach(function(btn){
+      btn.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        const name=this.getAttribute('data-progress-pick');
+        if(name && typeof window.chooseProgressExercise==='function') window.chooseProgressExercise(name);
+      },{passive:false});
+    });
+  };
+
+  window.openProgressExercisePicker=function(){
+    const modal=document.getElementById('progressExercisePickerModal');
+    if(!modal) return;
+    const input=document.getElementById('progressExercisePickerSearch');
+    if(input) input.value='';
+    if(typeof lockModalScroll==='function') lockModalScroll();
+    modal.classList.remove('hidden');
+    window.renderProgressExercisePicker();
+  };
+
+  // Hard CSS isolation: the progress picker uses the same visible hierarchy as the directory.
+  const style=document.createElement('style');
+  style.textContent='\n'
+    +'#progressPickerList{display:block!important;max-height:58vh!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding:2px 0 18px!important;}\n'
+    +'#progressPickerList .directory-group{display:block!important;margin:0 0 18px!important;}\n'
+    +'#progressPickerList .directory-group-title{display:block!important;font-size:16px!important;font-weight:850!important;padding:8px 2px!important;margin:0 0 7px!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:var(--subtext)!important;background:transparent!important;}\n'
+    +'#progressPickerList .directory-list{display:flex!important;flex-direction:column!important;gap:7px!important;}\n'
+    +'#progressPickerList .progress-directory-row{width:100%!important;min-height:58px!important;margin:0!important;padding:12px 13px!important;border:1px solid var(--border)!important;background:var(--card-bg)!important;border-radius:14px!important;color:var(--text)!important;text-align:left!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;cursor:pointer!important;}\n'
+    +'#progressPickerList .progress-directory-row .directory-item-name{flex:1!important;min-width:0!important;font-size:16px!important;font-weight:750!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;}\n'
+    +'#progressPickerList .progress-directory-row .progress-picker-row-count{flex:0 0 30px!important;width:30px!important;height:30px!important;border:1px solid var(--border)!important;border-radius:50%!important;background:var(--input-bg)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:12px!important;font-weight:900!important;}\n'
+    +'#progressPickerList .progress-directory-row .directory-chevron{flex:none!important;font-size:24px!important;color:var(--subtext)!important;}\n'
+    +'#progressPickerList .progress-directory-row.selected{outline:2px solid var(--accent)!important;}\n';
+  document.head.appendChild(style);
+})();
+/* ===== END v1.2.4 PROGRESS PICKER ===== */
 
 </script>
 </body>
