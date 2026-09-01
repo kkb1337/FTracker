@@ -16220,7 +16220,7 @@ function fbFingerprint(v){
 async function fbDownload(payload){
   const json=JSON.stringify(payload);
   const blob=new Blob([json],{type:'application/json;charset=utf-8'});
-  const d=new Date(); const pad=n=>String(n).padStart(2,'0'); const stamp=`${d.getFullYear()}-${pad(d.getMonth()+1)}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`; const name=`${stamp}_FTracker_backup.json`;
+  const d=new Date(); const pad=n=>String(n).padStart(2,'0'); const stamp=`${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}_${pad(d.getHours())}-${pad(d.getMinutes())}`; const name=`${stamp}_FTracker_backup.json`;
   /* On iPhone/iPad the reliable way to put a generated file into Files is the native share sheet. */
   if(typeof File==='function' && navigator.share){
     const file=new File([blob],name,{type:'application/json'});
