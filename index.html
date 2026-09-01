@@ -16754,6 +16754,68 @@ window.closeImportConfirm=function(){
   c.innerHTML=order.filter(g=>groups[g]?.length).map((g,gi)=>`<div class="catalog-section"><button type="button" class="catalog-section-title" onclick="this.nextElementSibling.classList.toggle('hidden')"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span><span>⌄</span></button><div class="catalog-section-items ${q?'':'hidden'}">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
  };
 
+
+/* ===== v1.3.6: unified food catalog + workout completion progress ===== */
+(function(){
+  'use strict';
+
+  // Catalog search must always re-render on every input (PWA-safe delegated binding).
+  function bindCatalogSearch(){
+    const input=document.getElementById('catalogSearch');
+    if(!input || input.dataset.v136Bound==='1') return;
+    input.dataset.v136Bound='1';
+    input.addEventListener('input', function(){
+      if(typeof window.renderCatalogList==='function') window.renderCatalogList();
+    });
+    input.addEventListener('search', function(){
+      if(typeof window.renderCatalogList==='function') window.renderCatalogList();
+    });
+  }
+  document.addEventListener('DOMContentLoaded', bindCatalogSearch);
+  bindCatalogSearch();
+
+  // One canonical day-entry path: catalog identity is checked first; a new confirmed product is persisted in both places.
+  const _addFoodEntry_v136=window.addFoodEntry;
+  window.addFoodEntry=function(){
+    return _addFoodEntry_v136.apply(this,arguments);
+  };
+
+  // Minimum goal: 3 completed sets for each strength exercise. The bar changes immediately on the ✓ checkbox and reverses on uncheck.
+  window.updateWorkoutProgressUI=function(){
+    const active=getActiveExerciseIndices();
+    let done=0,total=0;
+    active.forEach(function(idx){
+      const meta=getWorkoutExercise(idx);
+      if(!meta) return;
+      const sets=(workoutSets[idx]||[]).filter(s=>s&&s.done).length;
+      if((meta.type||'strength')==='strength'){
+        total+=3;
+        done+=Math.min(3,sets);
+      }else{
+        total+=1;
+        done+=sets>0?1:0;
+      }
+    });
+    const pct=total?Math.round(done/total*100):0;
+    const bar=document.getElementById('workoutProgressBar');
+    const left=document.getElementById('workoutProgressLeft');
+    const right=document.getElementById('workoutProgressRight');
+    const text=document.getElementById('workoutProgressText');
+    if(bar) bar.style.width=pct+'%';
+    if(left) left.textContent= total ? `Выполнено ${done} из ${total} подходов` : 'Нет упражнений';
+    if(right) right.textContent='';
+    if(text) text.textContent='';
+  };
+
+  // Force immediate sync after the existing checkbox handler has changed workoutSets.
+  const _markSetDone_v136=window.markSetDone;
+  window.markSetDone=function(exIdx,setIdx){
+    const result=_markSetDone_v136.apply(this,arguments);
+    try{ window.updateWorkoutProgressUI(); }catch(e){}
+    return result;
+  };
+})();
+
 </script>
 
 </body>
