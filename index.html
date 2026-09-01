@@ -5758,6 +5758,15 @@ body{
 /* v1.0.15 targeted workout button/readability fixes */
 #workoutScreen .workout-bottom-action{min-width:0!important;overflow:hidden!important;padding:12px 10px!important;}
 #workoutScreen .workout-bottom-action .nav-label{display:block!important;width:100%!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;line-height:1.18!important;text-align:center!important;}
+
+/* Scrollable muscle-group dropdown for Progress exercise picker */
+.progress-group-dropdown{position:relative;margin-top:10px;z-index:30;}
+.progress-group-toggle{width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;text-align:left;padding:0 16px;border:1px solid var(--border);border-radius:14px;background:var(--input-bg);color:var(--text);font-size:17px;font-weight:650;}
+.progress-group-menu{position:absolute;left:0;right:0;top:calc(100% + 6px);max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:14px;background:var(--card-bg);box-shadow:0 14px 32px rgba(0,0,0,.35);padding:6px;z-index:50;}
+.progress-group-menu.hidden{display:none!important;}
+.progress-group-option{width:100%;min-height:46px;text-align:left;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--text);font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+.progress-group-option.active{background:rgba(52,199,89,.16);}
+.progress-group-option small{color:var(--subtext);font-weight:600;}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5916,8 +5925,466 @@ body{
 .fscore-analytics-status.attention{color:#f2c94c;background:rgba(242,201,76,.10);border:1px solid rgba(242,201,76,.20)}
 .fscore-analytics-status.bad{color:var(--negative);background:rgba(255,59,48,.10);border:1px solid rgba(255,59,48,.20)}
 .analytics-card{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);border-radius:20px;margin:10px 0;overflow:hidden}.analytics-card>summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:12px}.analytics-card>summary::-webkit-details-marker{display:none}.analytics-card>summary:after{content:'›';font-size:22px;color:var(--subtext);transition:transform .18s}.analytics-card[open]>summary:after{transform:rotate(90deg)}.analytics-inner{padding:0 18px 18px;color:var(--subtext);line-height:1.5}.analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.analytics-stat{padding:13px;border-radius:16px;background:rgba(255,255,255,.045)}.analytics-stat strong{display:block;font-size:21px;color:var(--text);letter-spacing:-.5px}.analytics-stat span{font-size:12px}.analytics-note{padding:14px;border-radius:16px;background:rgba(212,255,79,.07);border:1px solid rgba(212,255,79,.12);color:var(--text)}.analytics-hero{padding:20px;border-radius:22px;background:linear-gradient(135deg,rgba(212,255,79,.10),rgba(120,90,255,.09));border:1px solid rgba(255,255,255,.10);margin-bottom:12px}.analytics-hero-row{display:flex;align-items:center;justify-content:space-between}.analytics-score{font-size:52px;font-weight:850;letter-spacing:-2px}.analytics-period{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.analytics-period button{min-height:36px;padding:0 12px;border-radius:999px}.analytics-period button.active{background:var(--accent);color:#111;border-color:var(--accent)}
+
+/* ===== F-Score v2: compact widget + clean breakdown ===== */
+#fscoreHomeWidget.fscore-widget{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:76px!important;
+  margin:12px 0!important;
+  padding:12px 14px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:18px!important;
+  background:rgba(255,255,255,.045)!important;
+  color:var(--text)!important;
+  overflow:hidden!important;
+  white-space:normal!important;
+}
+#fscoreHomeWidget .fscore-home-number{
+  flex:0 0 auto!important;
+  font-size:34px!important;
+  line-height:1!important;
+  font-weight:850!important;
+  letter-spacing:-1.5px!important;
+}
+#fscoreHomeWidget .fscore-home-status{
+  min-width:0!important;
+  flex:0 1 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  overflow-wrap:anywhere!important;
+}
+#fscoreHomeWidget .fscore-home-dot{
+  display:block!important;
+  width:9px!important;
+  height:9px!important;
+  flex:0 0 9px!important;
+  border-radius:50%!important;
+  background:currentColor!important;
+}
+#fscoreHomeWidget.fscore-widget-good .fscore-home-status{color:var(--positive)!important}
+#fscoreHomeWidget.fscore-widget-attention .fscore-home-status{color:#f2c94c!important}
+#fscoreHomeWidget.fscore-widget-bad .fscore-home-status{color:var(--negative)!important}
+
+.fscore-detail-card{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:22px;
+  background:linear-gradient(135deg,rgba(212,255,79,.09),rgba(120,90,255,.07));
+  margin:10px 0 12px;
+}
+.fscore-detail-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+}
+.fscore-detail-score{
+  font-size:52px;
+  line-height:.95;
+  font-weight:850;
+  letter-spacing:-2px;
+}
+.fscore-detail-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:9px;
+  font-size:14px;
+  line-height:1.2;
+  font-weight:800;
+}
+.fscore-detail-status.good{color:var(--positive)}
+.fscore-detail-status.attention{color:#f2c94c}
+.fscore-detail-status.bad{color:var(--negative)}
+.fscore-detail-goal{
+  flex:0 0 auto;
+  text-align:right;
+  color:var(--subtext);
+  font-size:12px;
+  line-height:1.35;
+}
+.fscore-detail-goal strong{color:var(--text);font-size:15px}
+.fscore-detail-note{
+  margin-top:14px;
+  color:var(--subtext);
+  font-size:13px;
+  line-height:1.45;
+}
+.fscore-components{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+.fscore-component{
+  box-sizing:border-box;
+  min-width:0;
+  padding:15px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:18px;
+  background:rgba(255,255,255,.045);
+}
+.fscore-component-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+}
+.fscore-component-head>div{min-width:0;flex:1}
+.fscore-component h3{
+  margin:0;
+  font-size:16px;
+  line-height:1.25;
+}
+.fscore-component p{
+  margin:5px 0 0;
+  color:var(--subtext);
+  font-size:12px;
+  line-height:1.4;
+}
+.fscore-component-head>strong{
+  flex:0 0 auto;
+  white-space:nowrap;
+  font-size:15px;
+}
+.fscore-component-value{
+  margin-top:12px;
+  font-size:25px;
+  font-weight:850;
+  letter-spacing:-.5px;
+}
+.fscore-component-note{
+  margin-top:10px;
+  color:var(--subtext);
+  font-size:12px;
+  line-height:1.4;
+}
+.fscore-subgrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.fscore-subgrid>div{
+  min-width:0;
+  padding:11px;
+  border-radius:14px;
+  background:rgba(255,255,255,.045);
+}
+.fscore-subgrid span,.fscore-subgrid small{
+  display:block;
+  color:var(--subtext);
+  font-size:11px;
+  line-height:1.35;
+}
+.fscore-subgrid b{
+  display:block;
+  margin:5px 0 3px;
+  font-size:18px;
+  line-height:1.1;
+}
+.fscore-breakdown-row,.fscore-breakdown-total{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.fscore-breakdown-total{
+  border-bottom:0;
+  padding-bottom:0;
+  font-size:15px;
+}
+@media(max-width:430px){
+  #fscoreHomeWidget.fscore-widget{min-height:68px!important;padding:11px 12px!important;gap:9px!important}
+  #fscoreHomeWidget .fscore-home-number{font-size:30px!important}
+  #fscoreHomeWidget .fscore-home-status{font-size:13px!important;gap:7px!important}
+  .fscore-detail-card{padding:15px}
+  .fscore-detail-score{font-size:46px}
+  .fscore-subgrid{grid-template-columns:1fr}
+}
+@media(min-width:700px){
+  .fscore-components{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+}
+
 </style>
 
+
+<style id="fscore-home-final-v4">
+/* F-Score v4 — clean, informative home button. No absolute positioning. */
+#fscoreHomeWidget.fscore-widget{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:86px!important;
+  margin:14px 0 18px!important;
+  padding:14px 16px!important;
+  display:grid!important;
+  grid-template-columns:minmax(76px,88px) minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:14px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  border-radius:20px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035))!important;
+  color:var(--text)!important;
+  text-align:left!important;
+  overflow:hidden!important;
+  white-space:normal!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.14)!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+#fscoreHomeWidget:active{transform:scale(.992)!important;opacity:.92!important}
+#fscoreHomeWidget .fscore-home-number-wrap{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding-right:14px!important;
+  border-right:1px solid rgba(255,255,255,.09)!important;
+}
+#fscoreHomeWidget .fscore-home-number{
+  display:block!important;
+  min-width:0!important;
+  font-size:38px!important;
+  line-height:.9!important;
+  font-weight:900!important;
+  letter-spacing:-2px!important;
+}
+#fscoreHomeWidget .fscore-home-scale{
+  display:block!important;
+  margin-top:5px!important;
+  color:var(--subtext)!important;
+  font-size:10px!important;
+  line-height:1!important;
+  font-weight:750!important;
+  letter-spacing:.05em!important;
+}
+#fscoreHomeWidget .fscore-home-main{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  gap:5px!important;
+}
+#fscoreHomeWidget .fscore-home-kicker{
+  display:block!important;
+  color:var(--subtext)!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+  font-weight:850!important;
+  letter-spacing:.09em!important;
+  text-transform:uppercase!important;
+}
+#fscoreHomeWidget .fscore-home-status{
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  font-size:16px!important;
+  line-height:1.2!important;
+  font-weight:850!important;
+}
+#fscoreHomeWidget .fscore-home-status-text{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#fscoreHomeWidget .fscore-home-dot{
+  display:block!important;
+  width:9px!important;
+  height:9px!important;
+  min-width:9px!important;
+  flex:0 0 9px!important;
+  border-radius:50%!important;
+  background:currentColor!important;
+}
+#fscoreHomeWidget .fscore-home-hint{
+  display:block!important;
+  color:var(--subtext)!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+  font-weight:650!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#fscoreHomeWidget .fscore-home-arrow{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:28px!important;
+  height:28px!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.055)!important;
+  color:var(--subtext)!important;
+  font-size:22px!important;
+  line-height:1!important;
+}
+#fscoreHomeWidget.fscore-widget-good .fscore-home-status{color:var(--positive)!important}
+#fscoreHomeWidget.fscore-widget-attention .fscore-home-status{color:#f2c94c!important}
+#fscoreHomeWidget.fscore-widget-bad .fscore-home-status{color:var(--negative)!important}
+@media(max-width:430px){
+  #fscoreHomeWidget.fscore-widget{grid-template-columns:70px minmax(0,1fr) 26px!important;gap:11px!important;padding:13px!important;min-height:82px!important}
+  #fscoreHomeWidget .fscore-home-number-wrap{padding-right:10px!important}
+  #fscoreHomeWidget .fscore-home-number{font-size:34px!important}
+  #fscoreHomeWidget .fscore-home-status{font-size:14px!important}
+  #fscoreHomeWidget .fscore-home-hint{font-size:10px!important}
+  #fscoreHomeWidget .fscore-home-arrow{width:26px!important;height:26px!important;font-size:20px!important}
+}
+</style>
+
+<style id="index-system-home-v5">
+/* Index of consistency — user-facing home card. The technical F-Score name stays internal. */
+#fscoreHomeWidget.fscore-widget{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:126px!important;
+  margin:14px 0 18px!important;
+  padding:15px 16px 14px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:0!important;
+  border:1.5px solid rgba(48,210,93,.58)!important;
+  border-radius:20px!important;
+  background:linear-gradient(145deg,rgba(48,210,93,.065),rgba(255,255,255,.035))!important;
+  color:var(--text)!important;
+  text-align:left!important;
+  overflow:hidden!important;
+  white-space:normal!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.14)!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent!important;
+  touch-action:manipulation!important;
+}
+#fscoreHomeWidget:active{transform:scale(.992)!important;opacity:.92!important}
+#fscoreHomeWidget .fscore-home-top{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  min-width:0!important;
+}
+#fscoreHomeWidget .fscore-home-title{
+  min-width:0!important;
+  font-size:17px!important;
+  line-height:1.2!important;
+  font-weight:850!important;
+  letter-spacing:-.2px!important;
+}
+#fscoreHomeWidget .fscore-home-action{
+  flex:0 0 auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  color:var(--accent)!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+#fscoreHomeWidget .fscore-home-action span{font-size:18px!important;line-height:.7!important}
+#fscoreHomeWidget .fscore-home-middle{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+  margin-top:10px!important;
+}
+#fscoreHomeWidget .fscore-home-number-wrap{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:5px!important;
+  flex:0 0 auto!important;
+  min-width:0!important;
+  padding:0!important;
+  border:0!important;
+}
+#fscoreHomeWidget .fscore-home-number{
+  display:block!important;
+  font-size:36px!important;
+  line-height:.92!important;
+  font-weight:900!important;
+  letter-spacing:-2px!important;
+}
+#fscoreHomeWidget .fscore-home-scale{
+  display:block!important;
+  color:var(--subtext)!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:750!important;
+}
+#fscoreHomeWidget .fscore-home-status{
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+}
+#fscoreHomeWidget .fscore-home-status-text{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+#fscoreHomeWidget .fscore-home-dot{width:8px!important;height:8px!important;min-width:8px!important;flex:0 0 8px!important;border-radius:50%!important;background:currentColor!important}
+#fscoreHomeWidget.fscore-widget-good .fscore-home-status{color:var(--positive)!important}
+#fscoreHomeWidget.fscore-widget-attention .fscore-home-status{color:#f2c94c!important}
+#fscoreHomeWidget.fscore-widget-bad .fscore-home-status{color:#f2a23a!important}
+#fscoreHomeWidget .fscore-home-progress{
+  display:block!important;
+  width:100%!important;
+  height:6px!important;
+  margin-top:11px!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.10)!important;
+  overflow:hidden!important;
+}
+#fscoreHomeWidget .fscore-home-progress-fill{
+  display:block!important;
+  height:100%!important;
+  min-width:0!important;
+  border-radius:inherit!important;
+  background:var(--accent)!important;
+  transition:width .2s ease!important;
+}
+#fscoreHomeWidget.fscore-widget-attention .fscore-home-progress-fill{background:#f2c94c!important}
+#fscoreHomeWidget.fscore-widget-bad .fscore-home-progress-fill{background:#f2a23a!important}
+#fscoreHomeWidget .fscore-home-hint{
+  display:block!important;
+  margin-top:8px!important;
+  color:var(--subtext)!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+  font-weight:650!important;
+  white-space:normal!important;
+}
+@media(max-width:430px){
+  #fscoreHomeWidget.fscore-widget{min-height:121px!important;padding:14px!important;border-radius:18px!important}
+  #fscoreHomeWidget .fscore-home-title{font-size:16px!important}
+  #fscoreHomeWidget .fscore-home-number{font-size:34px!important}
+  #fscoreHomeWidget .fscore-home-status{font-size:13px!important}
+  #fscoreHomeWidget .fscore-home-hint{font-size:10.5px!important}
+}
+</style>
 </head>
 <body>
 <div class="safe-area"><div class="container" id="app">
@@ -5930,8 +6397,19 @@ body{
             Прошло больше недели с последнего экспорта.<br><button onclick="exportData(); closeExportReminder();" style="background:#fff; color:#000; margin-top:8px;">📥 Экспортировать сейчас</button>
         </div>
         <div id="programList"></div>
-        <button id="fscoreHomeWidget" type="button" class="fscore-widget" aria-label="Открыть F-Score" onclick="showFScoreAnalytics()">
-            <span class="fscore-fallback-label">F-SCORE</span>
+        <button id="fscoreHomeWidget" type="button" class="fscore-widget" aria-label="Открыть индекс системности" onclick="showFScoreAnalytics()">
+            <span class="fscore-home-top">
+                <span class="fscore-home-title">Индекс системности</span>
+                <span class="fscore-home-action">Подробнее <span aria-hidden="true">›</span></span>
+            </span>
+            <span class="fscore-home-middle">
+                <span class="fscore-home-number-wrap">
+                    <span class="fscore-home-number">0</span><span class="fscore-home-scale">/ 100</span>
+                </span>
+                <span class="fscore-home-status"><span class="fscore-home-dot" aria-hidden="true"></span><span class="fscore-home-status-text">Ниже желаемого</span></span>
+            </span>
+            <span class="fscore-home-progress" aria-hidden="true"><span class="fscore-home-progress-fill"></span></span>
+            <span class="fscore-home-hint">Насколько системно вы тренируетесь и двигаетесь к цели</span>
         </button>
         <div class="nav-buttons">
             <button onclick="showProgress()" class="outline">
@@ -5965,7 +6443,7 @@ body{
         <div id="progressContent"></div>
     </div>
     <div id="fscoreAnalyticsScreen" class="hidden">
-        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">◎</span><span>Аналитика</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">◎</span><span>Индекс системности</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="fscoreAnalyticsContent"></div>
     </div>
     <div id="bodyScreen" class="hidden">
@@ -6854,6 +7332,8 @@ let data = {
 
 let currentProgram = null, currentExerciseIndex = 0, workoutSets = {}, workoutStartTime = null;
 let workoutExerciseSlots = [];
+// F-Score keeps the original planned exercises separately from temporary replacements.
+let workoutPlanSnapshot = [];
 // Exercises borrowed from another split exist only inside the current workout.
 // Negative slot references point into this transient array and are never saved to data.programs.
 let workoutTransientExercises = [];
@@ -7342,10 +7822,10 @@ function saveData(showError=true, autoBackupReason='Изменение данн�
     return false;
   }
 }
-function saveDraft() { if (currentProgram === null) return; localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime, exerciseSlots: workoutExerciseSlots, transientExercises: workoutTransientExercises })); }
+function saveDraft() { if (currentProgram === null) return; localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime, exerciseSlots: workoutExerciseSlots, transientExercises: workoutTransientExercises, fscorePlanSnapshot: workoutPlanSnapshot })); }
 function clearDraft() { localStorage.removeItem(DRAFT_KEY); document.getElementById('draftBanner').classList.add('hidden'); }
 function checkDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (draft) { try { const p = JSON.parse(draft); if (p.programIndex !== undefined) document.getElementById('draftBanner').classList.remove('hidden'); } catch(e) {} } }
-function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutTransientExercises = Array.isArray(p.transientExercises) ? p.transientExercises : []; const savedSlots = Array.isArray(p.exerciseSlots) ? p.exerciseSlots : []; workoutExerciseSlots = savedSlots.length ? savedSlots.map(Number).filter(ref=>Number.isInteger(ref) && (ref>=0 ? !!data.programs[currentProgram]?.exercises?.[ref] : !!workoutTransientExercises[-ref-1])) : (data.programs[currentProgram]?.exercises||[]).map((_,i)=>i).filter(i=>data.programs[currentProgram].active?.[i]); workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); } catch(e) { clearDraft(); } }
+function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutTransientExercises = Array.isArray(p.transientExercises) ? p.transientExercises : []; workoutPlanSnapshot = Array.isArray(p.fscorePlanSnapshot) ? p.fscorePlanSnapshot : []; const savedSlots = Array.isArray(p.exerciseSlots) ? p.exerciseSlots : []; workoutExerciseSlots = savedSlots.length ? savedSlots.map(Number).filter(ref=>Number.isInteger(ref) && (ref>=0 ? !!data.programs[currentProgram]?.exercises?.[ref] : !!workoutTransientExercises[-ref-1])) : (data.programs[currentProgram]?.exercises||[]).map((_,i)=>i).filter(i=>data.programs[currentProgram].active?.[i]); workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); } catch(e) { clearDraft(); } }
 function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EXPORT_KEY); if (lastExport && (Date.now() - parseInt(lastExport)) > 7*24*60*60*1000) document.getElementById('exportReminder').classList.remove('hidden'); }
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
@@ -7411,7 +7891,7 @@ function setFScoreGoal(goal){
     if(!['cut','gain','maintain'].includes(goal)) return;
     data.fscoreGoal=goal;
     try{localStorage.setItem('ftracker_fscore_goal',goal);}catch(e){}
-    saveData(false,'Изменение цели F-Score');
+    saveData(false,'Изменение цели индекса системности');
     renderFScoreAnalytics();
     renderFScoreHomeWidget();
 }
@@ -7465,76 +7945,254 @@ function fScoreRecordStats(history){
     const records=getExerciseRecords();
     return Object.entries(records).map(([name,r])=>({name,maxWeight:Number(r.maxWeight)||0,maxReps:Number(r.maxReps)||0,bestWeightReps:r.bestWeightReps||''})).filter(r=>r.maxWeight>0||r.maxReps>0).sort((a,b)=>(b.maxWeight-a.maxWeight)||(b.maxReps-a.maxReps));
 }
+
+function fScoreExerciseGroup(name,type){
+    const key=fScoreNormName(name);
+    if(!key) return '';
+    try{
+        const all=[...(data.exerciseDirectory||[]),...(data.exerciseDirectoryArchived||[])];
+        const hit=all.find(e=>fScoreNormName(e?.name)===key);
+        if(hit?.group) return String(hit.group);
+        if(typeof EXERCISE_GUIDES!=='undefined' && Array.isArray(EXERCISE_GUIDES)){
+            const g=EXERCISE_GUIDES.find(e=>fScoreNormName(e?.name)===key);
+            if(g?.group) return String(g.group);
+        }
+    }catch(e){}
+    try{return String(inferExerciseGroup(name,type)||'');}catch(e){return '';}
+}
+function fScoreNormName(v){
+    return String(v??'').normalize('NFKC').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\s+/g,' ');
+}
+function fScorePlanQuality(entry){
+    const planned=Array.isArray(entry?.plannedExercises)?entry.plannedExercises:[];
+    if(!planned.length){
+        // Legacy/manual records have no separate plan snapshot. Their saved
+        // exercises are treated as the planned list so old data stays usable.
+        const actual=Array.isArray(entry?.exercises)?entry.exercises:[];
+        if(!actual.length)return 0;
+        return 100;
+    }
+    let sum=0;
+    planned.forEach(p=>{
+        let score=0;
+        if(p?.status==='replaced'){
+            score=Number(p.score);
+            if(!Number.isFinite(score)){
+                const pg=fScoreNormName(p.plannedGroup), ag=fScoreNormName(p.actualGroup);
+                score=(pg&&ag&&pg===ag)?100:50;
+            }
+        }else if(p?.status==='completed') score=100;
+        else score=0;
+        sum+=fScoreClamp(score);
+    });
+    return sum/planned.length;
+}
+function fScoreVolume(entry){
+    return calculateWorkoutVolume(entry);
+}
+function fScoreStability(recent,prev){
+    const recentAvg=recent.length?recent.reduce((a,e)=>a+fScoreVolume(e),0)/recent.length:0;
+    const prevAvg=prev.length?prev.reduce((a,e)=>a+fScoreVolume(e),0)/prev.length:0;
+    if(!recent.length && !prev.length) return {score:100,change:null,recentAvg,prevAvg,available:false};
+    if(prevAvg===0){
+        return {score:recentAvg===0?100:60,change:null,recentAvg,prevAvg,available:false};
+    }
+    const change=(recentAvg-prevAvg)/Math.abs(prevAvg)*100;
+    let score;
+    const a=Math.abs(change);
+    if(change>=-10 && change<=10){
+        score=100-(a/10)*10;
+    }else if(change<-10 && change>=-30){
+        score=90-((Math.abs(change)-10)/20)*30;
+    }else if(change>10 && change<=25){
+        score=90-((change-10)/15)*30;
+    }else if(change<-30){
+        score=Math.max(20,60-(Math.abs(change)-30)*1.6);
+    }else{
+        score=Math.max(20,60-(change-25)*1.6);
+    }
+    return {score:fScoreClamp(score),change,recentAvg,prevAvg,available:true};
+}
+function fScoreRangeScore(value,ranges){
+    // ranges: [{min,max,scoreMin,scoreMax}] with linear interpolation.
+    for(const r of ranges){
+        if(value>=r.min && value<=r.max){
+            const span=r.max-r.min;
+            return span===0?r.scoreMax:r.scoreMin+(value-r.min)/span*(r.scoreMax-r.scoreMin);
+        }
+    }
+    return null;
+}
+function fScoreBodyMetricScore(goal,weightDelta,measurementDeltas){
+    let weightScore=null;
+    if(weightDelta!=null){
+        if(goal==='cut') weightScore=weightDelta<=-0.5?100:weightDelta<0?75:Math.max(0,75-weightDelta*60);
+        else if(goal==='gain') weightScore=weightDelta>=0.25&&weightDelta<=1.5?100:weightDelta>1.5?Math.max(55,100-(weightDelta-1.5)*25):Math.max(0,55+weightDelta*180);
+        else weightScore=Math.abs(weightDelta)<=1?100:Math.max(0,100-(Math.abs(weightDelta)-1)*40);
+    }
+    const metrics=(measurementDeltas||[]).filter(m=>Number.isFinite(m.delta));
+    const scores=metrics.map(m=>{
+        const d=m.delta;
+        // Замеры не имеют заранее заданного «главного» статуса: каждый доступный
+        // показатель участвует одинаково, а направление интерпретируется по цели.
+        let score;
+        if(goal==='gain') score=d>0?Math.min(100,70+d*15):d===0?75:Math.max(35,75+d*20);
+        else if(goal==='cut') score=d<0?Math.min(100,70+Math.abs(d)*15):d===0?75:Math.max(25,75-d*20);
+        else score=Math.abs(d)<=1?100:Math.max(35,100-(Math.abs(d)-1)*18);
+        return {...m,score:fScoreClamp(score)};
+    });
+    const bodyParts=[];
+    if(weightScore!=null) bodyParts.push({score:weightScore,weight:50});
+    scores.forEach(m=>bodyParts.push({score:m.score,weight:50/Math.max(scores.length,1)}));
+    if(!bodyParts.length)return {score:0,weightScore:null,measurementScores:[],available:false};
+    const total=bodyParts.reduce((a,p)=>a+p.weight,0);
+    return {score:bodyParts.reduce((a,p)=>a+p.score*p.weight,0)/total,weightScore,measurementScores:scores,available:true};
+}
 function fScoreData(){
     const h=(data.history||[]).filter(e=>e&&e.date).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
     const m=(data.measurements||[]).filter(e=>e&&e.date).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
     const recent=fScoreRecent(h,30), prev=fScoreRecent(h,60,30);
     const recentM=fScoreRecent(m,30), prevM=fScoreRecent(m,60,30);
-    const recentVol=recent.reduce((a,e)=>a+calculateWorkoutVolume(e),0), prevVol=prev.reduce((a,e)=>a+calculateWorkoutVolume(e),0);
-    const rM=recentM.length?recentM[recentM.length-1]:null, pM=prevM.length?prevM[prevM.length-1]:null;
-    const rW=rM&&Number.isFinite(parseFloat(rM.weight))?parseFloat(rM.weight):null, oW=pM&&Number.isFinite(parseFloat(pM.weight))?parseFloat(pM.weight):null;
-    const rWa=rM&&Number.isFinite(parseFloat(rM.waist))?parseFloat(rM.waist):null, oWa=pM&&Number.isFinite(parseFloat(pM.waist))?parseFloat(pM.waist):null;
+    const recentMlast=recentM.length?recentM[recentM.length-1]:null;
+    const prevMlast=prevM.length?prevM[prevM.length-1]:null;
+    const rW=recentMlast&&Number.isFinite(parseFloat(recentMlast.weight))?parseFloat(recentMlast.weight):null;
+    const oW=prevMlast&&Number.isFinite(parseFloat(prevMlast.weight))?parseFloat(prevMlast.weight):null;
+    const measurementDeltas=[];
+    if(recentMlast&&prevMlast){
+        const skip=new Set(['date','id','weight','createdAt','updatedAt','note','notes']);
+        Object.keys(recentMlast).forEach(key=>{
+            if(skip.has(key))return;
+            const a=parseFloat(prevMlast[key]), b=parseFloat(recentMlast[key]);
+            if(Number.isFinite(a)&&Number.isFinite(b)) measurementDeltas.push({key,label:key,delta:b-a});
+        });
+    }
     const goal=getFScoreGoal();
 
-    // F-Score is a normalized 0–100 score. Strength and records are analytics only.
-    // Regularity: ideal rhythm is one workout every other day = 15 workouts / 30 days.
     const regularity=fScoreClamp(recent.length/15*100);
-    const volumeAvailable=recentVol>0&&prevVol>0;
-    const volumeScore=volumeAvailable?fScoreClamp(100 + ((recentVol-prevVol)/prevVol*100)*1.5):null;
-    const bodyScore=fScoreBodyScore(goal,fScoreDelta(oW,rW),fScoreDelta(oWa,rWa));
-    const components=[];
-    if(regularity!=null)components.push({name:'Регулярность',score:regularity,weight:40});
-    if(volumeScore!=null)components.push({name:'Тренировочный объём',score:volumeScore,weight:20});
-    if(bodyScore!=null)components.push({name:'Динамика тела',score:bodyScore,weight:40});
-    const weightSum=components.reduce((a,c)=>a+c.weight,0);
-    const score=weightSum?Math.round(components.reduce((a,c)=>a+c.score*c.weight,0)/weightSum):0;
-    const reasons=[];
-    reasons.push(`Регулярность ${recent.length}/15`);
-    if(volumeAvailable) reasons.push((recentVol>prevVol*1.03?'Объём ↑':recentVol<prevVol*0.90?'Объём ↓':'Объём →'));
-    if(bodyScore!=null) reasons.push(goal==='cut'?'Цель · Сушка':goal==='gain'?'Цель · Набор':'Цель · Поддержание');
-    // Status is deliberately independent from the selected goal: it tells the user whether the current F-Score is in a good, attention, or bad zone.
+    const planScores=recent.map(e=>fScorePlanQuality(e));
+    const planExecution=planScores.length?planScores.reduce((a,b)=>a+b,0)/planScores.length:0;
+    const stability=fScoreStability(recent,prev);
+    const processScore=planExecution*0.60+stability.score*0.40;
+    const body=fScoreBodyMetricScore(goal,fScoreDelta(oW,rW),measurementDeltas);
+    const bodyScore=body.score;
+    const score=Math.round(regularity*0.40+processScore*0.30+bodyScore*0.30);
+    const hasAnyData=recent.length||prev.length||m.length;
     const statusLevel=score>=80?'good':score>=55?'attention':'bad';
-    const status=statusLevel==='good'?'Всё хорошо':statusLevel==='attention'?'Есть что улучшить':'Нужна работа';
-    const strength=fScoreStrengthStats(h), records=fScoreRecordStats(h);
-    return {score,status,statusLevel,goal,history:h,measures:m,recent,prev,recentVol,prevVol,rW,oW,rWa,oWa,regularity,volumeScore,bodyScore,components,reasons,strength,records};
+    const status=statusLevel==='good'?'Отличная системность':statusLevel==='attention'?'Есть куда расти':'Ниже желаемого';
+    const reasons=[
+        `Регулярность ${recent.length}/15`,
+        `План ${Math.round(planExecution)}%`,
+        stability.change==null?'Объём —':`Объём ${stability.change>0?'+':''}${stability.change.toFixed(1)}%`
+    ];
+    return {
+        score,status,statusLevel,goal,history:h,measures:m,recent,prev,recentVol:recent.reduce((a,e)=>a+fScoreVolume(e),0),
+        prevVol:prev.reduce((a,e)=>a+fScoreVolume(e),0),rW,oW,measurementDeltas,regularity,
+        planExecution,stability,processScore,bodyScore,body,components:[
+            {name:'Регулярность',score:regularity,weight:40},
+            {name:'Качество процесса',score:processScore,weight:30},
+            {name:'Соответствие цели',score:bodyScore,weight:30}
+        ],reasons,strength:fScoreStrengthStats(h),records:fScoreRecordStats(h),hasAnyData:Boolean(hasAnyData)
+    };
 }
+
 function fScoreFmt(v,u){return v==null?'—':(v>0?'+':'')+v.toFixed(1)+u;}
 function renderFScoreHomeWidget(){
     const el=document.getElementById('fscoreHomeWidget'); if(!el)return;
     try{
-      const x=fScoreData(),gn={cut:'Сушка',gain:'Набор',maintain:'Поддержание'}[x.goal]||'Сушка';
-      el.innerHTML='<div class="fscore-widget-head"><div class="fscore-widget-score"><span class="fscore-kicker">F-SCORE</span><span class="fscore-score">'+x.score+'</span></div><div class="fscore-widget-main"><span class="fscore-goal">Цель · '+escapeHtml(gn)+'</span><span class="fscore-status '+x.statusLevel+'">'+escapeHtml(x.status)+'</span></div><div class="fscore-arrow" aria-hidden="true">›</div></div><div class="fscore-signals">'+x.reasons.slice(0,3).map(r=>'<span class="fscore-signal">'+escapeHtml(r)+'</span>').join('')+'</div>';
+        const x=fScoreData();
+        el.className=`fscore-widget fscore-widget-${x.statusLevel}`;
+        el.innerHTML=`<span class="fscore-home-top"><span class="fscore-home-title">Индекс системности</span><span class="fscore-home-action">Подробнее <span aria-hidden="true">›</span></span></span><span class="fscore-home-middle"><span class="fscore-home-number-wrap"><span class="fscore-home-number">${x.score}</span><span class="fscore-home-scale">/ 100</span></span><span class="fscore-home-status"><span class="fscore-home-dot" aria-hidden="true"></span><span class="fscore-home-status-text">${escapeHtml(x.status)}</span></span></span><span class="fscore-home-progress" aria-hidden="true"><span class="fscore-home-progress-fill" style="width:${Math.max(0,Math.min(100,x.score))}%"></span></span><span class="fscore-home-hint">Насколько системно вы тренируетесь и двигаетесь к цели</span>`;
     }catch(err){
-      console.error('FScore render failed',err);
-      el.innerHTML='<div class="fscore-widget-head"><div class="fscore-widget-score"><span class="fscore-kicker">F-SCORE</span><span class="fscore-score">—</span></div><div class="fscore-widget-main"><span class="fscore-goal">Аналитика</span><span class="fscore-status attention">Открыть F-Score</span></div><div class="fscore-arrow" aria-hidden="true">›</div></div>';
+        console.error('FScore render failed',err);
+        el.className='fscore-widget fscore-widget-attention';
+        el.innerHTML='<span class="fscore-home-top"><span class="fscore-home-title">Индекс системности</span><span class="fscore-home-action">Подробнее <span aria-hidden="true">›</span></span></span><span class="fscore-home-middle"><span class="fscore-home-number-wrap"><span class="fscore-home-number">0</span><span class="fscore-home-scale">/ 100</span></span><span class="fscore-home-status"><span class="fscore-home-dot"></span><span class="fscore-home-status-text">Пока нет данных</span></span></span><span class="fscore-home-progress"><span class="fscore-home-progress-fill" style="width:0%"></span></span><span class="fscore-home-hint">Записывайте тренировки и замеры — индекс начнёт рассчитываться</span>';
     }
 }
-function showFScoreAnalytics(){showScreen('fscoreAnalyticsScreen');requestAnimationFrame(()=>{try{renderFScoreAnalytics();}catch(err){console.error('FScore analytics failed',err);const r=document.getElementById('fscoreAnalyticsContent');if(r)r.innerHTML='<div class="card">Не удалось построить аналитику F-Score. Попробуйте обновить приложение.</div>';}});}
+function showFScoreAnalytics(){
+    showScreen('fscoreAnalyticsScreen');
+    requestAnimationFrame(()=>{try{renderFScoreAnalytics();}catch(err){
+        console.error('FScore analytics failed',err);
+        const r=document.getElementById('fscoreAnalyticsContent');
+        if(r)r.innerHTML='<div class="card">Не удалось построить индекс системности. Попробуйте обновить приложение.</div>';
+    }});
+}
 function buildFScoreConclusion(x){
-    if(!x.history.length&&!x.measures.length)return'Пока мало данных для уверенного вывода. Продолжай записывать тренировки и замеры — аналитика станет точнее.';
-    const b=[];
-    b.push(`Режим: ${x.recent.length} тренировок за 30 дней при ориентире 15 — тренировка через день.`);
-    if(x.bodyScore!=null){
-        const g={cut:'сушки',gain:'набора',maintain:'поддержания'}[x.goal];
-        b.push(`Динамика тела оценена относительно цели «${g}».`);
-    }else b.push('Для оценки результата по цели пока недостаточно замеров.');
-    if(x.recentVol&&x.prevVol)b.push(x.recentVol>x.prevVol?'Тренировочный объём вырос относительно предыдущих 30 дней.':'Тренировочный объём не вырос относительно предыдущих 30 дней.');
-    return b.join(' ');
+    if(!x.hasAnyData)return'Пока нет данных. Записывайте тренировки и замеры — индекс системности начнёт рассчитываться автоматически.';
+    const g={cut:'сушки',gain:'набора',maintain:'поддержания'}[x.goal]||'цели';
+    const p=x.stability.change==null?'стабильность объёма пока не сравнивается':`средний объём изменился на ${x.stability.change>0?'+':''}${x.stability.change.toFixed(1)}%`;
+    return `За последние 30 дней: ${x.recent.length} тренировок при эталоне 15. Качество выполнения плана — ${Math.round(x.planExecution)}%, ${p}. Динамика тела оценивается по весу и всем доступным замерам, а не по одной талии, относительно цели «${g}».`;
 }
 function renderFScoreAnalytics(){
     const root=document.getElementById('fscoreAnalyticsContent');if(!root)return;
-    const x=fScoreData(),gn={cut:'Сушка',gain:'Набор',maintain:'Поддержание'}[x.goal]||'Сушка',wd=fScoreDelta(x.oW,x.rW),ad=fScoreDelta(x.oWa,x.rWa),vd=x.prevVol?((x.recentVol-x.prevVol)/x.prevVol*100):null;
-    const strengthRows=x.strength.rows.slice(0,5).map(r=>`<div class="progress-ex-history-row"><span>${escapeHtml(r.name)}</span><span class="progress-ex-history-value">${formatNum(r.maxWeight)} кг × ${formatNum(r.maxReps)}<small>Объём ${formatKg(r.volume)}</small></span></div>`).join('')||'<div class="progress-ex-no-results">Нет силовых данных</div>';
-    const recordRows=x.records.slice(0,5).map(r=>`<div class="progress-ex-history-row"><span>🏆 ${escapeHtml(r.name)}</span><span class="progress-ex-history-value">${r.maxWeight>0?formatNum(r.maxWeight)+' кг':''}${r.maxReps>0?' · '+formatNum(r.maxReps)+' повт.':''}</span></div>`).join('')||'<div class="progress-ex-no-results">Рекордов пока нет</div>';
-    root.innerHTML=`<div class="analytics-hero"><div class="analytics-hero-row"><div><div class="fscore-kicker">F-SCORE</div><div class="analytics-score">${x.score}</div><div class="fscore-analytics-status ${x.statusLevel}">${escapeHtml(x.status)}</div><div style="color:var(--subtext);font-size:12px;margin-top:7px;font-weight:750">Цель · ${gn}</div></div><div style="font-size:34px;color:var(--subtext)">◎</div></div><div class="fscore-signals">${x.reasons.slice(0,4).map(r=>'<span class="fscore-signal">'+escapeHtml(r)+'</span>').join('')}</div></div>
-    <details class="analytics-card" open><summary>Общая оценка</summary><div class="analytics-inner"><div class="analytics-note">${escapeHtml(buildFScoreConclusion(x))}</div><div class="analytics-grid" style="margin-top:10px">${x.components.map(c=>`<div class="analytics-stat"><strong>${Math.round(c.score)}</strong><span>${escapeHtml(c.name)} · ${c.weight}%</span></div>`).join('')}</div></div></details>
-    <details class="analytics-card"><summary>Тело</summary><div class="analytics-inner"><div class="analytics-grid"><div class="analytics-stat"><strong>${x.rW!=null?x.rW.toFixed(1)+' кг':'—'}</strong><span>Вес · ${fScoreFmt(wd,'%')}</span></div><div class="analytics-stat"><strong>${x.rWa!=null?x.rWa.toFixed(1)+' см':'—'}</strong><span>Талия · ${fScoreFmt(ad,'%')}</span></div></div></div></details>
-    <details class="analytics-card"><summary>Тренировки</summary><div class="analytics-inner"><div class="analytics-grid"><div class="analytics-stat"><strong>${x.recent.length}/15</strong><span>Регулярность · 30 дней</span></div><div class="analytics-stat"><strong>${Math.round(x.recentVol).toLocaleString('ru-RU')} кг</strong><span>Объём</span></div><div class="analytics-stat"><strong>${fScoreFmt(vd,'%')}</strong><span>К прошлым 30 дням</span></div></div><div class="analytics-note" style="margin-top:10px">Ориентир регулярности: <strong>15 тренировок за 30 дней</strong> — режим через день. Это не цель пользователя.</div></div></details>
-    <details class="analytics-card"><summary>Силовые показатели</summary><div class="analytics-inner"><div class="analytics-grid"><div class="analytics-stat"><strong>${x.strength.exerciseCount}</strong><span>Упражнений со статистикой</span></div><div class="analytics-stat"><strong>${x.records.length}</strong><span>Упражнений с рекордами</span></div></div><div class="progress-ex-history" style="margin-top:10px">${strengthRows}</div></div></details>
-    <details class="analytics-card"><summary>Рекорды</summary><div class="analytics-inner"><div class="progress-ex-history">${recordRows}</div><div class="analytics-note" style="margin-top:10px">Рекорды здесь только отображаются из существующей статистики. F-Score их отдельно не начисляет.</div></div></details>
-    <details class="analytics-card"><summary>Питание</summary><div class="analytics-inner">Питание не включено в математическую формулу F-Score, пока для него нет устойчивой статистики. Записи дневника не ухудшают оценку автоматически.</div></details>
-    <details class="analytics-card"><summary>Цель</summary><div class="analytics-inner"><div class="analytics-period"><button type="button" class="${x.goal==='cut'?'active':''}" onclick="setFScoreGoal('cut')">🔥 Сушка</button><button type="button" class="${x.goal==='gain'?'active':''}" onclick="setFScoreGoal('gain')">💪 Набор</button><button type="button" class="${x.goal==='maintain'?'active':''}" onclick="setFScoreGoal('maintain')">⚖️ Поддержание</button></div><div class="analytics-note" style="margin-top:10px">Цель определяет, как F-Score интерпретирует динамику веса и талии. Она не связана с количеством тренировок.</div></div></details>
-    <details class="analytics-card"><summary>Как считается F-Score</summary><div class="analytics-inner"><p><strong>0–100 баллов.</strong> Регулярность — 40%, тренировочный объём — 20%, динамика тела с учётом выбранной цели — 40%.</p><p>Регулярность: 15 тренировок за 30 дней — эталон режима через день. Силовые показатели и рекорды являются статистикой и не начисляют отдельные баллы.</p><p>Если данных для показателя нет, он не получает искусственный нулевой результат: итог пересчитывается по доступным компонентам.</p></div></details>`;
+    const x=fScoreData();
+    const gn={cut:'Сушка',gain:'Набор',maintain:'Поддержание'}[x.goal]||'Сушка';
+    const wd=fScoreDelta(x.oW,x.rW);
+    const statusDot=x.statusLevel;
+    const metric=v=>v==null?'—':Math.round(v);
+    const change=x.stability.change==null?'—':`${x.stability.change>0?'+':''}${x.stability.change.toFixed(1)}%`;
+    const planText=x.recent.length?`${Math.round(x.planExecution)} / 100`:'0 / 100';
+    const weightText=x.body.weightScore==null?'—':`${Math.round(x.body.weightScore)} / 100`;
+    const measurementText=x.body.measurementScores?.length?`${x.body.measurementScores.length} замер(ов)`:'—';
+    root.innerHTML=`
+      <div class="fscore-detail-card">
+        <div class="fscore-detail-top">
+          <div>
+            <div class="fscore-detail-score">${x.score}</div>
+            <div class="fscore-detail-status ${statusDot}"><span class="fscore-home-dot"></span>${escapeHtml(x.status)}</div>
+          </div>
+          <div class="fscore-detail-goal">Цель<br><strong>${gn}</strong></div>
+        </div>
+        <div class="fscore-detail-note">${escapeHtml(buildFScoreConclusion(x))}</div>
+      </div>
+
+      <div class="fscore-components">
+        <section class="fscore-component">
+          <div class="fscore-component-head"><div><h3>Регулярность</h3><p>Частота тренировочных сессий за последние 30 дней.</p></div><strong>${Math.round(x.regularity)} / 40</strong></div>
+          <div class="fscore-component-value">${Math.round(x.regularity)} / 100</div>
+          <div class="fscore-component-note">${x.recent.length} тренировок из эталона 15. Любая сессия засчитывается.</div>
+        </section>
+
+        <section class="fscore-component">
+          <div class="fscore-component-head"><div><h3>Качество процесса</h3><p>Осознанное выполнение плана и стабильность нагрузки.</p></div><strong>${Math.round(x.processScore*0.30)} / 30</strong></div>
+          <div class="fscore-subgrid">
+            <div><span>Выполнение плана · 60%</span><b>${planText}</b><small>${x.recent.length?`${x.recent.length} тренировок усреднено`:'Нет тренировок'}</small></div>
+            <div><span>Стабильность нагрузки · 40%</span><b>${Math.round(x.stability.score)} / 100</b><small>${change} к среднему объёму предыдущих 30 дней</small></div>
+          </div>
+          <div class="fscore-component-note">Итог: ${Math.round(x.processScore)} / 100 × 30% = ${Math.round(x.processScore*0.30)} баллов.</div>
+        </section>
+
+        <section class="fscore-component">
+          <div class="fscore-component-head"><div><h3>Соответствие цели</h3><p>Динамика веса и всех доступных замеров относительно выбранной цели.</p></div><strong>${Math.round(x.bodyScore*0.30)} / 30</strong></div>
+          <div class="fscore-subgrid">
+            <div><span>Вес</span><b>${weightText}</b><small>${x.rW!=null?`${x.rW.toFixed(1)} кг · изменение ${fScoreFmt(wd,'%')}`:'Нет данных'}</small></div>
+            <div><span>Замеры тела</span><b>${measurementText}</b><small>${x.body.measurementScores?.length?'Учитываются все доступные числовые замеры':'Нет сопоставимых замеров за два периода'}</small></div>
+          </div>
+          ${x.body.measurementScores?.length?`<div class="fscore-component-note">${x.body.measurementScores.map(m=>`${escapeHtml(String(m.label))}: ${m.delta>0?'+':''}${Number(m.delta).toFixed(1)} см`).join(' · ')}</div>`:''}
+          <div class="fscore-component-note">Итог: ${Math.round(x.bodyScore)} / 100 × 30% = ${Math.round(x.bodyScore*0.30)} баллов.</div>
+        </section>
+      </div>
+
+      <details class="analytics-card">
+        <summary>Промежуточные значения</summary>
+        <div class="analytics-inner">
+          <div class="fscore-breakdown-row"><span>Регулярность</span><b>${Math.round(x.regularity)} × 40%</b></div>
+          <div class="fscore-breakdown-row"><span>Качество процесса</span><b>${Math.round(x.processScore)} × 30%</b></div>
+          <div class="fscore-breakdown-row"><span>Соответствие цели</span><b>${Math.round(x.bodyScore)} × 30%</b></div>
+          <div class="fscore-breakdown-total"><span>Индекс системности</span><b>${x.score} / 100</b></div>
+        </div>
+      </details>
+
+      <details class="analytics-card">
+        <summary>Цель и методика</summary>
+        <div class="analytics-inner">
+          <div class="analytics-period">
+            <button type="button" class="${x.goal==='cut'?'active':''}" onclick="setFScoreGoal('cut')">🔥 Сушка</button>
+            <button type="button" class="${x.goal==='gain'?'active':''}" onclick="setFScoreGoal('gain')">💪 Набор</button>
+            <button type="button" class="${x.goal==='maintain'?'active':''}" onclick="setFScoreGoal('maintain')">⚖️ Поддержание</button>
+          </div>
+          <div class="analytics-note"><strong>Как работает цель:</strong><br>💪 Набор — оценивается общая положительная тенденция веса и доступных замеров.<br>🔥 Сушка — оценивается общая тенденция снижения показателей тела без требования рекордов.<br>⚖️ Поддержание — оценивается стабильность показателей.<br><br><strong>Важно:</strong> один пропуск, 3 вместо 4 подходов или отсутствие нового рекорда не считаются ухудшением. Анализируется тенденция за период, а не одна тренировка. Все доступные замеры участвуют в анализе одинаково — талия не является главным показателем.</div>
+        </div>
+      </details>`;
 }
 
 function showProgress() {
@@ -8216,43 +8874,117 @@ function handleReplaceSelectChange(){
 function closeReplaceExerciseModal(){ document.getElementById('replaceExerciseModal')?.classList.add('hidden'); replacementSlotIndex=null; replaceExerciseSelectedKey='__none__'; }
 function confirmReplaceExercise(){
     if(replacementSlotIndex===null || currentProgram===null) return;
-    const program=data.programs[currentProgram];
-    const slots=getActiveExerciseIndices();
-    const oldIdx=slots[replacementSlotIndex];
-    if(oldIdx===undefined) return;
-    let newIdx=null, replacementName='', replacementType='strength';
+    const slots=Array.isArray(workoutExerciseSlots)?workoutExerciseSlots.slice():[];
+    const slot=replacementSlotIndex;
+    if(slot<0 || slot>=slots.length){ showToast('Не удалось определить упражнение'); return; }
+
+    const oldRef=slots[slot];
+    const oldMeta=getWorkoutExercise(oldRef);
+    let newRef=null, replacementName='', replacementType='strength';
+
     if(replaceExerciseSelectedKey==='__new__' || replaceExerciseSelectedKey==='__none__'){
-        showToast('Сначала выберите упражнение из списка'); return;
-    } else {
-        const c=replaceExerciseCandidates.find(x=>replacementCandidateKey(x)===replaceExerciseSelectedKey);
-        if(!c){ showToast('Выбери упражнение'); return; }
-        replacementName=c.name; replacementType=c.type;
-        if(c.source==='program' && c.programIndex===currentProgram){
-            newIdx=c.exerciseIndex;
-        } else {
-            // Упражнение из другого сплита/истории только временно заимствуется в этой тренировке.
-            // Ни один сплит не изменяется и новое упражнение в него НЕ добавляется.
-            const transientIndex=workoutTransientExercises.length;
-            workoutTransientExercises.push({name:c.name,type:c.type,sourceProgram:c.programIndex,sourceExerciseIndex:c.exerciseIndex});
-            newIdx=-(transientIndex+1);
-        }
-        if(slots.some(i=>i===newIdx)){ showToast('Это упражнение уже используется в этой тренировке'); return; }
-        if(!workoutSets[newIdx]){
-            const previous=getPreviousExerciseResult(replacementName,new Date().toISOString());
-            if(previous?.sets?.length){
-                const source=previous.sets[previous.sets.length-1], row={done:false};
-                if(replacementType==='strength'){row.weight=source.weight??'';row.reps=source.reps??'';} else if(replacementType==='cardio'){row.time=source.time??source.minutes??'';row.intensity=source.intensity??'';} else row.reps=source.reps??'';
-                workoutSets[newIdx]=[row];
-            }
-        }
+        showToast('Сначала выберите упражнение из списка');
+        return;
     }
-    if(newIdx===oldIdx){ closeReplaceExerciseModal(); return; }
-    workoutExerciseSlots[replacementSlotIndex]=newIdx;
-    currentExerciseIndex=replacementSlotIndex;
+
+    const candidate=replaceExerciseCandidates.find(x=>replacementCandidateKey(x)===replaceExerciseSelectedKey);
+    if(!candidate){ showToast('Выберите упражнение'); return; }
+
+    replacementName=String(candidate.name||'').trim();
+    replacementType=candidate.type||'strength';
+    if(!replacementName){ showToast('Некорректное упражнение'); return; }
+
+    // Replacement is a SLOT operation, not an ADD operation:
+    // the old exercise disappears from this workout and the new one occupies
+    // exactly the same position. The program itself is never modified.
+    if(normalizeExerciseName(replacementName)===normalizeExerciseName(oldMeta?.name||'')){
+        closeReplaceExerciseModal();
+        return;
+    }
+
+    // Never allow an exercise that is already present in another slot.
+    const duplicateSlot=slots.findIndex((ref,i)=>i!==slot && normalizeExerciseName(getWorkoutExercise(ref)?.name||'')===normalizeExerciseName(replacementName));
+    if(duplicateSlot!==-1){ showToast('Это упражнение уже есть в этой тренировке'); return; }
+
+    if(candidate.source==='program' && candidate.programIndex===currentProgram){
+        newRef=candidate.exerciseIndex;
+    }else{
+        // Exercises borrowed from the directory are temporary for this session.
+        workoutTransientExercises=Array.isArray(workoutTransientExercises)?workoutTransientExercises:[];
+        const transientIndex=workoutTransientExercises.length;
+        workoutTransientExercises.push({
+            name:replacementName,
+            type:replacementType,
+            group:candidate.group||fScoreExerciseGroup(replacementName,replacementType),
+            sourceProgram:candidate.programIndex,
+            sourceExerciseIndex:candidate.exerciseIndex
+        });
+        newRef=-(transientIndex+1);
+    }
+
+    // Remove ALL draft data belonging to the old slot/reference. This is
+    // important: stale sets must not be counted after a replacement.
+    if(oldRef!==undefined) delete workoutSets[oldRef];
+    delete workoutSets[newRef];
+
+    const previous=getPreviousExerciseResult(replacementName,new Date().toISOString());
+    if(previous?.sets?.length){
+        const source=previous.sets[previous.sets.length-1], row={done:false};
+        if(replacementType==='strength'){
+            row.weight=source.weight??'';
+            row.reps=source.reps??'';
+        }else if(replacementType==='cardio'){
+            row.time=source.time??source.minutes??'';
+            row.intensity=source.intensity??'';
+        }else{
+            row.reps=source.reps??'';
+        }
+        workoutSets[newRef]=[row];
+    }
+
+    // Keep the original planned exercise in the same plan slot so F-Score
+    // evaluates the replacement against what was actually planned.
+    if(!Array.isArray(workoutPlanSnapshot)) workoutPlanSnapshot=[];
+    if(!workoutPlanSnapshot[slot]){
+        workoutPlanSnapshot[slot]={
+            plannedName:oldMeta?.name||'',
+            plannedType:oldMeta?.type||'strength',
+            plannedGroup:fScoreExerciseGroup(oldMeta?.name||'',oldMeta?.type||'strength'),
+            status:'pending'
+        };
+    }
+    const plan=workoutPlanSnapshot[slot];
+    plan.status='replaced';
+    plan.actualName=replacementName;
+    plan.actualType=replacementType;
+    plan.actualGroup=fScoreExerciseGroup(replacementName,replacementType);
+    plan.score=(fScoreNormName(plan.plannedGroup)&&fScoreNormName(plan.plannedGroup)===fScoreNormName(plan.actualGroup))?100:50;
+    workoutPlanSnapshot[slot]=plan;
+
+    // Replace in-place. Do NOT push/append.
+    // The session is slot-based: one planned slot can contain exactly one
+    // current exercise. Remove any stale set keys that point to the old
+    // exercise, then write the new reference into the same slot.
+    workoutExerciseSlots=slots;
+    workoutExerciseSlots[slot]=newRef;
+    const validRefs=new Set(workoutExerciseSlots.map(Number));
+    Object.keys(workoutSets||{}).forEach(k=>{
+        const ref=Number(k);
+        if(!validRefs.has(ref)) delete workoutSets[k];
+    });
+    currentExerciseIndex=slot;
+
+    // Keep snapshot and slots one-to-one. This prevents the old exercise from
+    // reappearing in the saved plan/history as an extra eighth exercise.
+    if(workoutPlanSnapshot.length>workoutExerciseSlots.length){
+        workoutPlanSnapshot=workoutPlanSnapshot.slice(0,workoutExerciseSlots.length);
+    }
+
     saveDraft();
     closeReplaceExerciseModal();
-    renderExerciseStrip(); renderExercise();
-    showToast(`Заменено на «${replacementName}»`);
+    renderExerciseStrip();
+    renderExercise();
+    showToast(`Заменено: «${oldMeta?.name||'упражнение'}» → «${replacementName}»`);
 }
 
 function openExerciseModal(realIdx){
@@ -8856,6 +9588,7 @@ function startConfirmed() {
     currentExerciseIndex=0;
     workoutSets={};
     workoutExerciseSlots = data.programs[index].exercises.map((_,i)=>i).filter(i=>data.programs[index].active?.[i]);
+    workoutPlanSnapshot = workoutExerciseSlots.map(ref=>{ const meta=getWorkoutExercise(ref); return { plannedName:meta?.name||'', plannedType:meta?.type||'strength', plannedGroup:fScoreExerciseGroup(meta?.name||'',meta?.type||'strength'), status:'pending' }; });
     seedWorkoutSetsFromHistory();
     workoutStartTime=Date.now();
     startTotalTimer();
@@ -9481,7 +10214,7 @@ function finishWorkout() {
         if (!Object.keys(cleaned).length) {
             showToast('Нет заполненных подходов — тренировка не сохранена');
             clearDraft(); stopRestTimer(); stopTotalTimer();
-            workoutSets = {}; workoutExerciseSlots = []; workoutTransientExercises = []; currentProgram = null;
+            workoutSets = {}; workoutExerciseSlots = []; workoutTransientExercises = []; workoutPlanSnapshot = []; currentProgram = null;
             goHome();
             return;
         }
@@ -9491,7 +10224,9 @@ function finishWorkout() {
     const sessionDurationSeconds = workoutStartTime ? Math.max(0, Math.floor((Date.now() - workoutStartTime) / 1000)) : 0;
     closeConfirmExit(); stopRestTimer(); stopTotalTimer();
     if (currentProgram === null) return;
-    const hasAnySets = Object.values(workoutSets).some(sets => sets.length > 0);
+    const activeRefSet = new Set(getActiveExerciseIndices().map(Number));
+    Object.keys(workoutSets||{}).forEach(k=>{ if(!activeRefSet.has(Number(k))) delete workoutSets[k]; });
+    const hasAnySets = getActiveExerciseIndices().some(ref => Array.isArray(workoutSets[ref]) && workoutSets[ref].length > 0);
     if (!hasAnySets) { workoutExerciseSlots=[]; workoutTransientExercises=[]; currentProgram = null; clearDraft(); showToast('Нет выполненных подходов, тренировка не сохранена'); goHome(); return; }
     const program = data.programs[currentProgram];
     const sessionIndices = getActiveExerciseIndices();
@@ -9512,18 +10247,34 @@ function finishWorkout() {
     const completionTotal=strengthIndices.length*3;
     const completionDone=strengthIndices.reduce((sum,realIdx)=>sum+Math.min(3,(workoutSets[realIdx]||[]).filter(s=>s.done).length),0);
     const completionPercent=completionTotal?Math.round(completionDone/completionTotal*100):0;
+    const plannedSnapshot=Array.isArray(workoutPlanSnapshot)?workoutPlanSnapshot:[];
+    const plannedExercises=plannedSnapshot.map((p,i)=>{
+        const ref=workoutExerciseSlots[i];
+        const meta=getWorkoutExercise(ref);
+        const doneSets=(workoutSets[ref]||[]).filter(s=>s&&s.done);
+        let status=p?.status||'pending', score=0;
+        if(status!=='replaced') status=doneSets.length?'completed':'skipped';
+        if(status==='completed') score=100;
+        else if(status==='replaced'){
+            const pg=fScoreNormName(p.plannedGroup), ag=fScoreNormName(p.actualGroup);
+            score=(pg&&ag&&pg===ag)?100:50;
+        }
+        return {...p, actualName:meta?.name||p?.plannedName||'', actualType:meta?.type||p?.plannedType||'strength',
+            actualGroup:p?.actualGroup||fScoreExerciseGroup(meta?.name||'',meta?.type||'strength'), status, score};
+    });
     const newHistoryEntry = {
         date: new Date().toISOString(), program: program.name, durationSeconds,
         completion:{completed:completionDone,total:completionTotal,percent:completionPercent},
+        plannedExercises,
         exercises: completedExerciseIndices.map(realIdx => {
             const meta=getWorkoutExercise(realIdx);
             if(!meta) return null;
             const doneSets=(workoutSets[realIdx] || []).filter(s=>s && s.done);
-            return { name: meta.name, completedSets: doneSets.length, sets: doneSets.map(s => { const { done, ...clean } = s; return clean; }) };
+            return { name: meta.name, type:meta.type||'strength', group:fScoreExerciseGroup(meta.name,meta.type||'strength'), completedSets: doneSets.length, sets: doneSets.map(s => { const { done, ...clean } = s; return clean; }) };
         }).filter(x => x && x.sets.length)
     };
     data.history.push(newHistoryEntry);
-    saveData(true, 'Завершение тренировки'); clearDraft(); workoutTransientExercises=[]; currentProgram = null;
+    saveData(true, 'Завершение тренировки'); clearDraft(); workoutTransientExercises=[]; workoutPlanSnapshot=[]; currentProgram = null;
     showWorkoutSummary(newHistoryEntry);
 
     } catch(err) {
@@ -10389,6 +11140,7 @@ function saveManualWorkout() {
         date: new Date(date).toISOString(),
         durationSeconds: 0,
         program: program.name,
+        plannedExercises: activeEx.map(ex=>({plannedName:ex, plannedType:(program.types?.[program.exercises.indexOf(ex)]||'strength'), plannedGroup:fScoreExerciseGroup(ex,program.types?.[program.exercises.indexOf(ex)]||'strength'), status:(manualSets[ex]||[]).length?'completed':'skipped'})),
         exercises: activeEx.map((ex,idx) => ({ name: ex, sets: manualSets[ex] || [] }))
     });
     saveData(); closeManualWorkout(); showHistory(); showToast('Тренировка добавлена');
@@ -11284,7 +12036,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.1.2', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.2.2', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -11351,7 +12103,8 @@ function openProgressExercisePicker(){
     const input=document.getElementById('progressExercisePickerSearch');
     if(input)input.value='';
     renderProgressExercisePicker();
-    lockModalScroll(); modal.classList.remove('hidden');
+    lockModalScroll();
+    modal.classList.remove('hidden');
 }
 function closeProgressExercisePicker(){
     document.getElementById('progressExercisePickerModal')?.classList.add('hidden');
@@ -11360,35 +12113,48 @@ function renderProgressExercisePicker(){
     const list=document.getElementById('progressPickerList');
     const input=document.getElementById('progressExercisePickerSearch');
     if(!list)return;
+
     const q=(input?.value||'').trim().toLocaleLowerCase('ru');
     const current=window.progressSelectedExercise||'';
-    const names=getProgressExerciseNames().filter(n=>!q||n.toLocaleLowerCase('ru').includes(q));
+    const allNames=getProgressExerciseNames();
+    const names=allNames.filter(n=>!q||n.toLocaleLowerCase('ru').includes(q));
+
     if(!names.length){
         list.innerHTML='<div style="padding:22px;text-align:center;color:var(--subtext);">Упражнений с сохранёнными данными не найдено</div>';
         return;
     }
-    /* Не используем inline onclick с названием упражнения: кавычки/апострофы в имени
-       могут ломать HTML-атрибут. Обработчик навешивается через delegation ниже. */
-    list.innerHTML=names.map((name,i)=>{
-        const rows=getExerciseSeries(name,getHistoryInPeriod('all'))||[];
-        const last=rows[rows.length-1];
-        const detail=`${rows.length} ${rows.length===1?'тренировка':(rows.length<5?'тренировки':'тренировок')}`;
-        const safeName=progressEsc(name);
-        return `<button type="button" class="progress-picker-row ${name===current?'selected':''}" data-progress-exercise-index="${i}" aria-label="Выбрать ${safeName}">
-            <span class="progress-picker-row-main"><strong>${safeName}</strong><small>${progressEsc(detail)}</small></span>
-            <span class="progress-picker-row-mark">${name===current?'✓':'›'}</span>
-        </button>`;
+
+    // Та же логика, что в справочнике: группа мышц → упражнения этой группы.
+    const grouped={};
+    names.forEach(name=>{
+        const group=fScoreExerciseGroup(name,getExerciseTypeByName(name))||'Другое';
+        (grouped[group]||(grouped[group]=[])).push(name);
+    });
+    const groups=Object.keys(grouped).sort((a,b)=>a.localeCompare(b,'ru'));
+
+    list.innerHTML=groups.map(group=>{
+        const items=grouped[group].sort((a,b)=>a.localeCompare(b,'ru'));
+        return `<section class="picker-group"><div class="picker-group-title">${progressEsc(group)}</div>${items.map(name=>{
+            const rows=getExerciseSeries(name,getHistoryInPeriod('all'))||[];
+            const detail=`${rows.length} ${rows.length===1?'тренировка':(rows.length<5?'тренировки':'тренировок')}`;
+            const safeName=progressEsc(name);
+            return `<button type="button" class="progress-picker-row ${name===current?'selected':''}" data-progress-exercise-name="${safeName}" aria-label="Выбрать ${safeName}">
+                <span class="progress-picker-row-main"><strong>${safeName}</strong><small>${progressEsc(detail)}</small></span>
+                <span class="progress-picker-row-mark">${name===current?'✓':'›'}</span>
+            </button>`;
+        }).join('')}</section>`;
     }).join('');
-    list.querySelectorAll('[data-progress-exercise-index]').forEach((button,index)=>{
+
+    list.querySelectorAll('[data-progress-exercise-name]').forEach(button=>{
         button.addEventListener('click',function(e){
             e.preventDefault();
             e.stopPropagation();
-            const namesNow=getProgressExerciseNames().filter(n=>!q||n.toLocaleLowerCase('ru').includes(q));
-            const name=namesNow[index];
+            const name=this.getAttribute('data-progress-exercise-name');
             if(name) chooseProgressExercise(name);
         },{passive:false});
     });
 }
+
 function renderProgressDashboard(){
     const container=document.getElementById('progressContent'); if(!container)return;
     const names=getAllExerciseNames();
