@@ -10031,6 +10031,31 @@ function markSetDone(exIdx, setIdx) {
     const workoutScreen = document.getElementById('workoutScreen');
     const savedScroll = workoutScreen ? workoutScreen.scrollTop : null;
 
+    // Update the CURRENT exercise completion card immediately. The card is not
+    // rebuilt on every tap, so its static 0/1 (or 0/3) markup must be synchronized
+    // with the checkbox state here.
+    const currentMeta = getWorkoutExercise(exIdx);
+    const currentSets = workoutSets[exIdx] || [];
+    const targetSets = (currentMeta?.type || 'strength') === 'strength' ? 3 : 1;
+    const completedNow = currentSets.filter(s => s && s.done).length;
+    const shownDone = Math.min(completedNow, targetSets);
+
+    const completionStrong = document.querySelector('#exerciseContainer .workout-completion-head strong');
+    if (completionStrong) completionStrong.textContent = `${shownDone}/${targetSets}`;
+
+    const completionSegments = document.querySelectorAll('#exerciseContainer .completion-segment');
+    completionSegments.forEach((segment, i) => {
+        segment.classList.toggle('filled', i < shownDone);
+    });
+
+    // Update the exercise strip state immediately as well.
+    const activeIndicesForStrip = getActiveExerciseIndices();
+    const stripPosition = activeIndicesForStrip.indexOf(exIdx);
+    if (stripPosition >= 0) {
+        const stripItem = document.querySelector(`#exerciseStrip .exercise-dot[data-step="${stripPosition + 1}"]`);
+        if (stripItem) stripItem.classList.toggle('done', completedNow > 0);
+    }
+
     updateWorkoutProgressUI();
 
     // Keep the current workout position after marking a set complete.
@@ -16722,7 +16747,7 @@ window.closeImportConfirm=function(){
     if(builtin)return '🍲 Блюда и другое';
     return '⭐ Мои продукты';
   };
-  window.renderCatalogList=function(){
+  renderCatalogList=function(){
     const c=document.getElementById('catalogContainer');if(!c)return;
     const q=String(document.getElementById('catalogSearch')?.value||'').trim().toLowerCase();
     const items=(data.productCatalog||[]).map((p,i)=>({...p,_idx:i})).filter(p=>!q||String(p.name||'').toLowerCase().includes(q));
@@ -16733,17 +16758,26 @@ window.closeImportConfirm=function(){
     c.innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<div class="catalog-section"><div class="catalog-section-title"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span></div><div class="catalog-section-items">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
   };
   // Search is bound once to the actual input and calls the canonical renderer.
-  function bind(){const input=document.getElementById('catalogSearch');if(!input||input.dataset.catalogBound)return;input.dataset.catalogBound='1';input.addEventListener('input',window.renderCatalogList);input.addEventListener('search',window.renderCatalogList);}
+  function bind(){const input=document.getElementById('catalogSearch');if(!input||input.dataset.catalogBound)return;input.dataset.catalogBound='1';input.addEventListener('input',renderCatalogList);input.addEventListener('search',renderCatalogList);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
   // The existing markSetDone is the checkbox handler; it already calls updateWorkoutProgressUI after toggling.
   // Keep one progress implementation and make its calculation explicitly based on completed checkbox states.
-  window.updateWorkoutProgressUI=function(){
+  updateWorkoutProgressUI=function(){
     const active=getActiveExerciseIndices();let done=0,total=0;
     active.forEach(idx=>{const meta=getWorkoutExercise(idx);if(!meta)return;const completed=(workoutSets[idx]||[]).filter(s=>s&&s.done).length;if((meta.type||'strength')==='strength'){total+=3;done+=Math.min(3,completed);}else{total+=1;done+=completed>0?1:0;}});
     const pct=total?Math.round(done/total*100):0;
     const bar=document.getElementById('workoutProgressBar');const left=document.getElementById('workoutProgressLeft');const right=document.getElementById('workoutProgressRight');const text=document.getElementById('workoutProgressText');
     if(bar)bar.style.width=pct+'%';if(left)left.textContent=total?`Выполнено ${done} из ${total} подходов`:'Нет упражнений';if(right)right.textContent='';if(text)text.textContent='';
   };
+
+  // Inline onclick/oninput attributes use global bindings, not just window properties.
+  // Synchronize both paths so old implementations cannot win in the PWA.
+  window.renderCatalogList=renderCatalogList;
+  saveCatalogProduct=window.saveCatalogProduct;
+  window.saveCatalogProduct=saveCatalogProduct;
+  addFoodEntry=window.addFoodEntry;
+  window.addFoodEntry=addFoodEntry;
+  window.updateWorkoutProgressUI=updateWorkoutProgressUI;
 })();
 </script>
 
