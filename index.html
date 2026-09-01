@@ -15260,7 +15260,7 @@ window.addFoodEntry=function(){
   const dup=typeof window.findFoodDuplicate==='function'?window.findFoodDuplicate(name):{exact:[],similar:[]};
   if(dup.exact?.length){
     /* Exact identity already exists: do not create a second catalog card, add only today's entry. */
-    commit(dup.exact[0].product);return;
+    commit(dup.exact[0]);return;
   }
   if(dup.similar?.length){
     window.showFoodDuplicateModal(name,dup.similar,false,()=>commit());return;
@@ -16693,33 +16693,7 @@ window.closeImportConfirm=function(){
 /* ===== END v1.2.4 PROGRESS PICKER ===== */
 
 
-/* ===== v1.3.5 FOOD CATALOG IDENTITY ===== */
-(function(){
-  'use strict';
-  const normalize=function(v){return String(v||'').normalize('NFKC').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u2010-\u2015]/g,'-').replace(/[«»„“”"'`]/g,'').replace(/[^a-zа-я0-9]+/gi,' ').trim().replace(/\s+/g,' ');};
-  window.normalizeFoodCatalogName=normalize;
-  // Final guard: one catalog identity per normalized product name, independent of portion/per-100 mode.
-  const originalSave=window.saveCatalogProduct;
-  if(typeof originalSave==='function'){
-    window.saveCatalogProduct=function(){
-      const input=document.getElementById('catalogName');
-      const name=input?input.value.trim():'';
-      if(!name)return originalSave.apply(this,arguments);
-      const exclude=typeof editingCatalogProduct!=='undefined'?editingCatalogProduct:null;
-      const exact=(data.productCatalog||[]).findIndex((p,i)=>i!==exclude && normalize(p&&p.name)===normalize(name));
-      if(exact!==-1){showToast('Продукт с таким названием уже есть в каталоге');return;}
-      if(typeof window.findFoodDuplicate==='function' && typeof window.showFoodDuplicateModal==='function'){
-        const found=window.findFoodDuplicate(name,exclude);
-        if(found && found.similar && found.similar.length){
-          window.showFoodDuplicateModal(name,found.similar,false,()=>originalSave.apply(this,arguments));
-          return;
-        }
-      }
-      return originalSave.apply(this,arguments);
-    };
-  }
-})();
-/* ===== END v1.3.5 FOOD CATALOG IDENTITY ===== */
+
 
 </script>
 
@@ -16730,92 +16704,47 @@ window.closeImportConfirm=function(){
 .catalog-empty{color:var(--subtext);text-align:center;padding:18px 8px}
 </style>
 <script>
-/* v1.3.2: searchable grouped food catalog */
-(function(){
- const categoryFor=name=>{const n=String(name||'').toLowerCase();
-  if(/кур|индей|говя|свинин|фарш|тефтел|кордон|мяс/.test(n))return '🥩 Мясо и птица';
-  if(/лосос|тун|треск|рыб|кревет/.test(n))return '🐟 Рыба и морепродукты';
-  if(/яйц/.test(n))return '🥚 Яйца';
-  if(/творог|йогурт|молок|кефир|сыр/.test(n))return '🥛 Молочные продукты';
-  if(/рис|греч|макарон|картоф|овся|булгур|паст/.test(n))return '🍚 Крупы и гарниры';
-  if(/хлеб|лаваш|блин|наполеон/.test(n))return '🍞 Хлеб и выпечка';
-  if(/огур|помидор|броккол|морков|перец|овощ/.test(n))return '🥦 Овощи';
-  if(/банан|яблок|апельсин|ягод|фрукт/.test(n))return '🍌 Фрукты';
-  if(/арахис|миндал|масло/.test(n))return '🥜 Орехи и жиры';
-  if(/шоколад|мёд|сахар|пикник|батон/.test(n))return '🍫 Перекусы и сладкое';
-  return '🍲 Блюда и другое';};
- window.renderCatalogList=function(){
-  const c=document.getElementById('catalogContainer');if(!c)return;
-  const q=String(document.getElementById('catalogSearch')?.value||'').trim().toLowerCase();
-  const items=(data.productCatalog||[]).map((p,i)=>({...p,_idx:i})).filter(p=>!q||String(p.name||'').toLowerCase().includes(q));
-  if(!items.length){c.innerHTML='<div class="catalog-empty">Ничего не найдено</div>';return;}
-  const groups={};items.forEach(p=>{const g=p.builtin?categoryFor(p.name):'⭐ Мои продукты';(groups[g]||(groups[g]=[])).push(p)});
-  const order=['⭐ Мои продукты','🥩 Мясо и птица','🐟 Рыба и морепродукты','🥚 Яйца','🥛 Молочные продукты','🍚 Крупы и гарниры','🍞 Хлеб и выпечка','🥦 Овощи','🍌 Фрукты','🥜 Орехи и жиры','🍫 Перекусы и сладкое','🍲 Блюда и другое'];
-  c.innerHTML=order.filter(g=>groups[g]?.length).map((g,gi)=>`<div class="catalog-section"><button type="button" class="catalog-section-title" onclick="this.nextElementSibling.classList.toggle('hidden')"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span><span>⌄</span></button><div class="catalog-section-items ${q?'':'hidden'}">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
- };
-
-
-/* ===== v1.3.6: unified food catalog + workout completion progress ===== */
+/* ===== CANONICAL FOOD CATALOG + WORKOUT PROGRESS ===== */
 (function(){
   'use strict';
-
-  // Catalog search must always re-render on every input (PWA-safe delegated binding).
-  function bindCatalogSearch(){
-    const input=document.getElementById('catalogSearch');
-    if(!input || input.dataset.v136Bound==='1') return;
-    input.dataset.v136Bound='1';
-    input.addEventListener('input', function(){
-      if(typeof window.renderCatalogList==='function') window.renderCatalogList();
-    });
-    input.addEventListener('search', function(){
-      if(typeof window.renderCatalogList==='function') window.renderCatalogList();
-    });
-  }
-  document.addEventListener('DOMContentLoaded', bindCatalogSearch);
-  bindCatalogSearch();
-
-  // One canonical day-entry path: catalog identity is checked first; a new confirmed product is persisted in both places.
-  const _addFoodEntry_v136=window.addFoodEntry;
-  window.addFoodEntry=function(){
-    return _addFoodEntry_v136.apply(this,arguments);
+  const categoryFor=function(name,builtin){
+    const n=String(name||'').toLowerCase();
+    if(/кур|индей|говя|свинин|фарш|тефтел|кордон|мяс/.test(n))return '🥩 Мясо и птица';
+    if(/лосос|тун|треск|рыб|кревет/.test(n))return '🐟 Рыба и морепродукты';
+    if(/яйц/.test(n))return '🥚 Яйца';
+    if(/творог|йогурт|молок|кефир|сыр|skyr/.test(n))return '🥛 Молочные продукты';
+    if(/рис|греч|макарон|картоф|овся|булгур|паст/.test(n))return '🍚 Крупы и гарниры';
+    if(/хлеб|лаваш|блин/.test(n))return '🍞 Хлеб и выпечка';
+    if(/огур|помидор|броккол|морков|перец|овощ/.test(n))return '🥦 Овощи';
+    if(/банан|яблок|апельсин|ягод|фрукт/.test(n))return '🍌 Фрукты';
+    if(/арахис|миндал|масло|орех/.test(n))return '🥜 Орехи и жиры';
+    if(/шоколад|мёд|сахар|пикник|батон/.test(n))return '🍫 Перекусы и сладкое';
+    if(builtin)return '🍲 Блюда и другое';
+    return '⭐ Мои продукты';
   };
-
-  // Minimum goal: 3 completed sets for each strength exercise. The bar changes immediately on the ✓ checkbox and reverses on uncheck.
+  window.renderCatalogList=function(){
+    const c=document.getElementById('catalogContainer');if(!c)return;
+    const q=String(document.getElementById('catalogSearch')?.value||'').trim().toLowerCase();
+    const items=(data.productCatalog||[]).map((p,i)=>({...p,_idx:i})).filter(p=>!q||String(p.name||'').toLowerCase().includes(q));
+    if(!items.length){c.innerHTML='<div class="catalog-empty">Ничего не найдено</div>';return;}
+    const groups={};
+    items.forEach(p=>{const g=categoryFor(p.name,!!p.builtin);(groups[g]||(groups[g]=[])).push(p);});
+    const order=['⭐ Мои продукты','🥩 Мясо и птица','🐟 Рыба и морепродукты','🥚 Яйца','🥛 Молочные продукты','🍚 Крупы и гарниры','🍞 Хлеб и выпечка','🥦 Овощи','🍌 Фрукты','🥜 Орехи и жиры','🍫 Перекусы и сладкое','🍲 Блюда и другое'];
+    c.innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<div class="catalog-section"><div class="catalog-section-title"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span></div><div class="catalog-section-items">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
+  };
+  // Search is bound once to the actual input and calls the canonical renderer.
+  function bind(){const input=document.getElementById('catalogSearch');if(!input||input.dataset.catalogBound)return;input.dataset.catalogBound='1';input.addEventListener('input',window.renderCatalogList);input.addEventListener('search',window.renderCatalogList);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+  // The existing markSetDone is the checkbox handler; it already calls updateWorkoutProgressUI after toggling.
+  // Keep one progress implementation and make its calculation explicitly based on completed checkbox states.
   window.updateWorkoutProgressUI=function(){
-    const active=getActiveExerciseIndices();
-    let done=0,total=0;
-    active.forEach(function(idx){
-      const meta=getWorkoutExercise(idx);
-      if(!meta) return;
-      const sets=(workoutSets[idx]||[]).filter(s=>s&&s.done).length;
-      if((meta.type||'strength')==='strength'){
-        total+=3;
-        done+=Math.min(3,sets);
-      }else{
-        total+=1;
-        done+=sets>0?1:0;
-      }
-    });
+    const active=getActiveExerciseIndices();let done=0,total=0;
+    active.forEach(idx=>{const meta=getWorkoutExercise(idx);if(!meta)return;const completed=(workoutSets[idx]||[]).filter(s=>s&&s.done).length;if((meta.type||'strength')==='strength'){total+=3;done+=Math.min(3,completed);}else{total+=1;done+=completed>0?1:0;}});
     const pct=total?Math.round(done/total*100):0;
-    const bar=document.getElementById('workoutProgressBar');
-    const left=document.getElementById('workoutProgressLeft');
-    const right=document.getElementById('workoutProgressRight');
-    const text=document.getElementById('workoutProgressText');
-    if(bar) bar.style.width=pct+'%';
-    if(left) left.textContent= total ? `Выполнено ${done} из ${total} подходов` : 'Нет упражнений';
-    if(right) right.textContent='';
-    if(text) text.textContent='';
-  };
-
-  // Force immediate sync after the existing checkbox handler has changed workoutSets.
-  const _markSetDone_v136=window.markSetDone;
-  window.markSetDone=function(exIdx,setIdx){
-    const result=_markSetDone_v136.apply(this,arguments);
-    try{ window.updateWorkoutProgressUI(); }catch(e){}
-    return result;
+    const bar=document.getElementById('workoutProgressBar');const left=document.getElementById('workoutProgressLeft');const right=document.getElementById('workoutProgressRight');const text=document.getElementById('workoutProgressText');
+    if(bar)bar.style.width=pct+'%';if(left)left.textContent=total?`Выполнено ${done} из ${total} подходов`:'Нет упражнений';if(right)right.textContent='';if(text)text.textContent='';
   };
 })();
-
 </script>
 
 </body>

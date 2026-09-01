@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v1.3.6-food-catalog-progress';
+const CACHE_VERSION = 'ftracker-v1.3.7-canonical-food-workout';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = [
   './',
