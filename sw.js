@@ -1,116 +1,15 @@
-const CACHE_VERSION = 'ftracker-v1.0.20';
+const CACHE_VERSION = 'ftracker-v1.1.5-fscore-ui-backup-fixed';
 const CACHE_NAME = CACHE_VERSION;
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
-
-const STATIC_DESTINATIONS = new Set([
-  'style',
-  'script',
-  'font',
-  'image',
-  'manifest'
-]);
-
-function isSameOrigin(request) {
-  return new URL(request.url).origin === self.location.origin;
-}
-
-function isExerciseRemoteMedia(request) {
-  try { const origin = new URL(request.url).origin; return origin === 'https://upload.wikimedia.org' || origin === 'https://exercise-dataset.com'; }
-  catch (_) { return false; }
-}
-
-function isNavigation(request) {
-  return request.mode === 'navigate' ||
-    request.destination === 'document' ||
-    request.headers.get('accept')?.includes('text/html');
-}
-
-function isStatic(request) {
-  if (STATIC_DESTINATIONS.has(request.destination)) return true;
-  const url = new URL(request.url);
-  return /\.(?:css|js|mjs|woff2?|ttf|otf|png|jpe?g|gif|webp|svg|ico|json)$/i.test(url.pathname);
-}
-
-async function putInCache(request, response) {
-  if (!response || (!response.ok && response.type !== 'opaque')) return;
-  const cache = await caches.open(CACHE_NAME);
-  await cache.put(request, response.clone());
-}
-
-async function networkFirst(request) {
-  try {
-    const response = await fetch(request, { cache: 'no-store' });
-    if (response.ok) {
-      await putInCache(request, response);
-    }
-    return response;
-  } catch (error) {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    throw error;
-  }
-}
-
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-
-  const networkUpdate = fetch(request, { cache: 'no-cache' })
-    .then(response => {
-      if (response.ok || response.type === 'opaque') {
-        return cache.put(request, response.clone()).then(() => response);
-      }
-      return response;
-    })
-    .catch(() => null);
-
-  return cached || await networkUpdate || Response.error();
-}
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', event => {
-  const request = event.request;
-
-  if (request.method !== 'GET') return;
-
-  if (isExerciseRemoteMedia(request)) {
-    event.respondWith(staleWhileRevalidate(request));
-    return;
-  }
-
-  if (!isSameOrigin(request)) return;
-
-  if (isNavigation(request)) {
-    event.respondWith(networkFirst(request));
-    return;
-  }
-
-  if (isStatic(request)) {
-    event.respondWith(staleWhileRevalidate(request));
-  }
-});
+const APP_SHELL = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
+const STATIC_DESTINATIONS = new Set(['style','script','font','image','manifest']);
+function sameOrigin(r){try{return new URL(r.url).origin===self.location.origin}catch(e){return false}}
+function navigation(r){return r.mode==='navigate'||r.destination==='document'||r.headers.get('accept')?.includes('text/html')}
+function staticAsset(r){if(STATIC_DESTINATIONS.has(r.destination))return true;try{return /\.(?:css|js|mjs|woff2?|ttf|otf|png|jpe?g|gif|webp|svg|ico|json)$/i.test(new URL(r.url).pathname)}catch(e){return false}}
+function remoteMedia(r){try{const o=new URL(r.url).origin;return o==='https://upload.wikimedia.org'||o==='https://exercise-dataset.com'}catch(e){return false}}
+async function cachePut(req,res){if(!res||(!res.ok&&res.type!=='opaque'))return;const c=await caches.open(CACHE_NAME);await c.put(req,res.clone())}
+async function cacheFirst(req){const c=await caches.open(CACHE_NAME);const hit=await c.match(req);if(hit)return hit;try{const res=await fetch(req);await cachePut(req,res);return res}catch(e){return Response.error()}}
+async function navigationOfflineFirst(req){const c=await caches.open(CACHE_NAME);const hit=await c.match(req)||await c.match('./index.html');if(hit){fetch(req,{cache:'no-cache'}).then(r=>cachePut(req,r)).catch(()=>{});return hit}try{const r=await fetch(req);await cachePut(req,r);return r}catch(e){return Response.error()}}
+async function mediaSWR(req){const c=await caches.open(CACHE_NAME),hit=await c.match(req);const update=fetch(req,{cache:'no-cache'}).then(r=>{if(r.ok||r.type==='opaque')return c.put(req,r.clone()).then(()=>r);return r}).catch(()=>null);return hit||await update||Response.error()}
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET'||!sameOrigin(r))return;if(remoteMedia(r)){e.respondWith(mediaSWR(r));return}if(navigation(r)){e.respondWith(navigationOfflineFirst(r));return}if(staticAsset(r)){e.respondWith(cacheFirst(r));}});

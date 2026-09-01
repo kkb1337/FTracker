@@ -5886,6 +5886,36 @@ body{
 #workoutScreen .workout-bottom-action.add-action{background:var(--accent-gradient)!important;color:#fff!important;border-color:transparent!important;}
 #workoutScreen .workout-bottom-action.next-action{background:var(--input-bg)!important;color:var(--text)!important;}
 @media(max-width:390px){#workoutScreen .workout-bottom-action{padding:8px 7px!important;gap:6px!important}.workout-bottom-action .nav-label{font-size:12px!important}.workout-bottom-action .nav-icon{font-size:24px!important;}}
+
+/* F-Score compact home widget */
+/* F-Score home card — rigid grid so iPhone/PWA cannot collapse or misalign the content. */
+.fscore-widget{display:block!important;width:100%!important;min-height:112px!important;box-sizing:border-box!important;margin:12px 0 16px!important;padding:16px 18px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:22px!important;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.035))!important;color:var(--text)!important;text-align:left!important;font:inherit!important;appearance:none!important;-webkit-appearance:none!important;-webkit-text-fill-color:initial!important;box-shadow:0 10px 28px rgba(0,0,0,.16)!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;transition:transform .16s ease,opacity .16s ease!important;overflow:hidden!important}
+.fscore-widget:active{transform:scale(.985);opacity:.9}
+.fscore-widget-head{display:grid!important;grid-template-columns:minmax(72px,auto) minmax(0,1fr) 24px!important;align-items:center!important;gap:14px!important;width:100%!important;min-width:0!important}
+.fscore-widget-score{display:flex!important;align-items:baseline!important;gap:7px!important;min-width:0!important}
+.fscore-widget-score .fscore-kicker{display:block!important}
+.fscore-widget-score .fscore-score{display:block!important;margin:0!important}
+.fscore-widget-main{min-width:0!important;display:flex!important;flex-direction:column!important;justify-content:center!important;overflow:hidden!important}
+.fscore-widget-main .fscore-kicker{display:block!important;margin:0!important}
+.fscore-widget-main .fscore-status{display:block!important;margin:3px 0 0!important;line-height:1.18!important;white-space:normal!important;overflow:visible!important}
+.fscore-widget-main .fscore-goal{display:block!important;margin:0!important;color:var(--subtext)!important;font-size:12px!important;font-weight:750!important;line-height:1.15!important}
+.fscore-score{font-size:32px!important;font-weight:850!important;letter-spacing:-1.5px!important;line-height:1!important}
+.fscore-kicker{font-size:11px!important;font-weight:750!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:var(--subtext)!important;line-height:1.1!important}
+.fscore-status{font-size:17px!important;font-weight:800!important}
+.fscore-status.good{color:var(--positive)!important}
+.fscore-status.attention{color:#f2c94c!important}
+.fscore-status.bad{color:var(--negative)!important}
+.fscore-arrow{display:flex!important;align-items:center!important;justify-content:center!important;font-size:27px!important;line-height:1!important;color:var(--subtext)!important}
+.fscore-signals{display:flex!important;gap:7px!important;flex-wrap:wrap!important;margin-top:11px!important;font-size:12px!important;color:var(--subtext)!important}
+.fscore-signal{display:inline-flex!important;align-items:center!important;min-height:27px!important;padding:5px 9px!important;border-radius:999px!important;background:rgba(255,255,255,.055)!important;line-height:1.1!important}
+.fscore-fallback-label{display:block!important;font-weight:800!important;font-size:16px!important}
+@media(max-width:430px){.fscore-widget{padding:15px 14px!important}.fscore-widget-head{grid-template-columns:66px minmax(0,1fr) 20px!important;gap:10px!important}.fscore-score{font-size:30px!important}.fscore-status{font-size:16px!important}.fscore-arrow{font-size:24px!important}}
+/* F-Score analytics status */
+.fscore-analytics-status{display:inline-flex;align-items:center;min-height:30px;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:800;margin-top:6px}
+.fscore-analytics-status.good{color:var(--positive);background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.22)}
+.fscore-analytics-status.attention{color:#f2c94c;background:rgba(242,201,76,.10);border:1px solid rgba(242,201,76,.20)}
+.fscore-analytics-status.bad{color:var(--negative);background:rgba(255,59,48,.10);border:1px solid rgba(255,59,48,.20)}
+.analytics-card{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);border-radius:20px;margin:10px 0;overflow:hidden}.analytics-card>summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:12px}.analytics-card>summary::-webkit-details-marker{display:none}.analytics-card>summary:after{content:'›';font-size:22px;color:var(--subtext);transition:transform .18s}.analytics-card[open]>summary:after{transform:rotate(90deg)}.analytics-inner{padding:0 18px 18px;color:var(--subtext);line-height:1.5}.analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.analytics-stat{padding:13px;border-radius:16px;background:rgba(255,255,255,.045)}.analytics-stat strong{display:block;font-size:21px;color:var(--text);letter-spacing:-.5px}.analytics-stat span{font-size:12px}.analytics-note{padding:14px;border-radius:16px;background:rgba(212,255,79,.07);border:1px solid rgba(212,255,79,.12);color:var(--text)}.analytics-hero{padding:20px;border-radius:22px;background:linear-gradient(135deg,rgba(212,255,79,.10),rgba(120,90,255,.09));border:1px solid rgba(255,255,255,.10);margin-bottom:12px}.analytics-hero-row{display:flex;align-items:center;justify-content:space-between}.analytics-score{font-size:52px;font-weight:850;letter-spacing:-2px}.analytics-period{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.analytics-period button{min-height:36px;padding:0 12px;border-radius:999px}.analytics-period button.active{background:var(--accent);color:#111;border-color:var(--accent)}
 </style>
 
 </head>
@@ -5900,6 +5930,9 @@ body{
             Прошло больше недели с последнего экспорта.<br><button onclick="exportData(); closeExportReminder();" style="background:#fff; color:#000; margin-top:8px;">📥 Экспортировать сейчас</button>
         </div>
         <div id="programList"></div>
+        <button id="fscoreHomeWidget" type="button" class="fscore-widget" aria-label="Открыть F-Score" onclick="showFScoreAnalytics()">
+            <span class="fscore-fallback-label">F-SCORE</span>
+        </button>
         <div class="nav-buttons">
             <button onclick="showProgress()" class="outline">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
@@ -5930,6 +5963,10 @@ body{
     <div id="progressScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">↗</span><span>Прогресс</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
         <div id="progressContent"></div>
+    </div>
+    <div id="fscoreAnalyticsScreen" class="hidden">
+        <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">◎</span><span>Аналитика</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
+        <div id="fscoreAnalyticsContent"></div>
     </div>
     <div id="bodyScreen" class="hidden">
         <div class="screen-header"><button onclick="goHome()" class="gray">← Назад</button><div class="title section-title"><span class="section-title-icon">⌁</span><span>Замеры</span></div><span class="screen-header-spacer" aria-hidden="true"></span></div>
@@ -6811,7 +6848,8 @@ let data = {
     foodDiary: { limits: {}, entries: [] },
     productCatalog: [],
     exerciseDirectory: [],
-    exerciseDirectoryHidden: []
+    exerciseDirectoryHidden: [],
+    fscoreGoal: 'cut'
 };
 
 let currentProgram = null, currentExerciseIndex = 0, workoutSets = {}, workoutStartTime = null;
@@ -6941,6 +6979,9 @@ function migrateFTrackerState(state){
     if(!state.programAliases || typeof state.programAliases!=='object') state.programAliases={};
     if(!Array.isArray(state._importedBackupFingerprints)) state._importedBackupFingerprints=[];
     if(!Array.isArray(state._backupConflicts)) state._backupConflicts=[];
+    if(!['cut','gain','maintain'].includes(state.fscoreGoal)){
+        try{ state.fscoreGoal=localStorage.getItem('ftracker_fscore_goal')||'cut'; }catch(e){ state.fscoreGoal='cut'; }
+    }
 
     state.measurementFields=state.measurementFields
       .filter(f=>f && f.key && f.label)
@@ -7354,6 +7395,146 @@ function renderHome() {
             <div style="color:var(--subtext); margin-top:4px;">${p.active.filter(Boolean).length} упражнений</div>
         </div>`;
     }).join('');
+    renderFScoreHomeWidget();
+}
+
+
+function getFScoreGoal(){
+    try{
+        const goal=(data&&['cut','gain','maintain'].includes(data.fscoreGoal))?data.fscoreGoal:null;
+        if(goal) return goal;
+        const legacy=localStorage.getItem('ftracker_fscore_goal');
+        return ['cut','gain','maintain'].includes(legacy)?legacy:'cut';
+    }catch(e){return 'cut';}
+}
+function setFScoreGoal(goal){
+    if(!['cut','gain','maintain'].includes(goal)) return;
+    data.fscoreGoal=goal;
+    try{localStorage.setItem('ftracker_fscore_goal',goal);}catch(e){}
+    saveData(false,'Изменение цели F-Score');
+    renderFScoreAnalytics();
+    renderFScoreHomeWidget();
+}
+function fScoreDelta(a,b){a=parseFloat(a);b=parseFloat(b);return Number.isFinite(a)&&Number.isFinite(b)&&a!==0?((b-a)/Math.abs(a))*100:null;}
+function fScoreClamp(v,min=0,max=100){return Math.max(min,Math.min(max,v));}
+function fScoreRecent(history,daysStart,daysEnd=0){
+    const now=Date.now(), lo=now-daysStart*86400000, hi=daysEnd?now-daysEnd*86400000:Infinity;
+    return history.filter(e=>{const t=new Date(e.date).getTime();return Number.isFinite(t)&&t>=lo&&t<hi;});
+}
+function fScoreBodyScore(goal,weightDelta,waistDelta){
+    const parts=[];
+    if(weightDelta!=null){
+        let w;
+        if(goal==='cut'){
+            // A controlled decrease is positive; a very fast loss is not rewarded as strongly.
+            w=weightDelta<=-0.5 ? 100 : weightDelta<0 ? 70+(-weightDelta)*60 : Math.max(0,70-weightDelta*70);
+            if(weightDelta<-2.0) w=85;
+        }else if(goal==='gain'){
+            // Controlled gain; large jumps are not treated as automatically better.
+            w=weightDelta>=0.25&&weightDelta<=1.0?100:weightDelta>1.0?Math.max(55,100-(weightDelta-1)*35):Math.max(0,55+weightDelta*80);
+        }else{
+            w=Math.abs(weightDelta)<=1.0?100:Math.max(0,100-(Math.abs(weightDelta)-1)*45);
+        }
+        parts.push(w);
+    }
+    if(waistDelta!=null){
+        let a;
+        if(goal==='cut') a=waistDelta<=-0.3?100:waistDelta<=0?75:Math.max(0,75-waistDelta*60);
+        else if(goal==='gain') a=waistDelta<=0.5?100:Math.max(0,100-(waistDelta-0.5)*60);
+        else a=Math.abs(waistDelta)<=1.0?100:Math.max(0,100-(Math.abs(waistDelta)-1)*45);
+        parts.push(a);
+    }
+    if(!parts.length) return null;
+    return parts.reduce((a,b)=>a+b,0)/parts.length;
+}
+function fScoreStrengthStats(history){
+    const by={};
+    history.forEach(entry=>(entry.exercises||[]).forEach(ex=>{
+        const sets=(ex.sets||[]).filter(s=>Number.isFinite(parseFloat(s.weight))&&Number.isFinite(parseInt(s.reps)));
+        if(!sets.length)return;
+        const name=String(ex.name||'').trim(); if(!name)return;
+        if(!by[name])by[name]={name,volume:0,maxWeight:0,maxReps:0,lastDate:0};
+        const x=by[name];
+        sets.forEach(s=>{const w=Math.max(0,parseFloat(s.weight)||0),r=Math.max(0,parseInt(s.reps)||0);x.volume+=w*r;x.maxWeight=Math.max(x.maxWeight,w);x.maxReps=Math.max(x.maxReps,r);});
+        const t=new Date(entry.date).getTime(); if(t>x.lastDate)x.lastDate=t;
+    }));
+    const rows=Object.values(by).sort((a,b)=>b.volume-a.volume);
+    return {exerciseCount:rows.length,rows};
+}
+function fScoreRecordStats(history){
+    const records=getExerciseRecords();
+    return Object.entries(records).map(([name,r])=>({name,maxWeight:Number(r.maxWeight)||0,maxReps:Number(r.maxReps)||0,bestWeightReps:r.bestWeightReps||''})).filter(r=>r.maxWeight>0||r.maxReps>0).sort((a,b)=>(b.maxWeight-a.maxWeight)||(b.maxReps-a.maxReps));
+}
+function fScoreData(){
+    const h=(data.history||[]).filter(e=>e&&e.date).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const m=(data.measurements||[]).filter(e=>e&&e.date).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const recent=fScoreRecent(h,30), prev=fScoreRecent(h,60,30);
+    const recentM=fScoreRecent(m,30), prevM=fScoreRecent(m,60,30);
+    const recentVol=recent.reduce((a,e)=>a+calculateWorkoutVolume(e),0), prevVol=prev.reduce((a,e)=>a+calculateWorkoutVolume(e),0);
+    const rM=recentM.length?recentM[recentM.length-1]:null, pM=prevM.length?prevM[prevM.length-1]:null;
+    const rW=rM&&Number.isFinite(parseFloat(rM.weight))?parseFloat(rM.weight):null, oW=pM&&Number.isFinite(parseFloat(pM.weight))?parseFloat(pM.weight):null;
+    const rWa=rM&&Number.isFinite(parseFloat(rM.waist))?parseFloat(rM.waist):null, oWa=pM&&Number.isFinite(parseFloat(pM.waist))?parseFloat(pM.waist):null;
+    const goal=getFScoreGoal();
+
+    // F-Score is a normalized 0–100 score. Strength and records are analytics only.
+    // Regularity: ideal rhythm is one workout every other day = 15 workouts / 30 days.
+    const regularity=fScoreClamp(recent.length/15*100);
+    const volumeAvailable=recentVol>0&&prevVol>0;
+    const volumeScore=volumeAvailable?fScoreClamp(100 + ((recentVol-prevVol)/prevVol*100)*1.5):null;
+    const bodyScore=fScoreBodyScore(goal,fScoreDelta(oW,rW),fScoreDelta(oWa,rWa));
+    const components=[];
+    if(regularity!=null)components.push({name:'Регулярность',score:regularity,weight:40});
+    if(volumeScore!=null)components.push({name:'Тренировочный объём',score:volumeScore,weight:20});
+    if(bodyScore!=null)components.push({name:'Динамика тела',score:bodyScore,weight:40});
+    const weightSum=components.reduce((a,c)=>a+c.weight,0);
+    const score=weightSum?Math.round(components.reduce((a,c)=>a+c.score*c.weight,0)/weightSum):0;
+    const reasons=[];
+    reasons.push(`Регулярность ${recent.length}/15`);
+    if(volumeAvailable) reasons.push((recentVol>prevVol*1.03?'Объём ↑':recentVol<prevVol*0.90?'Объём ↓':'Объём →'));
+    if(bodyScore!=null) reasons.push(goal==='cut'?'Цель · Сушка':goal==='gain'?'Цель · Набор':'Цель · Поддержание');
+    // Status is deliberately independent from the selected goal: it tells the user whether the current F-Score is in a good, attention, or bad zone.
+    const statusLevel=score>=80?'good':score>=55?'attention':'bad';
+    const status=statusLevel==='good'?'Всё хорошо':statusLevel==='attention'?'Есть что улучшить':'Нужна работа';
+    const strength=fScoreStrengthStats(h), records=fScoreRecordStats(h);
+    return {score,status,statusLevel,goal,history:h,measures:m,recent,prev,recentVol,prevVol,rW,oW,rWa,oWa,regularity,volumeScore,bodyScore,components,reasons,strength,records};
+}
+function fScoreFmt(v,u){return v==null?'—':(v>0?'+':'')+v.toFixed(1)+u;}
+function renderFScoreHomeWidget(){
+    const el=document.getElementById('fscoreHomeWidget'); if(!el)return;
+    try{
+      const x=fScoreData(),gn={cut:'Сушка',gain:'Набор',maintain:'Поддержание'}[x.goal]||'Сушка';
+      el.innerHTML='<div class="fscore-widget-head"><div class="fscore-widget-score"><span class="fscore-kicker">F-SCORE</span><span class="fscore-score">'+x.score+'</span></div><div class="fscore-widget-main"><span class="fscore-goal">Цель · '+escapeHtml(gn)+'</span><span class="fscore-status '+x.statusLevel+'">'+escapeHtml(x.status)+'</span></div><div class="fscore-arrow" aria-hidden="true">›</div></div><div class="fscore-signals">'+x.reasons.slice(0,3).map(r=>'<span class="fscore-signal">'+escapeHtml(r)+'</span>').join('')+'</div>';
+    }catch(err){
+      console.error('FScore render failed',err);
+      el.innerHTML='<div class="fscore-widget-head"><div class="fscore-widget-score"><span class="fscore-kicker">F-SCORE</span><span class="fscore-score">—</span></div><div class="fscore-widget-main"><span class="fscore-goal">Аналитика</span><span class="fscore-status attention">Открыть F-Score</span></div><div class="fscore-arrow" aria-hidden="true">›</div></div>';
+    }
+}
+function showFScoreAnalytics(){showScreen('fscoreAnalyticsScreen');requestAnimationFrame(()=>{try{renderFScoreAnalytics();}catch(err){console.error('FScore analytics failed',err);const r=document.getElementById('fscoreAnalyticsContent');if(r)r.innerHTML='<div class="card">Не удалось построить аналитику F-Score. Попробуйте обновить приложение.</div>';}});}
+function buildFScoreConclusion(x){
+    if(!x.history.length&&!x.measures.length)return'Пока мало данных для уверенного вывода. Продолжай записывать тренировки и замеры — аналитика станет точнее.';
+    const b=[];
+    b.push(`Режим: ${x.recent.length} тренировок за 30 дней при ориентире 15 — тренировка через день.`);
+    if(x.bodyScore!=null){
+        const g={cut:'сушки',gain:'набора',maintain:'поддержания'}[x.goal];
+        b.push(`Динамика тела оценена относительно цели «${g}».`);
+    }else b.push('Для оценки результата по цели пока недостаточно замеров.');
+    if(x.recentVol&&x.prevVol)b.push(x.recentVol>x.prevVol?'Тренировочный объём вырос относительно предыдущих 30 дней.':'Тренировочный объём не вырос относительно предыдущих 30 дней.');
+    return b.join(' ');
+}
+function renderFScoreAnalytics(){
+    const root=document.getElementById('fscoreAnalyticsContent');if(!root)return;
+    const x=fScoreData(),gn={cut:'Сушка',gain:'Набор',maintain:'Поддержание'}[x.goal]||'Сушка',wd=fScoreDelta(x.oW,x.rW),ad=fScoreDelta(x.oWa,x.rWa),vd=x.prevVol?((x.recentVol-x.prevVol)/x.prevVol*100):null;
+    const strengthRows=x.strength.rows.slice(0,5).map(r=>`<div class="progress-ex-history-row"><span>${escapeHtml(r.name)}</span><span class="progress-ex-history-value">${formatNum(r.maxWeight)} кг × ${formatNum(r.maxReps)}<small>Объём ${formatKg(r.volume)}</small></span></div>`).join('')||'<div class="progress-ex-no-results">Нет силовых данных</div>';
+    const recordRows=x.records.slice(0,5).map(r=>`<div class="progress-ex-history-row"><span>🏆 ${escapeHtml(r.name)}</span><span class="progress-ex-history-value">${r.maxWeight>0?formatNum(r.maxWeight)+' кг':''}${r.maxReps>0?' · '+formatNum(r.maxReps)+' повт.':''}</span></div>`).join('')||'<div class="progress-ex-no-results">Рекордов пока нет</div>';
+    root.innerHTML=`<div class="analytics-hero"><div class="analytics-hero-row"><div><div class="fscore-kicker">F-SCORE</div><div class="analytics-score">${x.score}</div><div class="fscore-analytics-status ${x.statusLevel}">${escapeHtml(x.status)}</div><div style="color:var(--subtext);font-size:12px;margin-top:7px;font-weight:750">Цель · ${gn}</div></div><div style="font-size:34px;color:var(--subtext)">◎</div></div><div class="fscore-signals">${x.reasons.slice(0,4).map(r=>'<span class="fscore-signal">'+escapeHtml(r)+'</span>').join('')}</div></div>
+    <details class="analytics-card" open><summary>Общая оценка</summary><div class="analytics-inner"><div class="analytics-note">${escapeHtml(buildFScoreConclusion(x))}</div><div class="analytics-grid" style="margin-top:10px">${x.components.map(c=>`<div class="analytics-stat"><strong>${Math.round(c.score)}</strong><span>${escapeHtml(c.name)} · ${c.weight}%</span></div>`).join('')}</div></div></details>
+    <details class="analytics-card"><summary>Тело</summary><div class="analytics-inner"><div class="analytics-grid"><div class="analytics-stat"><strong>${x.rW!=null?x.rW.toFixed(1)+' кг':'—'}</strong><span>Вес · ${fScoreFmt(wd,'%')}</span></div><div class="analytics-stat"><strong>${x.rWa!=null?x.rWa.toFixed(1)+' см':'—'}</strong><span>Талия · ${fScoreFmt(ad,'%')}</span></div></div></div></details>
+    <details class="analytics-card"><summary>Тренировки</summary><div class="analytics-inner"><div class="analytics-grid"><div class="analytics-stat"><strong>${x.recent.length}/15</strong><span>Регулярность · 30 дней</span></div><div class="analytics-stat"><strong>${Math.round(x.recentVol).toLocaleString('ru-RU')} кг</strong><span>Объём</span></div><div class="analytics-stat"><strong>${fScoreFmt(vd,'%')}</strong><span>К прошлым 30 дням</span></div></div><div class="analytics-note" style="margin-top:10px">Ориентир регулярности: <strong>15 тренировок за 30 дней</strong> — режим через день. Это не цель пользователя.</div></div></details>
+    <details class="analytics-card"><summary>Силовые показатели</summary><div class="analytics-inner"><div class="analytics-grid"><div class="analytics-stat"><strong>${x.strength.exerciseCount}</strong><span>Упражнений со статистикой</span></div><div class="analytics-stat"><strong>${x.records.length}</strong><span>Упражнений с рекордами</span></div></div><div class="progress-ex-history" style="margin-top:10px">${strengthRows}</div></div></details>
+    <details class="analytics-card"><summary>Рекорды</summary><div class="analytics-inner"><div class="progress-ex-history">${recordRows}</div><div class="analytics-note" style="margin-top:10px">Рекорды здесь только отображаются из существующей статистики. F-Score их отдельно не начисляет.</div></div></details>
+    <details class="analytics-card"><summary>Питание</summary><div class="analytics-inner">Питание не включено в математическую формулу F-Score, пока для него нет устойчивой статистики. Записи дневника не ухудшают оценку автоматически.</div></details>
+    <details class="analytics-card"><summary>Цель</summary><div class="analytics-inner"><div class="analytics-period"><button type="button" class="${x.goal==='cut'?'active':''}" onclick="setFScoreGoal('cut')">🔥 Сушка</button><button type="button" class="${x.goal==='gain'?'active':''}" onclick="setFScoreGoal('gain')">💪 Набор</button><button type="button" class="${x.goal==='maintain'?'active':''}" onclick="setFScoreGoal('maintain')">⚖️ Поддержание</button></div><div class="analytics-note" style="margin-top:10px">Цель определяет, как F-Score интерпретирует динамику веса и талии. Она не связана с количеством тренировок.</div></div></details>
+    <details class="analytics-card"><summary>Как считается F-Score</summary><div class="analytics-inner"><p><strong>0–100 баллов.</strong> Регулярность — 40%, тренировочный объём — 20%, динамика тела с учётом выбранной цели — 40%.</p><p>Регулярность: 15 тренировок за 30 дней — эталон режима через день. Силовые показатели и рекорды являются статистикой и не начисляют отдельные баллы.</p><p>Если данных для показателя нет, он не получает искусственный нулевой результат: итог пересчитывается по доступным компонентам.</p></div></details>`;
 }
 
 function showProgress() {
@@ -11103,7 +11284,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.0.20', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.1.2', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -15133,7 +15314,7 @@ const foodList=$('foodPresetList');if(foodList&&!foodList.dataset.v66Bound){food
   },true);
 
   window.__ftrackerV113QA = {
-    version:'113',
+    version:'115',
     calendarPeriods:true,
     importValidation:true,
     additiveImport:true,
@@ -15270,18 +15451,27 @@ function fbFingerprint(v){
 
 async function fbDownload(payload){
   const json=JSON.stringify(payload);
-  const blob=new Blob([json],{type:'application/json'});
-  const name='ftracker_full_backup_'+new Date().toISOString().slice(0,10)+'.json';
-  if(navigator.share && typeof File==='function'){
+  const blob=new Blob([json],{type:'application/json;charset=utf-8'});
+  const d=new Date(); const pad=n=>String(n).padStart(2,'0'); const stamp=`${d.getFullYear()}-${pad(d.getMonth()+1)}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`; const name=`${stamp}_FTracker_backup.json`;
+  /* On iPhone/iPad the reliable way to put a generated file into Files is the native share sheet. */
+  if(typeof File==='function' && navigator.share){
     const file=new File([blob],name,{type:'application/json'});
-    try{ await navigator.share({files:[file],title:'FTracker Full Backup'}); return; }
-    catch(e){ if(e?.name==='AbortError') throw e; console.warn('Share failed, using JSON fallback',e); }
+    try{
+      if(!navigator.canShare || navigator.canShare({files:[file]})){
+        await navigator.share({files:[file]});
+        return {name,shared:true};
+      }
+    }catch(e){
+      if(e?.name==='AbortError') throw e;
+      console.warn('Native file share failed, using download fallback',e);
+    }
   }
-  /* Exactly one generated artifact: the JSON backup. No .txt file is created. */
+  /* Exactly one generated artifact: JSON only. */
   const u=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=u; a.download=name; a.rel='noopener';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(u),60000);
+  a.href=u; a.download=name; a.type='application/json'; a.rel='noopener';
+  a.style.display='none'; document.body.appendChild(a);
+  try{a.click();}finally{a.remove(); setTimeout(()=>URL.revokeObjectURL(u),60000);}
+  return {name,shared:false};
 }
 
 window.exportData=async function(){
@@ -15291,10 +15481,10 @@ window.exportData=async function(){
     const snap=await fbSnapshot();
     for(const id of refs) if(!snap.map.has(id)) throw new Error('Экспорт остановлен: не найден файл '+id);
     const payload={_backupMeta:{format:FB_FORMAT,version:FB_VERSION,exportedAt:new Date().toISOString(),mediaCount:snap.media.length,referencedMediaCount:refs.size},data:state,media:snap.media};
-    await fbDownload(payload);
+    const result=await fbDownload(payload);
     try{localStorage.setItem(LAST_EXPORT_KEY,String(Date.now()));}catch(e){}
     renderDataHistoryStatus();
-    fbToast('Полный бэкап создан: '+snap.media.length+' медиа, из них '+refs.size+' используются карточками');
+    fbToast(result?.shared ? 'Бэкап готов: выберите «Сохранить в Файлы».' : 'Бэкап создан: '+result.name);
     return true;
   }catch(e){
     if(e?.name!=='AbortError') fbToast('Бэкап не создан: '+fbErr(e));
