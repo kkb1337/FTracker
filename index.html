@@ -7992,109 +7992,87 @@ function fScorePlanQuality(entry){
 function fScoreVolume(entry){
     return calculateWorkoutVolume(entry);
 }
-function fScoreStability(recent,prev){
-    const recentAvg=recent.length?recent.reduce((a,e)=>a+fScoreVolume(e),0)/recent.length:0;
-    const prevAvg=prev.length?prev.reduce((a,e)=>a+fScoreVolume(e),0)/prev.length:0;
-    if(!recent.length && !prev.length) return {score:100,change:null,recentAvg,prevAvg,available:false};
-    if(prevAvg===0){
-        return {score:recentAvg===0?100:60,change:null,recentAvg,prevAvg,available:false};
-    }
-    const change=(recentAvg-prevAvg)/Math.abs(prevAvg)*100;
-    let score;
-    const a=Math.abs(change);
-    if(change>=-10 && change<=10){
-        score=100-(a/10)*10;
-    }else if(change<-10 && change>=-30){
-        score=90-((Math.abs(change)-10)/20)*30;
-    }else if(change>10 && change<=25){
-        score=90-((change-10)/15)*30;
-    }else if(change<-30){
-        score=Math.max(20,60-(Math.abs(change)-30)*1.6);
-    }else{
-        score=Math.max(20,60-(change-25)*1.6);
-    }
-    return {score:fScoreClamp(score),change,recentAvg,prevAvg,available:true};
-}
-function fScoreRangeScore(value,ranges){
-    // ranges: [{min,max,scoreMin,scoreMax}] with linear interpolation.
-    for(const r of ranges){
-        if(value>=r.min && value<=r.max){
-            const span=r.max-r.min;
-            return span===0?r.scoreMax:r.scoreMin+(value-r.min)/span*(r.scoreMax-r.scoreMin);
-        }
-    }
-    return null;
-}
-function fScoreBodyMetricScore(goal,weightDelta,measurementDeltas){
-    let weightScore=null;
-    if(weightDelta!=null){
-        if(goal==='cut') weightScore=weightDelta<=-0.5?100:weightDelta<0?75:Math.max(0,75-weightDelta*60);
-        else if(goal==='gain') weightScore=weightDelta>=0.25&&weightDelta<=1.5?100:weightDelta>1.5?Math.max(55,100-(weightDelta-1.5)*25):Math.max(0,55+weightDelta*180);
-        else weightScore=Math.abs(weightDelta)<=1?100:Math.max(0,100-(Math.abs(weightDelta)-1)*40);
-    }
-    const metrics=(measurementDeltas||[]).filter(m=>Number.isFinite(m.delta));
-    const scores=metrics.map(m=>{
-        const d=m.delta;
-        // Замеры не имеют заранее заданного «главного» статуса: каждый доступный
-        // показатель участвует одинаково, а направление интерпретируется по цели.
-        let score;
-        if(goal==='gain') score=d>0?Math.min(100,70+d*15):d===0?75:Math.max(35,75+d*20);
-        else if(goal==='cut') score=d<0?Math.min(100,70+Math.abs(d)*15):d===0?75:Math.max(25,75-d*20);
-        else score=Math.abs(d)<=1?100:Math.max(35,100-(Math.abs(d)-1)*18);
-        return {...m,score:fScoreClamp(score)};
+function fScoreExerciseWorkingWeights(history){
+    const byExercise={};
+    (history||[]).forEach(entry=>{
+        (entry.exercises||[]).forEach(ex=>{
+            const name=(ex.name||ex.exerciseName||'').trim(); if(!name)return;
+            const sets=ex.sets||ex.approaches||[];
+            let values=[];
+            sets.forEach(set=>{
+                const w=parseFloat(set.weight??set.kg??set.valueWeight);
+                const r=parseFloat(set.reps??set.repetitions??set.valueReps);
+                if(Number.isFinite(w)&&w>0&&Number.isFinite(r)&&r>0) values.push({w,r});
+            });
+            if(!values.length)return;
+            // Рабочий уровень упражнения: тяжёлый рабочий вес, а не тоннаж и не число подходов.
+            const working=Math.max(...values.map(v=>v.w));
+            (byExercise[name]||(byExercise[name]=[])).push({date:new Date(entry.date).getTime(),weight:working});
+        });
     });
-    const bodyParts=[];
-    if(weightScore!=null) bodyParts.push({score:weightScore,weight:50});
-    scores.forEach(m=>bodyParts.push({score:m.score,weight:50/Math.max(scores.length,1)}));
-    if(!bodyParts.length)return {score:0,weightScore:null,measurementScores:[],available:false};
-    const total=bodyParts.reduce((a,p)=>a+p.weight,0);
-    return {score:bodyParts.reduce((a,p)=>a+p.score*p.weight,0)/total,weightScore,measurementScores:scores,available:true};
+    return byExercise;
+}
+function fScoreWorkingWeightTrend(history){
+    const groups=fScoreExerciseWorkingWeights(history);
+    const trends=[];
+    Object.entries(groups).forEach(([name,arr])=>{
+        arr.sort((a,b)=>a.date-b.date);
+        if(arr.length<3)return;
+        const recent=arr.slice(-Math.min(3,arr.length));
+        const base=arr.slice(-Math.min(6,arr.length), -Math.min(3,arr.length));
+        if(!base.length)return;
+        const ra=recent.reduce((a,v)=>a+v.weight,0)/recent.length;
+        const ba=base.reduce((a,v)=>a+v.weight,0)/base.length;
+        if(ba<=0)return;
+        trends.push({name,change:(ra-ba)/ba*100});
+    });
+    if(!trends.length)return {score:null,available:false,count:0,trend:'Недостаточно истории'};
+    const avg=trends.reduce((a,t)=>a+t.change,0)/trends.length;
+    // Стабильность — хороший результат. Небольшой рост — плюс. Только устойчивое падение снижает оценку.
+    let score;
+    if(avg>=-3 && avg<=8) score=100;
+    else if(avg>8) score=Math.max(85,100-(avg-8)*1.5);
+    else score=Math.max(20,100-(Math.abs(avg)-3)*8);
+    return {score:fScoreClamp(score),available:true,count:trends.length,avgChange:avg,trend:avg>3?'Рост рабочих весов':avg<-3?'Снижение рабочих весов':'Рабочие веса стабильны'};
+}
+function fScoreContinuity(recent){
+    if(!recent.length)return {score:null,available:false,maxGap:null};
+    const dates=recent.map(e=>new Date(e.date).getTime()).sort((a,b)=>a-b);
+    let maxGap=0;
+    for(let i=1;i<dates.length;i++)maxGap=Math.max(maxGap,(dates[i]-dates[i-1])/86400000);
+    // Небольшие паузы нормальны; оцениваем только реальные длительные выпадения.
+    let score=maxGap<=7?100:maxGap<=14?85:maxGap<=21?65:maxGap<=30?40:15;
+    return {score,available:true,maxGap};
+}
+function fScoreActivity(recent){
+    if(!recent.length)return {score:null,available:false,count:0};
+    // Не требуем фиксированное число тренировок: это мягкий показатель наличия процесса.
+    const count=recent.length;
+    const score=count>=12?100:count>=8?90:count>=4?75:count>=2?55:35;
+    return {score,available:true,count};
 }
 function fScoreData(){
     const h=(data.history||[]).filter(e=>e&&e.date).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
     const m=(data.measurements||[]).filter(e=>e&&e.date).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
     const recent=fScoreRecent(h,30), prev=fScoreRecent(h,60,30);
-    const recentM=fScoreRecent(m,30), prevM=fScoreRecent(m,60,30);
-    const recentMlast=recentM.length?recentM[recentM.length-1]:null;
-    const prevMlast=prevM.length?prevM[prevM.length-1]:null;
-    const rW=recentMlast&&Number.isFinite(parseFloat(recentMlast.weight))?parseFloat(recentMlast.weight):null;
-    const oW=prevMlast&&Number.isFinite(parseFloat(prevMlast.weight))?parseFloat(prevMlast.weight):null;
-    const measurementDeltas=[];
-    if(recentMlast&&prevMlast){
-        const skip=new Set(['date','id','weight','createdAt','updatedAt','note','notes']);
-        Object.keys(recentMlast).forEach(key=>{
-            if(skip.has(key))return;
-            const a=parseFloat(prevMlast[key]), b=parseFloat(recentMlast[key]);
-            if(Number.isFinite(a)&&Number.isFinite(b)) measurementDeltas.push({key,label:key,delta:b-a});
-        });
-    }
     const goal=getFScoreGoal();
-
-    const regularity=fScoreClamp(recent.length/15*100);
-    const planScores=recent.map(e=>fScorePlanQuality(e));
-    const planExecution=planScores.length?planScores.reduce((a,b)=>a+b,0)/planScores.length:0;
-    const stability=fScoreStability(recent,prev);
-    const processScore=planExecution*0.60+stability.score*0.40;
-    const body=fScoreBodyMetricScore(goal,fScoreDelta(oW,rW),measurementDeltas);
-    const bodyScore=body.score;
-    const score=Math.round(regularity*0.40+processScore*0.30+bodyScore*0.30);
-    const hasAnyData=recent.length||prev.length||m.length;
-    const statusLevel=score>=80?'good':score>=55?'attention':'bad';
-    const status=statusLevel==='good'?'Отличная системность':statusLevel==='attention'?'Есть куда расти':'Ниже желаемого';
-    const reasons=[
-        `Регулярность ${recent.length}/15`,
-        `План ${Math.round(planExecution)}%`,
-        stability.change==null?'Объём —':`Объём ${stability.change>0?'+':''}${stability.change.toFixed(1)}%`
+    const regularity=recent.length?fScoreClamp(recent.length/12*100):null;
+    const continuity=fScoreContinuity(recent);
+    const working=fScoreWorkingWeightTrend(h);
+    const activity=fScoreActivity(recent);
+    const parts=[
+        {name:'Регулярность',score:regularity,weight:40},
+        {name:'Непрерывность',score:continuity.score,weight:25},
+        {name:'Динамика рабочих весов',score:working.score,weight:20},
+        {name:'Активность процесса',score:activity.score,weight:15}
     ];
-    return {
-        score,status,statusLevel,goal,history:h,measures:m,recent,prev,recentVol:recent.reduce((a,e)=>a+fScoreVolume(e),0),
-        prevVol:prev.reduce((a,e)=>a+fScoreVolume(e),0),rW,oW,measurementDeltas,regularity,
-        planExecution,stability,processScore,bodyScore,body,components:[
-            {name:'Регулярность',score:regularity,weight:40},
-            {name:'Качество процесса',score:processScore,weight:30},
-            {name:'Соответствие цели',score:bodyScore,weight:30}
-        ],reasons,strength:fScoreStrengthStats(h),records:fScoreRecordStats(h),hasAnyData:Boolean(hasAnyData)
-    };
+    const available=parts.filter(p=>Number.isFinite(p.score));
+    const score=available.length?Math.round(available.reduce((a,p)=>a+p.score*p.weight,0)/available.reduce((a,p)=>a+p.weight,0)):0;
+    const hasAnyData=recent.length||prev.length||m.length;
+    const statusLevel=!available.length?'attention':score>=80?'good':score>=55?'attention':'bad';
+    const status=!available.length?'Пока нет данных':statusLevel==='good'?'Отличная системность':statusLevel==='attention'?'Есть куда расти':'Ниже желаемого';
+    return {score,status,statusLevel,goal,history:h,measures:m,recent,prev,regularity,continuity,working,activity,
+        components:parts,hasAnyData:Boolean(hasAnyData),availableCount:available.length};
 }
 
 function fScoreFmt(v,u){return v==null?'—':(v>0?'+':'')+v.toFixed(1)+u;}
@@ -8119,82 +8097,26 @@ function showFScoreAnalytics(){
     }});
 }
 function buildFScoreConclusion(x){
-    if(!x.hasAnyData)return'Пока нет данных. Записывайте тренировки и замеры — индекс системности начнёт рассчитываться автоматически.';
-    const g={cut:'сушки',gain:'набора',maintain:'поддержания'}[x.goal]||'цели';
-    const p=x.stability.change==null?'стабильность объёма пока не сравнивается':`средний объём изменился на ${x.stability.change>0?'+':''}${x.stability.change.toFixed(1)}%`;
-    return `За последние 30 дней: ${x.recent.length} тренировок при эталоне 15. Качество выполнения плана — ${Math.round(x.planExecution)}%, ${p}. Динамика тела оценивается по весу и всем доступным замерам, а не по одной талии, относительно цели «${g}».`;
+    if(!x.availableCount)return 'Недостаточно данных для оценки. Добавьте тренировки — система начнёт анализировать регулярность, непрерывность и динамику рабочих весов.';
+    const ww=x.working.available?x.working.trend:'динамика рабочих весов пока не оценивается';
+    return `За последние 30 дней записано ${x.recent.length} тренировок. ${ww}. Разовые изменения количества подходов, повторений или отсутствие рекорда не считаются ухудшением — оценивается общая тенденция.`;
 }
 function renderFScoreAnalytics(){
     const root=document.getElementById('fscoreAnalyticsContent');if(!root)return;
     const x=fScoreData();
-    const gn={cut:'Сушка',gain:'Набор',maintain:'Поддержание'}[x.goal]||'Сушка';
-    const wd=fScoreDelta(x.oW,x.rW);
-    const statusDot=x.statusLevel;
-    const metric=v=>v==null?'—':Math.round(v);
-    const change=x.stability.change==null?'—':`${x.stability.change>0?'+':''}${x.stability.change.toFixed(1)}%`;
-    const planText=x.recent.length?`${Math.round(x.planExecution)} / 100`:'0 / 100';
-    const weightText=x.body.weightScore==null?'—':`${Math.round(x.body.weightScore)} / 100`;
-    const measurementText=x.body.measurementScores?.length?`${x.body.measurementScores.length} замер(ов)`:'—';
+    const gn={cut:'Сушка',gain:'Набор',maintain:'Поддержание'}[x.goal]||'Поддержание';
+    const metric=v=>Number.isFinite(v)?`${Math.round(v)} / 100`:'Недостаточно данных';
+    const comp=(title,desc,weight,value,note)=>`<section class="fscore-component"><div class="fscore-component-head"><div><h3>${title}</h3><p>${desc}</p></div><strong>${Number.isFinite(value)?Math.round(value*weight/100):'—'} / ${weight}</strong></div><div class="fscore-component-value">${metric(value)}</div><div class="fscore-component-note">${note}</div></section>`;
     root.innerHTML=`
-      <div class="fscore-detail-card">
-        <div class="fscore-detail-top">
-          <div>
-            <div class="fscore-detail-score">${x.score}</div>
-            <div class="fscore-detail-status ${statusDot}"><span class="fscore-home-dot"></span>${escapeHtml(x.status)}</div>
-          </div>
-          <div class="fscore-detail-goal">Цель<br><strong>${gn}</strong></div>
-        </div>
-        <div class="fscore-detail-note">${escapeHtml(buildFScoreConclusion(x))}</div>
-      </div>
-
+      <div class="fscore-detail-card"><div class="fscore-detail-top"><div><div class="fscore-detail-score">${x.availableCount?x.score:'—'}</div><div class="fscore-detail-status ${x.statusLevel}"><span class="fscore-home-dot"></span>${escapeHtml(x.status)}</div></div><div class="fscore-detail-goal">Цель<br><strong>${gn}</strong></div></div><div class="fscore-detail-note">${escapeHtml(buildFScoreConclusion(x))}</div></div>
       <div class="fscore-components">
-        <section class="fscore-component">
-          <div class="fscore-component-head"><div><h3>Регулярность</h3><p>Частота тренировочных сессий за последние 30 дней.</p></div><strong>${Math.round(x.regularity)} / 40</strong></div>
-          <div class="fscore-component-value">${Math.round(x.regularity)} / 100</div>
-          <div class="fscore-component-note">${x.recent.length} тренировок из эталона 15. Любая сессия засчитывается.</div>
-        </section>
-
-        <section class="fscore-component">
-          <div class="fscore-component-head"><div><h3>Качество процесса</h3><p>Осознанное выполнение плана и стабильность нагрузки.</p></div><strong>${Math.round(x.processScore*0.30)} / 30</strong></div>
-          <div class="fscore-subgrid">
-            <div><span>Выполнение плана · 60%</span><b>${planText}</b><small>${x.recent.length?`${x.recent.length} тренировок усреднено`:'Нет тренировок'}</small></div>
-            <div><span>Стабильность нагрузки · 40%</span><b>${Math.round(x.stability.score)} / 100</b><small>${change} к среднему объёму предыдущих 30 дней</small></div>
-          </div>
-          <div class="fscore-component-note">Итог: ${Math.round(x.processScore)} / 100 × 30% = ${Math.round(x.processScore*0.30)} баллов.</div>
-        </section>
-
-        <section class="fscore-component">
-          <div class="fscore-component-head"><div><h3>Соответствие цели</h3><p>Динамика веса и всех доступных замеров относительно выбранной цели.</p></div><strong>${Math.round(x.bodyScore*0.30)} / 30</strong></div>
-          <div class="fscore-subgrid">
-            <div><span>Вес</span><b>${weightText}</b><small>${x.rW!=null?`${x.rW.toFixed(1)} кг · изменение ${fScoreFmt(wd,'%')}`:'Нет данных'}</small></div>
-            <div><span>Замеры тела</span><b>${measurementText}</b><small>${x.body.measurementScores?.length?'Учитываются все доступные числовые замеры':'Нет сопоставимых замеров за два периода'}</small></div>
-          </div>
-          ${x.body.measurementScores?.length?`<div class="fscore-component-note">${x.body.measurementScores.map(m=>`${escapeHtml(String(m.label))}: ${m.delta>0?'+':''}${Number(m.delta).toFixed(1)} см`).join(' · ')}</div>`:''}
-          <div class="fscore-component-note">Итог: ${Math.round(x.bodyScore)} / 100 × 30% = ${Math.round(x.bodyScore*0.30)} баллов.</div>
-        </section>
+        ${comp('Регулярность','Насколько регулярно тренировки присутствуют в процессе.','40',x.regularity,x.recent.length?`${x.recent.length} тренировок за последние 30 дней. Не требуется тренироваться по жёсткому календарю.`:'Нет тренировок для оценки.')}
+        ${comp('Непрерывность','Показывает, есть ли длительные выпадения из тренировочного процесса.','25',x.continuity.score,x.continuity.available?`Самая длинная пауза между тренировками: ${Math.round(x.continuity.maxGap)} дней. Короткий отдых не считается проблемой.`:'Нужна история тренировок.')}
+        ${comp('Динамика рабочих весов','Анализируется общая тенденция рабочих весов по упражнениям, а не тоннаж.','20',x.working.score,x.working.available?`${x.working.trend}. Проанализировано упражнений: ${x.working.count}. 3 вместо 4 подходов или отсутствие рекорда не ухудшают оценку сами по себе.`:'Нужно минимум несколько записей по одним и тем же упражнениям.')}
+        ${comp('Активность процесса','Мягкий показатель того, что тренировочный процесс действительно ведётся.','15',x.activity.score,x.activity.available?`${x.activity.count} тренировок за последние 30 дней. Этот пункт не требует одинакового количества подходов в упражнениях.`:'Нет тренировок для оценки.')}
       </div>
-
-      <details class="analytics-card">
-        <summary>Промежуточные значения</summary>
-        <div class="analytics-inner">
-          <div class="fscore-breakdown-row"><span>Регулярность</span><b>${Math.round(x.regularity)} × 40%</b></div>
-          <div class="fscore-breakdown-row"><span>Качество процесса</span><b>${Math.round(x.processScore)} × 30%</b></div>
-          <div class="fscore-breakdown-row"><span>Соответствие цели</span><b>${Math.round(x.bodyScore)} × 30%</b></div>
-          <div class="fscore-breakdown-total"><span>Индекс системности</span><b>${x.score} / 100</b></div>
-        </div>
-      </details>
-
-      <details class="analytics-card">
-        <summary>Цель и методика</summary>
-        <div class="analytics-inner">
-          <div class="analytics-period">
-            <button type="button" class="${x.goal==='cut'?'active':''}" onclick="setFScoreGoal('cut')">🔥 Сушка</button>
-            <button type="button" class="${x.goal==='gain'?'active':''}" onclick="setFScoreGoal('gain')">💪 Набор</button>
-            <button type="button" class="${x.goal==='maintain'?'active':''}" onclick="setFScoreGoal('maintain')">⚖️ Поддержание</button>
-          </div>
-          <div class="analytics-note"><strong>Как работает цель:</strong><br>💪 Набор — оценивается общая положительная тенденция веса и доступных замеров.<br>🔥 Сушка — оценивается общая тенденция снижения показателей тела без требования рекордов.<br>⚖️ Поддержание — оценивается стабильность показателей.<br><br><strong>Важно:</strong> один пропуск, 3 вместо 4 подходов или отсутствие нового рекорда не считаются ухудшением. Анализируется тенденция за период, а не одна тренировка. Все доступные замеры участвуют в анализе одинаково — талия не является главным показателем.</div>
-        </div>
-      </details>`;
+      <details class="analytics-card"><summary>Как рассчитывается индекс</summary><div class="analytics-inner"><div class="analytics-note"><strong>Формула:</strong><br>Регулярность — 40%<br>Непрерывность — 25%<br>Динамика рабочих весов — 20%<br>Активность процесса — 15%<br><br><strong>Важно:</strong> система не считает тоннаж главным критерием. Жим в 4 подхода на одной неделе и 3 подхода на другой не считается ухудшением. Можно делать 2 подхода жима и 5 подходов бицепса — структура упражнений индивидуальна. Разовые колебания рабочих весов, повторений и отсутствие нового рекорда нормальны. Оценивается устойчивая тенденция.</div></div></details>
+      <details class="analytics-card"><summary>Цели и как их читать</summary><div class="analytics-inner"><div class="analytics-period"><button type="button" class="${x.goal==='cut'?'active':''}" onclick="setFScoreGoal('cut')">🔥 Сушка</button><button type="button" class="${x.goal==='gain'?'active':''}" onclick="setFScoreGoal('gain')">💪 Набор</button><button type="button" class="${x.goal==='maintain'?'active':''}" onclick="setFScoreGoal('maintain')">⚖️ Поддержание</button></div><div class="analytics-note"><strong>💪 Набор:</strong> анализируется общая положительная динамика тела и тренировочных показателей.<br><strong>🔥 Сушка:</strong> оценивается движение к снижению массы и замеров при сохранении тренировочного процесса.<br><strong>⚖️ Поддержание:</strong> оценивается сохранение общей стабильности.<br><br>Замеры тела рассматриваются как дополнительные индивидуальные данные: талия не является главным показателем, и система не ставит грудь, плечи или бицепс ниже неё.</div></div></details>`;
 }
 
 function showProgress() {
@@ -12038,7 +11960,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.2.8', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.2.9', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
