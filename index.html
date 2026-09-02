@@ -7865,7 +7865,7 @@ function saveDraft() {
     return true;
   } catch(e) { console.error('FTracker saveDraft error', e); showToast('Не удалось сохранить черновик тренировки'); return false; }
 }
-function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch(e) {} document.getElementById('draftBanner')?.classList.add('hidden'); }
+function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch(e) { console.warn('FTracker clearDraft failed', e); } document.getElementById('draftBanner')?.classList.add('hidden'); }
 function checkDraft() {
   let draft=null; try { draft=localStorage.getItem(DRAFT_KEY); } catch(e) { return; }
   if (!draft) return;
@@ -9145,7 +9145,7 @@ function openNewMeasurementModal() {
         document.body.appendChild(modal);
     }
 
-    const today = new Date().toISOString().slice(0,10);
+    const today = localDateString(new Date()); // [FIX] Локальная календарная дата, без UTC-сдвига
     // Для нового замера автоматически подставляем последнее сохранённое
     // значение каждого параметра. Если в последнем замере параметр пустой,
     // берём самое свежее непустое значение из истории.
@@ -9225,7 +9225,7 @@ function openLastMeasurementEdit() {
         document.body.appendChild(modal);
     }
 
-    const dateValue = new Date(last.date).toISOString().slice(0,10);
+    const dateValue = localDateString(new Date(last.date)); // [FIX] Локальная календарная дата
 
     modal.innerHTML = `
         <div class="catalog-modal-content measurement-manager-modal-content">
@@ -9436,7 +9436,7 @@ function openHistoricalMeasurementEdit(index) {
         modal.onclick = function(e){ if(e.target===modal) closeHistoricalMeasurementEdit(); };
         document.body.appendChild(modal);
     }
-    const dateValue = new Date(measurement.date).toISOString().slice(0,10);
+    const dateValue = localDateString(new Date(measurement.date)); // [FIX] Локальная календарная дата
     modal.innerHTML = `<div class="catalog-modal-content measurement-manager-modal-content">
         <span class="close-btn" onclick="closeHistoricalMeasurementEdit()">&times;</span>
         <div style="font-size:21px;font-weight:800;margin-bottom:4px;">✏️ Изменить замер</div>
@@ -10217,6 +10217,25 @@ function exitWorkoutWithoutSaving() { closeConfirmExit(); stopRestTimer(); stopT
 
 function finishWorkout() {
     try {
+    // [FIX] Заполненные, но не отмеченные ✓ подходы не должны молча исчезать из итоговой истории.
+    const unfinished = [];
+    (getActiveExerciseIndices?.() || []).forEach(ref => {
+        const meta = getWorkoutExercise(ref);
+        const type = meta?.type || 'strength';
+        (workoutSets?.[ref] || []).forEach((set, idx) => {
+            if (!set || set.done) return;
+            const hasData = type === 'cardio'
+                ? Number(set.time) > 0 || Number(set.durationSeconds) > 0 || Number(set.intensity) > 0
+                : type === 'bodyweight'
+                    ? Number(set.reps) > 0
+                    : Number(set.weight) > 0 || Number(set.reps) > 0;
+            if (hasData) unfinished.push({ref, idx});
+        });
+    });
+    if (unfinished.length) {
+        showToast(`Есть заполненные подходы без отметки «✓»: ${unfinished.length}. Отметь или удали их перед завершением.`);
+        return;
+    }
     // Validate the current draft before saving. Empty placeholder rows are not
     // meaningful workout data and must never enter history.
     if (currentProgram !== null && Array.isArray(workoutExerciseSlots)) {
@@ -10386,7 +10405,7 @@ function closeWorkoutSummary() {
 }
 function closeAchievements() { document.getElementById('achievementsModal').classList.add('hidden'); currentAchievements = {}; goHome(); }
 
-function editHistoryDate(index) { editingHistoryIndex = index; const entry = data.history[index]; document.getElementById('newDateInput').value = new Date(entry.date).toISOString().slice(0,10); lockModalScroll(); document.getElementById('dateModal').classList.remove('hidden'); }
+function editHistoryDate(index) { editingHistoryIndex = index; const entry = data.history[index]; document.getElementById('newDateInput').value = localDateString(new Date(entry.date)); /* [FIX] Не сдвигаем дату из-за UTC */ lockModalScroll(); document.getElementById('dateModal').classList.remove('hidden'); }
 function closeDateModal() { document.getElementById('dateModal').classList.add('hidden'); editingHistoryIndex = null; }
 function saveDateChange() { if (editingHistoryIndex === null) return; const newDate = document.getElementById('newDateInput').value; if (newDate) { data.history[editingHistoryIndex].date = new Date(newDate + 'T12:00:00').toISOString(); saveData(); showHistory(); showToast('Дата изменена'); } closeDateModal(); }
 
@@ -12047,7 +12066,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.3.9', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
+        navigator.serviceWorker.register('./sw.js?v=1.3.10', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -15276,16 +15295,21 @@ function ensureFoodSearchClear(){
 ensureFoodSearchClear();
 
 /* ---------- Catalog creation: exact block, similar = explicit choice ---------- */
+// [FIX] Единая точечная проверка числовых значений КБЖУ: NaN, отрицательные и чрезмерные значения не сохраняются.
+function foodNumber(value, max=100000){
+  const n=Number(String(value ?? '').trim().replace(',', '.'));
+  return Number.isFinite(n) && n >= 0 && n <= max ? n : null;
+}
 window.saveCatalogProduct=function(){
   const name=String($('catalogName')?.value||'').trim().replace(/\s+/g,' ');
   if(!name){showToast('Введите название');return;}
   const type=$('catalogType')?.value||'per100';let product={name,type};
   if(type==='dish'){
-    product.calories=parseFloat($('catalogDishCalories')?.value)||0;product.protein=parseFloat($('catalogDishProtein')?.value)||0;product.fat=parseFloat($('catalogDishFat')?.value)||0;product.carbs=parseFloat($('catalogDishCarbs')?.value)||0;
-    if(!product.calories){showToast('Введите калории блюда');return;}
+    product.calories=foodNumber($('catalogDishCalories')?.value);product.protein=foodNumber($('catalogDishProtein')?.value);product.fat=foodNumber($('catalogDishFat')?.value);product.carbs=foodNumber($('catalogDishCarbs')?.value);
+    if(product.calories===null||product.protein===null||product.fat===null||product.carbs===null||product.calories<=0){showToast('Введите корректные неотрицательные КБЖУ блюда');return;}
   }else{
-    product.cal100=parseFloat($('catalogCal100')?.value)||0;product.protein100=parseFloat($('catalogProtein100')?.value)||0;product.fat100=parseFloat($('catalogFat100')?.value)||0;product.carbs100=parseFloat($('catalogCarbs100')?.value)||0;
-    if(!product.cal100){showToast('Введите калории на 100 г');return;}
+    product.cal100=foodNumber($('catalogCal100')?.value);product.protein100=foodNumber($('catalogProtein100')?.value);product.fat100=foodNumber($('catalogFat100')?.value);product.carbs100=foodNumber($('catalogCarbs100')?.value);
+    if(product.cal100===null||product.protein100===null||product.fat100===null||product.carbs100===null||product.cal100<=0){showToast('Введите корректные неотрицательные КБЖУ на 100 г');return;}
   }
   const commit=()=>{
     if(editingCatalogProduct!==null)data.productCatalog[editingCatalogProduct]=product;else data.productCatalog.push(product);
@@ -15303,12 +15327,12 @@ window.addFoodEntry=function(){
   if(!name){showToast('Введите название');return;}
   let portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100;
   if(currentFoodMode==='portion'){
-    portion=$('foodPortion')?.value.trim()||'—';calories=parseFloat($('foodCalories')?.value)||0;protein=parseFloat($('foodProtein')?.value)||0;fat=parseFloat($('foodFat')?.value)||0;carbs=parseFloat($('foodCarbs')?.value)||0;cal100=protein100=fat100=carbs100=null;
-    if(!calories){showToast('Введите калории');return;}
+    portion=$('foodPortion')?.value.trim()||'—';calories=foodNumber($('foodCalories')?.value);protein=foodNumber($('foodProtein')?.value);fat=foodNumber($('foodFat')?.value);carbs=foodNumber($('foodCarbs')?.value);cal100=protein100=fat100=carbs100=null;
+    if(calories===null||protein===null||fat===null||carbs===null||calories<=0){showToast('Введите корректные неотрицательные КБЖУ');return;}
   }else{
-    const weight=parseFloat($('foodWeight')?.value)||0;cal100=parseFloat($('foodCal100')?.value)||0;protein100=parseFloat($('foodProtein100')?.value)||0;fat100=parseFloat($('foodFat100')?.value)||0;carbs100=parseFloat($('foodCarbs100')?.value)||0;
-    if(!weight||!cal100){showToast('Введите вес порции и калории на 100 г');return;}
-    portion=weight+' г';calories=Math.round(cal100*weight/100);protein=Math.round(protein100*weight/100);fat=Math.round(fat100*weight/100);carbs=Math.round(carbs100*weight/100);
+    const weight=foodNumber($('foodWeight')?.value);cal100=foodNumber($('foodCal100')?.value);protein100=foodNumber($('foodProtein100')?.value);fat100=foodNumber($('foodFat100')?.value);carbs100=foodNumber($('foodCarbs100')?.value);
+    if(weight===null||cal100===null||protein100===null||fat100===null||carbs100===null||weight<=0||cal100<=0){showToast('Введите корректный вес и неотрицательные КБЖУ на 100 г');return;}
+    portion=weight+' г';calories=Math.round(cal100*weight/100);const roundMacro=n=>Math.round(n*10)/10;protein=roundMacro(protein100*weight/100);fat=roundMacro(fat100*weight/100);carbs=roundMacro(carbs100*weight/100); // [FIX] Ккал целые, Б/Ж/У до 0.1
   }
   const entryData={date,name,portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100};
   const commit=(catalogProduct=null)=>{
@@ -16801,8 +16825,8 @@ window.closeImportConfirm=function(){
     c.innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<div class="catalog-section"><div class="catalog-section-title"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span></div><div class="catalog-section-items">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
   };
   // Search is bound once to the actual input and calls the canonical renderer.
-  function bind(){const input=document.getElementById('catalogSearch');if(!input||input.dataset.catalogBound)return;input.dataset.catalogBound='1';input.addEventListener('input',renderCatalogList);input.addEventListener('search',renderCatalogList);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+  // [FIX] Поиск вызывается одним механизмом через существующий inline oninput="renderCatalogList()".
+  // Дополнительный addEventListener удалён, чтобы один ввод не запускал двойной рендер.
   // The existing markSetDone is the checkbox handler; it already calls updateWorkoutProgressUI after toggling.
   // Keep one progress implementation and make its calculation explicitly based on completed checkbox states.
   updateWorkoutProgressUI=function(){

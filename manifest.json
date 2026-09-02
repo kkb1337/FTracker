@@ -26,6 +26,6 @@
       "purpose": "any maskable"
     }
   ],
-  "_build": "ftracker-v1.3.9-audit-hardening",
-  "version": "1.3.9"
+  "_build": "ftracker-v1.3.10-audit-hardening",
+  "version": "1.3.10"
 }
