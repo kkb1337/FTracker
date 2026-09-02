@@ -4,6 +4,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<!-- [FIX] PWA build version is kept in sync with manifest.json and sw.js. -->
+<meta name="application-name" content="FTracker">
+<meta name="format-detection" content="telephone=no">
 <title>FTracker</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -7607,85 +7610,84 @@ function applyExerciseKnowledgeMigration(){
   }catch(err){ console.warn('exercise knowledge migration skipped',err); }
 }
 
+// [FIX] Безопасная загрузка: повреждённый localStorage больше не игнорируется молча.
 function loadData() {
+    let recoveredCorruptState = false;
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed.programs && Array.isArray(parsed.programs) && parsed.history) {
-                parsed.programs = parsed.programs.map(p => {
-                    if (!p.active) p.active = p.exercises.map(() => true);
-                    if (!p.types) p.types = p.exercises.map(() => 'strength');
-                    if (p.programActive === undefined) p.programActive = true;
-                    return p;
-                });
-                if (!parsed.measurements) parsed.measurements = [];
-                if (!Array.isArray(parsed.measurementFields) || !parsed.measurementFields.length) {
-                    parsed.measurementFields = DEFAULT_MEASURE_FIELDS.map(f => ({...f}));
-                } else {
-                    parsed.measurementFields = parsed.measurementFields.filter(f => f && f.key && f.label);
+        if (saved !== null) {
+            let parsed;
+            try {
+                parsed = JSON.parse(saved);
+            } catch (parseError) {
+                const recoveryKey = `${STORAGE_KEY}_corrupt_${Date.now()}`;
+                try {
+                    localStorage.setItem(recoveryKey, saved);
+                    localStorage.removeItem(STORAGE_KEY);
+                    recoveredCorruptState = true;
+                    console.error('FTracker: повреждённое хранилище сохранено в', recoveryKey, parseError);
+                } catch (recoveryError) {
+                    console.error('FTracker: не удалось сохранить повреждённое хранилище', recoveryError);
                 }
-                if (!parsed.foodDiary) parsed.foodDiary = { limits: {}, entries: [] };
-                if (!parsed.productCatalog) parsed.productCatalog = [];
-                parsed.productCatalog = parsed.productCatalog.map(p => ({ ...p, type: p.type || 'per100' }));
-                if (!Array.isArray(parsed.exerciseDirectory)) parsed.exerciseDirectory = [];
-                if (!Array.isArray(parsed.exerciseDirectoryArchived)) parsed.exerciseDirectoryArchived = [];
-                if (!Array.isArray(parsed.exerciseDirectoryHidden)) parsed.exerciseDirectoryHidden = [];
-                const archivedKeys = new Set(parsed.exerciseDirectoryArchived.map(e=>normalizeExerciseKey(e?.name)).filter(Boolean));
-                // Сохраняем в справочнике все упражнения, которые когда-либо уже были
-                // в программах или истории. Это позволяет не терять их после удаления из сплита.
-                const directoryMap = new Map();
-                parsed.exerciseDirectory.forEach(e => {
-                    if (!e || !e.name) return;
-                    const key = normalizeExerciseKey(e.name);
-                    if (key && !archivedKeys.has(key)) directoryMap.set(key, {...e, name:String(e.name).trim(), type:e.type||'strength', group:e.group||inferExerciseGroup(e.name,e.type||'strength')});
-                });
-                (parsed.programs || []).forEach(pr => (pr.exercises || []).forEach((n,i) => {
-                    const key = normalizeExerciseKey(n); if (!key || archivedKeys.has(key) || isRetiredExerciseName(n)) return;
-                    if (!directoryMap.has(key)) directoryMap.set(key,{name:String(n).trim(),type:pr.types?.[i]||'strength',group:inferExerciseGroup(n,pr.types?.[i]||'strength')});
-                }));
-                (parsed.history || []).forEach(h => (h.exercises || []).forEach(ex => {
-                    const key = normalizeExerciseKey(ex.name); if (!key || archivedKeys.has(key) || isRetiredExerciseName(ex.name)) return;
-                    if (!directoryMap.has(key)) directoryMap.set(key,{name:String(ex.name).trim(),type:ex.type||'strength',group:inferExerciseGroup(ex.name,ex.type||'strength')});
-                }));
-                parsed.exerciseDirectory = [...directoryMap.values()];
-                parsed.exerciseDirectoryArchived = (parsed.exerciseDirectoryArchived||[]).filter(e=>e && e.name);
-                // Миграция старого механизма скрытых упражнений в новый архив.
-                const archivedNow = new Set(parsed.exerciseDirectoryArchived.map(e=>normalizeExerciseKey(e.name)));
-                (parsed.exerciseDirectoryHidden||[]).forEach(key=>{
-                    const k=normalizeExerciseKey(key); if(!k || archivedNow.has(k)) return;
-                    let found=null;
-                    for(const pr of (parsed.programs||[])){
-                        const i=(pr.exercises||[]).findIndex(n=>normalizeExerciseKey(n)===k);
-                        if(i>=0){ found={name:pr.exercises[i],type:pr.types?.[i]||'strength',group:inferExerciseGroup(pr.exercises[i],pr.types?.[i]||'strength')}; break; }
-                    }
-                    if(!found){ for(const h of (parsed.history||[])){ const ex=(h.exercises||[]).find(x=>normalizeExerciseKey(x?.name)===k); if(ex){ found={name:ex.name,type:ex.type||'strength',group:inferExerciseGroup(ex.name,ex.type||'strength')}; break; } } }
-                    if(found){ parsed.exerciseDirectoryArchived.push({...found, archivedAt:new Date().toISOString()}); archivedNow.add(k); }
-                });
-                parsed.foodDiary.entries = (parsed.foodDiary.entries || []).map(e => ({
-                    ...e,
-                    calories: parseFloat(e.calories) || 0,
-                    protein: parseFloat(e.protein) || 0,
-                    fat: parseFloat(e.fat) || 0,
-                    carbs: parseFloat(e.carbs) || 0,
-                    cal100: e.cal100 !== undefined ? parseFloat(e.cal100) : null,
-                    protein100: e.protein100 !== undefined ? parseFloat(e.protein100) : null,
-                    fat100: e.fat100 !== undefined ? parseFloat(e.fat100) : null,
-                    carbs100: e.carbs100 !== undefined ? parseFloat(e.carbs100) : null
-                }));
-                repairCanonicalExerciseNames(parsed);
-                if(Array.isArray(parsed.exerciseDirectory)){
-                  parsed.exerciseDirectory.forEach(normalizeExerciseGuideContent);
+                parsed = null;
+            }
+
+            if (parsed !== null) {
+                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                    throw new Error('Некорректная структура данных FTracker');
                 }
+                // migrateFTrackerState умеет безопасно восстановить отсутствующие поля.
                 data = migrateFTrackerState(parsed);
+
+                if (!Array.isArray(data.measurementFields) || !data.measurementFields.length) {
+                    data.measurementFields = DEFAULT_MEASURE_FIELDS.map(f => ({...f}));
+                }
+                data.foodDiary.entries = (data.foodDiary.entries || []).map(e => ({
+                    ...e,
+                    calories: Number.isFinite(Number(e.calories)) ? Number(e.calories) : 0,
+                    protein: Number.isFinite(Number(e.protein)) ? Number(e.protein) : 0,
+                    fat: Number.isFinite(Number(e.fat)) ? Number(e.fat) : 0,
+                    carbs: Number.isFinite(Number(e.carbs)) ? Number(e.carbs) : 0,
+                    cal100: e.cal100 !== undefined && Number.isFinite(Number(e.cal100)) ? Number(e.cal100) : null,
+                    protein100: e.protein100 !== undefined && Number.isFinite(Number(e.protein100)) ? Number(e.protein100) : null,
+                    fat100: e.fat100 !== undefined && Number.isFinite(Number(e.fat100)) ? Number(e.fat100) : null,
+                    carbs100: e.carbs100 !== undefined && Number.isFinite(Number(e.carbs100)) ? Number(e.carbs100) : null
+                }));
+
+                repairCanonicalExerciseNames(data);
+                if (Array.isArray(data.exerciseDirectory)) data.exerciseDirectory.forEach(normalizeExerciseGuideContent);
             }
         }
-    } catch(e) {}
+    } catch(e) {
+        // [FIX] Не затираем исходную запись при неизвестной ошибке: оставляем текущие данные по умолчанию.
+        console.error('FTracker loadData error', e);
+        recoveredCorruptState = true;
+    }
+
     try { data = migrateFTrackerState(data); } catch(e) { console.warn('FTracker state migration skipped',e); }
-    try { const lr = localStorage.getItem('strong_last_results'); if (lr) lastResults = JSON.parse(lr); } catch(e) {}
+
+    try {
+        const lr = localStorage.getItem('strong_last_results');
+        if (lr) {
+            const parsedResults = JSON.parse(lr);
+            lastResults = parsedResults && typeof parsedResults === 'object' && !Array.isArray(parsedResults) ? parsedResults : {};
+        }
+    } catch(e) {
+        // [FIX] Повреждённые результаты не должны ломать запуск приложения.
+        console.warn('FTracker last results reset after parse error', e);
+        lastResults = {};
+        try { localStorage.removeItem('strong_last_results'); } catch(_) {}
+    }
+
     applyExerciseKnowledgeMigration();
-    const savedTheme = localStorage.getItem('strong_theme') || 'dark'; applyTheme(savedTheme);
-    renderHome(); checkDraft(); checkExportReminder();
+    const savedTheme = localStorage.getItem('strong_theme') || 'dark';
+    applyTheme(savedTheme);
+    renderHome();
+    checkDraft();
+    checkExportReminder();
+    if (recoveredCorruptState) {
+        setTimeout(() => showToast('Повреждённые локальные данные не были загружены. Проверь резервную копию.'), 0);
+    }
 }
 
 /* ---------- Automatic safety backups ----------
@@ -7842,21 +7844,56 @@ async function confirmAutoBackupRestore(){
 
 function saveData(showError=true, autoBackupReason='Изменение данных') {
   try {
-    try { data = migrateFTrackerState(data); } catch(migrationError) { console.warn('FTracker save migration skipped',migrationError); }
+    // [FIX] Перед сохранением всегда нормализуем состояние и сериализуем его один раз.
+    data = migrateFTrackerState(data);
     const serialized = JSON.stringify(data);
     localStorage.setItem(STORAGE_KEY, serialized);
     scheduleAutoBackup(autoBackupReason);
     return true;
   } catch(e) {
-    if(showError) showToast('Ошибка сохранения');
+    const quota = e && (e.name === 'QuotaExceededError' || e.code === 22);
+    if(showError) showToast(quota ? 'Недостаточно места для сохранения данных' : 'Ошибка сохранения');
     console.error('FTracker saveData error', e);
     return false;
   }
 }
-function saveDraft() { if (currentProgram === null) return; localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime, exerciseSlots: workoutExerciseSlots, transientExercises: workoutTransientExercises, fscorePlanSnapshot: workoutPlanSnapshot })); }
-function clearDraft() { localStorage.removeItem(DRAFT_KEY); document.getElementById('draftBanner').classList.add('hidden'); }
-function checkDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (draft) { try { const p = JSON.parse(draft); if (p.programIndex !== undefined) document.getElementById('draftBanner').classList.remove('hidden'); } catch(e) {} } }
-function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutTransientExercises = Array.isArray(p.transientExercises) ? p.transientExercises : []; workoutPlanSnapshot = Array.isArray(p.fscorePlanSnapshot) ? p.fscorePlanSnapshot : []; const savedSlots = Array.isArray(p.exerciseSlots) ? p.exerciseSlots : []; workoutExerciseSlots = savedSlots.length ? savedSlots.map(Number).filter(ref=>Number.isInteger(ref) && (ref>=0 ? !!data.programs[currentProgram]?.exercises?.[ref] : !!workoutTransientExercises[-ref-1])) : (data.programs[currentProgram]?.exercises||[]).map((_,i)=>i).filter(i=>data.programs[currentProgram].active?.[i]); workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); } catch(e) { clearDraft(); } }
+// [FIX] Черновик сохраняется с обработкой ошибок, чтобы переполненное хранилище не ломало тренировку.
+function saveDraft() {
+  if (currentProgram === null) return false;
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime, exerciseSlots: workoutExerciseSlots, transientExercises: workoutTransientExercises, fscorePlanSnapshot: workoutPlanSnapshot }));
+    return true;
+  } catch(e) { console.error('FTracker saveDraft error', e); showToast('Не удалось сохранить черновик тренировки'); return false; }
+}
+function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch(e) {} document.getElementById('draftBanner')?.classList.add('hidden'); }
+function checkDraft() {
+  let draft=null; try { draft=localStorage.getItem(DRAFT_KEY); } catch(e) { return; }
+  if (!draft) return;
+  try { const p=JSON.parse(draft); if (p && Number.isInteger(Number(p.programIndex))) document.getElementById('draftBanner')?.classList.remove('hidden'); else clearDraft(); }
+  catch(e) { console.warn('FTracker corrupted draft removed',e); clearDraft(); }
+}
+function resumeDraft() {
+  let draft=null; try { draft=localStorage.getItem(DRAFT_KEY); } catch(e) { return; }
+  if (!draft) return;
+  try {
+    const p=JSON.parse(draft);
+    const programIndex=Number(p.programIndex);
+    if (!Number.isInteger(programIndex) || !data.programs[programIndex]) throw new Error('Черновик ссылается на отсутствующую программу');
+    currentProgram=programIndex;
+    currentExerciseIndex=Math.max(0,Number.isInteger(Number(p.exerciseIndex)) ? Number(p.exerciseIndex) : 0);
+    workoutSets=p.sets && typeof p.sets==='object' ? p.sets : {};
+    workoutTransientExercises=Array.isArray(p.transientExercises) ? p.transientExercises : [];
+    workoutPlanSnapshot=Array.isArray(p.fscorePlanSnapshot) ? p.fscorePlanSnapshot : [];
+    const savedSlots=Array.isArray(p.exerciseSlots) ? p.exerciseSlots : [];
+    workoutExerciseSlots=savedSlots.length ? savedSlots.map(Number).filter(ref=>Number.isInteger(ref) && (ref>=0 ? !!data.programs[currentProgram]?.exercises?.[ref] : !!workoutTransientExercises[-ref-1])) : (data.programs[currentProgram]?.exercises||[]).map((_,i)=>i).filter(i=>data.programs[currentProgram].active?.[i]);
+    if (!workoutExerciseSlots.length) throw new Error('В черновике нет доступных упражнений');
+    currentExerciseIndex=Math.min(currentExerciseIndex,workoutExerciseSlots.length-1);
+    workoutStartTime=Number(p.startTime) || Date.now();
+    startTotalTimer(); showScreen('workoutScreen');
+    document.getElementById('workoutTitle').textContent=data.programs[currentProgram].name;
+    renderExerciseStrip(); renderExercise();
+  } catch(e) { console.warn('FTracker resumeDraft failed',e); clearDraft(); showToast('Повреждённый черновик тренировки был очищен'); }
+}
 function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EXPORT_KEY); if (lastExport && (Date.now() - parseInt(lastExport)) > 7*24*60*60*1000) document.getElementById('exportReminder').classList.remove('hidden'); }
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
@@ -9999,25 +10036,50 @@ function addSet() {
 }
 function deleteSet(exIdx, setIdx) { if (!workoutSets[exIdx]?.[setIdx]) return; pendingDeleteType='workoutSet'; pendingDeleteIndex=exIdx; pendingDeleteDate=String(setIdx); showDeleteConfirm('Удалить этот подход?'); }
 function updateSet(exIdx, setIdx, field, value) { if (!workoutSets[exIdx] || !workoutSets[exIdx][setIdx]) return; workoutSets[exIdx][setIdx][field] = value; saveDraft(); }
+// [FIX] Единая валидация перед отметкой подхода выполненным.
+function validateSetForCompletion(exIdx, setIdx) {
+    const meta = getWorkoutExercise(exIdx);
+    const set = workoutSets?.[exIdx]?.[setIdx];
+    if (!meta || !set) return {ok:false, message:'Подход не найден'};
+    const type = meta.type || 'strength';
+    const number = value => Number(String(value ?? '').replace(',', '.'));
+    if (type === 'strength') {
+        const weight = number(set.weight), reps = number(set.reps);
+        if (!Number.isFinite(weight) || weight <= 0 || weight > 10000) return {ok:false, message:'Укажи корректный рабочий вес'};
+        if (!Number.isInteger(reps) || reps <= 0 || reps > 10000) return {ok:false, message:'Укажи корректное количество повторений'};
+    } else if (type === 'bodyweight') {
+        const reps = number(set.reps);
+        if (!Number.isInteger(reps) || reps <= 0 || reps > 10000) return {ok:false, message:'Укажи корректное количество повторений'};
+    } else if (type === 'cardio') {
+        const time = number(set.time);
+        const intensity = set.intensity === '' || set.intensity == null ? null : number(set.intensity);
+        if (!Number.isFinite(time) || time <= 0 || time > 1440) return {ok:false, message:'Укажи корректную длительность'};
+        if (intensity !== null && (!Number.isFinite(intensity) || intensity < 0 || intensity > 10000)) return {ok:false, message:'Укажи корректную интенсивность'};
+    }
+    return {ok:true};
+}
+
 function markSetDone(exIdx, setIdx) {
-    const set = workoutSets[exIdx]?.[setIdx];
+    const set = workoutSets?.[exIdx]?.[setIdx];
     if (!set) return;
 
-    if (set.done) {
-        set.done = false;
-        stopRestTimer();
-    } else {
+    // Снять отметку можно всегда; поставить — только после проверки данных.
+    if (!set.done) {
+        const validation = validateSetForCompletion(exIdx, setIdx);
+        if (!validation.ok) { showToast(validation.message); return; }
         set.done = true;
         checkPersonalRecord(exIdx, setIdx);
+    } else {
+        set.done = false;
+        stopRestTimer();
     }
 
     saveDraft();
+    const workoutScreen = document.getElementById('workoutScreen');
+    const savedScroll = workoutScreen ? workoutScreen.scrollTop : null;
 
-    // Do not rebuild the workout DOM here. Re-rendering the whole exercise
-    // used to replace interactive controls after every tap and could leave
-    // stale overlays/listeners in the interaction path.
-    const rows = document.querySelectorAll('#setsList .workout-set-row');
-    const row = rows[setIdx];
+    // [FIX] Обновляем кнопку текущего подхода без пересоздания формы.
+    const row = document.querySelector(`#setsList .workout-set-row:nth-of-type(${Number(setIdx)+1})`) || document.querySelectorAll('#setsList .workout-set-row')[setIdx];
     if (row) {
         const btn = row.querySelector('.set-done-btn');
         if (btn) {
@@ -10028,44 +10090,25 @@ function markSetDone(exIdx, setIdx) {
         }
     }
 
-    const workoutScreen = document.getElementById('workoutScreen');
-    const savedScroll = workoutScreen ? workoutScreen.scrollTop : null;
-
-    // Update the CURRENT exercise completion card immediately. The card is not
-    // rebuilt on every tap, so its static 0/1 (or 0/3) markup must be synchronized
-    // with the checkbox state here.
+    // [FIX] Синхронизируем карточку упражнения, сегменты, ленту и общий прогресс из одного источника состояния.
     const currentMeta = getWorkoutExercise(exIdx);
     const currentSets = workoutSets[exIdx] || [];
     const targetSets = (currentMeta?.type || 'strength') === 'strength' ? 3 : 1;
     const completedNow = currentSets.filter(s => s && s.done).length;
     const shownDone = Math.min(completedNow, targetSets);
-
     const completionStrong = document.querySelector('#exerciseContainer .workout-completion-head strong');
     if (completionStrong) completionStrong.textContent = `${shownDone}/${targetSets}`;
+    document.querySelectorAll('#exerciseContainer .completion-segment').forEach((segment, i) => segment.classList.toggle('filled', i < shownDone));
 
-    const completionSegments = document.querySelectorAll('#exerciseContainer .completion-segment');
-    completionSegments.forEach((segment, i) => {
-        segment.classList.toggle('filled', i < shownDone);
-    });
-
-    // Update the exercise strip state immediately as well.
     const activeIndicesForStrip = getActiveExerciseIndices();
     const stripPosition = activeIndicesForStrip.indexOf(exIdx);
     if (stripPosition >= 0) {
         const stripItem = document.querySelector(`#exerciseStrip .exercise-dot[data-step="${stripPosition + 1}"]`);
         if (stripItem) stripItem.classList.toggle('done', completedNow > 0);
     }
-
     updateWorkoutProgressUI();
 
-    // Keep the current workout position after marking a set complete.
-    // Updating the strip should not move the user in iOS PWA.
-    requestAnimationFrame(() => {
-        if (workoutScreen && savedScroll !== null) {
-            workoutScreen.scrollTop = savedScroll;
-        }
-    });
-
+    requestAnimationFrame(() => { if (workoutScreen && savedScroll !== null) workoutScreen.scrollTop = savedScroll; });
     if (set.done) startRestTimer(lastRestDuration);
 }
 
@@ -12004,7 +12047,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.3.2', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.3.9', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });

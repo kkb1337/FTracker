@@ -1,4 +1,5 @@
-const CACHE_VERSION = 'ftracker-v1.3.8-workout-checkbox-catalog-global-fix';
+// [FIX] PWA cache version is unified with index.html and manifest.json.
+const CACHE_VERSION = 'ftracker-v1.3.9-audit-hardening';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = [
   './',
