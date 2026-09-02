@@ -8827,7 +8827,9 @@ function saveWorkoutNewExercise(){
         const ref=-(workoutTransientExercises.length);
         workoutExerciseSlots=getActiveExerciseIndices().concat([ref]);
         currentExerciseIndex=workoutExerciseSlots.length-1;
-        workoutSets[ref]=[{done:false}];
+        // [FIX] Не создаём подход автоматически: упражнение добавляется пустым,
+        // первый подход появляется только после явного нажатия «Добавить подход».
+        delete workoutSets[ref];
         saveDraft(); renderExerciseStrip(); renderExercise();
       }
       showToast('Упражнение добавлено');
@@ -8918,19 +8920,8 @@ function confirmReplaceExercise(){
     delete workoutSets[newRef];
 
     const previous=getPreviousExerciseResult(replacementName,new Date().toISOString());
-    if(previous?.sets?.length){
-        const source=previous.sets[previous.sets.length-1], row={done:false};
-        if(replacementType==='strength'){
-            row.weight=source.weight??'';
-            row.reps=source.reps??'';
-        }else if(replacementType==='cardio'){
-            row.time=source.time??source.minutes??'';
-            row.intensity=source.intensity??'';
-        }else{
-            row.reps=source.reps??'';
-        }
-        workoutSets[newRef]=[row];
-    }
+    // [FIX] При замене упражнения не создаём первый подход автоматически.
+    // История останется доступна как источник значений при ручном добавлении подхода.
 
     // Keep the original planned exercise in the same plan slot so F-Score
     // evaluates the replacement against what was actually planned.
@@ -9579,7 +9570,8 @@ function startConfirmed() {
     workoutSets={};
     workoutExerciseSlots = data.programs[index].exercises.map((_,i)=>i).filter(i=>data.programs[index].active?.[i]);
     workoutPlanSnapshot = workoutExerciseSlots.map(ref=>{ const meta=getWorkoutExercise(ref); return { plannedName:meta?.name||'', plannedType:meta?.type||'strength', plannedGroup:fScoreExerciseGroup(meta?.name||'',meta?.type||'strength'), status:'pending' }; });
-    seedWorkoutSetsFromHistory();
+    // [FIX] Не создаём первый подход автоматически: упражнение может быть пропущено без удаления пустого подхода.
+    // Первый подход создаётся только по явному нажатию «Добавить подход».
     workoutStartTime=Date.now();
     startTotalTimer();
     showScreen('workoutScreen');
@@ -9773,27 +9765,10 @@ function getAutofillStrengthResult(exerciseName,programName,beforeDate){
 }
 
 function seedWorkoutSetsFromHistory(){
+    // [FIX] История больше не создаёт первый подход автоматически.
+    // Предыдущие результаты используются только как источник значений,
+    // когда пользователь сам нажимает «Добавить подход».
     if(currentProgram === null || !data.programs[currentProgram]) return;
-    const program=data.programs[currentProgram];
-    const today=new Date().toISOString();
-    program.exercises.forEach((exerciseName,realIdx)=>{
-        if(program.active?.[realIdx]===false) return;
-        const previous=getPreviousExerciseResult(exerciseName,today);
-        if(!previous || !previous.sets?.length) return;
-        const type=program.types?.[realIdx] || getExerciseTypeByName(exerciseName);
-        const row={done:false};
-        if(type==='strength'){
-            const source=getAutofillStrengthResult(exerciseName,program.name,today);
-            if(source){ row.weight=source.weight>=0.01 ? formatNum(source.weight) : ''; row.reps=source.reps>0 ? formatNum(source.reps) : ''; }
-        } else if(type==='cardio'){
-            const source=previous.sets[previous.sets.length-1];
-            row.time=source.time ?? source.minutes ?? ''; row.intensity=source.intensity ?? '';
-            if(source.reps!==undefined) row.reps=source.reps;
-        } else {
-            const source=previous.sets[previous.sets.length-1]; row.reps=source.reps ?? '';
-        }
-        workoutSets[realIdx]=[row];
-    });
     saveDraft();
 }
 
@@ -10030,7 +10005,7 @@ function addSet() {
             workoutScreen.scrollTop = savedScroll;
         }
         if (activeElement && activeElement.tagName === 'INPUT') {
-            try { activeElement.focus({preventScroll:true}); } catch(e) {}
+            try { activeElement.focus({preventScroll:true}); } catch(e) { console.warn('[FIX] Не удалось вернуть фокус после обновления подхода', e); }
         }
     });
 }
@@ -10197,7 +10172,7 @@ function startRestTimer(seconds) {
     const container=document.getElementById('restTimerContainer'); if(container) container.classList.remove('hidden');
     restTimerInterval=setInterval(updateRestTimerDisplay,200);
 }
-function setRestDuration(seconds){ lastRestDuration = seconds; try { localStorage.setItem('ftracker_rest_duration', String(seconds)); } catch(e) {} startRestTimer(seconds); }
+function setRestDuration(seconds){ lastRestDuration = seconds; try { localStorage.setItem('ftracker_rest_duration', String(seconds)); } catch(e) { console.warn('[FIX] Не удалось сохранить длительность отдыха', e); } startRestTimer(seconds); }
 function updateRestTimerDisplay(){
     if(!restEndTime) return;
     const remaining=Math.max(0,Math.ceil((restEndTime-Date.now())/1000));
@@ -12066,7 +12041,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.3.11', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
+        navigator.serviceWorker.register('./sw.js?v=1.3.14', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -14034,7 +14009,7 @@ function adjustRestTime(delta){
   addSearchClear('progressExercisePickerSearch','v65ProgressSearchClear',clearProgressSearch);
 
   /* 3) Progress picker: count is next to the exercise name; selected card only gets a list affordance. */
-  function progressNames(){
+  function progressNamesV65(){
     if(typeof window.getProgressExerciseNames==='function')return window.getProgressExerciseNames();
     return [];
   }
@@ -14043,7 +14018,7 @@ function adjustRestTime(delta){
     if(!list)return;
     const q=String(input?.value||'').trim().toLocaleLowerCase('ru');
     const current=window.progressSelectedExercise||'';
-    const names=progressNames().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
+    const names=progressNamesV65().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
     if(!names.length){list.innerHTML='<div style="padding:22px;text-align:center;color:var(--subtext);">Упражнений с сохранёнными данными не найдено</div>';return;}
     list.innerHTML=names.map((name,i)=>{
       const rows=typeof window.getExerciseSeries==='function' ? (window.getExerciseSeries(name,window.getHistoryInPeriod?window.getHistoryInPeriod('all'):[])||[]) : [];
@@ -14057,7 +14032,7 @@ function adjustRestTime(delta){
     }).join('');
     $$('.progress-picker-row[data-v65-progress-index]',list).forEach((btn,index)=>btn.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();
-      const now=progressNames().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
+      const now=progressNamesV65().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
       if(now[index] && typeof window.chooseProgressExercise==='function')window.chooseProgressExercise(now[index]);
     },{passive:false}));
   }
