@@ -12066,7 +12066,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.3.10', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
+        navigator.serviceWorker.register('./sw.js?v=1.3.11', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -16163,12 +16163,12 @@ const foodList=$('foodPresetList');if(foodList&&!foodList.dataset.v66Bound){food
 
       if(!saveData(false)) throw new Error('Не удалось сохранить объединённые данные в localStorage');
 
-      try{renderHome();}catch(e){}
-      try{if(typeof renderExerciseDirectory==='function')renderExerciseDirectory();}catch(e){}
-      try{if(typeof renderFoodDiary==='function')renderFoodDiary();}catch(e){}
-      try{if(typeof renderProgressDashboard==='function')renderProgressDashboard();}catch(e){}
-      try{if(typeof renderMeasurements==='function')renderMeasurements();}catch(e){}
-      try{if(typeof renderSettings==='function')renderSettings();}catch(e){}
+      try{renderHome();}catch(e){console.warn('FTracker import renderHome failed',e);}
+      try{if(typeof renderExerciseDirectory==='function')renderExerciseDirectory();}catch(e){console.warn('FTracker import exercise directory render failed',e);}
+      try{if(typeof renderFoodDiary==='function')renderFoodDiary();}catch(e){console.warn('FTracker import food diary render failed',e);}
+      try{if(typeof renderProgressDashboard==='function')renderProgressDashboard();}catch(e){console.warn('FTracker import progress render failed',e);}
+      try{if(typeof renderMeasurements==='function')renderMeasurements();}catch(e){console.warn('FTracker import measurements render failed',e);}
+      try{if(typeof renderSettings==='function')renderSettings();}catch(e){console.warn('FTracker import settings render failed',e);}
 
       closeImportConfirm();
       const suffix=failed.length ? ` (пропущены повреждённые разделы: ${failed.join(', ')})` : '';
@@ -16398,12 +16398,21 @@ window.exportData=async function(){
   }
 };
 
+// [FIX] Phase 3: prevent overlapping imports and reject obviously invalid files before parsing.
+let __ftrackerImportBusy=false;
+const __FTRACKER_MAX_IMPORT_BYTES=50*1024*1024;
+
 window.importData=function(event){
   const file=event?.target?.files?.[0]; if(!file)return;
+  if(__ftrackerImportBusy){ fbToast('Импорт уже выполняется — дождитесь завершения'); event.target.value=''; return; }
+  if(file.size<=0){ fbToast('Импорт отменён: выбран пустой файл'); event.target.value=''; return; }
+  if(file.size>__FTRACKER_MAX_IMPORT_BYTES){ fbToast('Импорт отменён: файл слишком большой'); event.target.value=''; return; }
   const reader=new FileReader();
   reader.onload=function(e){
     try{
       const raw=JSON.parse(e.target.result);
+      // [FIX] A backup must be a plain object; arrays/primitives cannot be valid app state.
+      if(!raw || typeof raw!=='object' || Array.isArray(raw)) throw new Error('Неверная структура JSON-бэкапа');
       if(raw?._backupMeta?.format===FB_FORMAT && raw.data && Array.isArray(raw.media)){
         if(Number(raw._backupMeta.mediaCount)!==raw.media.length)
           throw new Error('Количество медиа не совпадает с метаданными');
@@ -16422,7 +16431,7 @@ window.importData=function(event){
     }catch(err){ fbToast('Импорт отменён: '+fbErr(err)); }
     finally{event.target.value='';}
   };
-  reader.onerror=()=>fbToast('Не удалось прочитать файл бэкапа');
+  reader.onerror=()=>{ pendingImportData=null; fbToast('Не удалось прочитать файл бэкапа'); };
   reader.readAsText(file);
 };
 
@@ -16459,6 +16468,8 @@ async function fbUpsert(media){
 window.confirmImport=async function(){
   const p=pendingImportData;
   if(!p?.__backupKind) return;
+  if(__ftrackerImportBusy){ fbToast('Импорт уже выполняется — дождитесь завершения'); return; }
+  __ftrackerImportBusy=true;
   let oldState=null, oldMedia=null;
   try{
     oldState=fbClone(data);
@@ -16513,6 +16524,9 @@ window.confirmImport=async function(){
     fbToast('Импорт не выполнен: текущие данные сохранены без изменений. Причина: '+fbErr(e));
     pendingImportData=null;
     document.getElementById('importConfirmModal')?.classList.add('hidden');
+  } finally {
+    // [FIX] Always release the import lock, including rollback/error paths.
+    __ftrackerImportBusy=false;
   }
 };
 
