@@ -1,5 +1,4 @@
-// [FIX] PWA cache version is unified with index.html and manifest.json.
-const CACHE_VERSION = 'ftracker-v1.3.19-food-core-rebuild';
+const CACHE_VERSION = 'ftracker-v1.3.8-workout-checkbox-catalog-global-fix';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = [
   './',

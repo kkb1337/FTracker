@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <!-- FTracker duplicate system rewritten as one canonical creation-time flow. -->
-<!-- [FIX] v1.3.15: product category is stored explicitly for new/edited catalog entries; legacy entries safely fall back without data migration. -->
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<!-- [FIX] PWA build version is kept in sync with manifest.json and sw.js. -->
-<meta name="application-name" content="FTracker">
-<meta name="format-detection" content="telephone=no">
 <title>FTracker</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -7611,84 +7607,85 @@ function applyExerciseKnowledgeMigration(){
   }catch(err){ console.warn('exercise knowledge migration skipped',err); }
 }
 
-// [FIX] Безопасная загрузка: повреждённый localStorage больше не игнорируется молча.
 function loadData() {
-    let recoveredCorruptState = false;
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved !== null) {
-            let parsed;
-            try {
-                parsed = JSON.parse(saved);
-            } catch (parseError) {
-                const recoveryKey = `${STORAGE_KEY}_corrupt_${Date.now()}`;
-                try {
-                    localStorage.setItem(recoveryKey, saved);
-                    localStorage.removeItem(STORAGE_KEY);
-                    recoveredCorruptState = true;
-                    console.error('FTracker: повреждённое хранилище сохранено в', recoveryKey, parseError);
-                } catch (recoveryError) {
-                    console.error('FTracker: не удалось сохранить повреждённое хранилище', recoveryError);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.programs && Array.isArray(parsed.programs) && parsed.history) {
+                parsed.programs = parsed.programs.map(p => {
+                    if (!p.active) p.active = p.exercises.map(() => true);
+                    if (!p.types) p.types = p.exercises.map(() => 'strength');
+                    if (p.programActive === undefined) p.programActive = true;
+                    return p;
+                });
+                if (!parsed.measurements) parsed.measurements = [];
+                if (!Array.isArray(parsed.measurementFields) || !parsed.measurementFields.length) {
+                    parsed.measurementFields = DEFAULT_MEASURE_FIELDS.map(f => ({...f}));
+                } else {
+                    parsed.measurementFields = parsed.measurementFields.filter(f => f && f.key && f.label);
                 }
-                parsed = null;
-            }
-
-            if (parsed !== null) {
-                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-                    throw new Error('Некорректная структура данных FTracker');
-                }
-                // migrateFTrackerState умеет безопасно восстановить отсутствующие поля.
-                data = migrateFTrackerState(parsed);
-
-                if (!Array.isArray(data.measurementFields) || !data.measurementFields.length) {
-                    data.measurementFields = DEFAULT_MEASURE_FIELDS.map(f => ({...f}));
-                }
-                data.foodDiary.entries = (data.foodDiary.entries || []).map(e => ({
-                    ...e,
-                    calories: Number.isFinite(Number(e.calories)) ? Number(e.calories) : 0,
-                    protein: Number.isFinite(Number(e.protein)) ? Number(e.protein) : 0,
-                    fat: Number.isFinite(Number(e.fat)) ? Number(e.fat) : 0,
-                    carbs: Number.isFinite(Number(e.carbs)) ? Number(e.carbs) : 0,
-                    cal100: e.cal100 !== undefined && Number.isFinite(Number(e.cal100)) ? Number(e.cal100) : null,
-                    protein100: e.protein100 !== undefined && Number.isFinite(Number(e.protein100)) ? Number(e.protein100) : null,
-                    fat100: e.fat100 !== undefined && Number.isFinite(Number(e.fat100)) ? Number(e.fat100) : null,
-                    carbs100: e.carbs100 !== undefined && Number.isFinite(Number(e.carbs100)) ? Number(e.carbs100) : null
+                if (!parsed.foodDiary) parsed.foodDiary = { limits: {}, entries: [] };
+                if (!parsed.productCatalog) parsed.productCatalog = [];
+                parsed.productCatalog = parsed.productCatalog.map(p => ({ ...p, type: p.type || 'per100' }));
+                if (!Array.isArray(parsed.exerciseDirectory)) parsed.exerciseDirectory = [];
+                if (!Array.isArray(parsed.exerciseDirectoryArchived)) parsed.exerciseDirectoryArchived = [];
+                if (!Array.isArray(parsed.exerciseDirectoryHidden)) parsed.exerciseDirectoryHidden = [];
+                const archivedKeys = new Set(parsed.exerciseDirectoryArchived.map(e=>normalizeExerciseKey(e?.name)).filter(Boolean));
+                // Сохраняем в справочнике все упражнения, которые когда-либо уже были
+                // в программах или истории. Это позволяет не терять их после удаления из сплита.
+                const directoryMap = new Map();
+                parsed.exerciseDirectory.forEach(e => {
+                    if (!e || !e.name) return;
+                    const key = normalizeExerciseKey(e.name);
+                    if (key && !archivedKeys.has(key)) directoryMap.set(key, {...e, name:String(e.name).trim(), type:e.type||'strength', group:e.group||inferExerciseGroup(e.name,e.type||'strength')});
+                });
+                (parsed.programs || []).forEach(pr => (pr.exercises || []).forEach((n,i) => {
+                    const key = normalizeExerciseKey(n); if (!key || archivedKeys.has(key) || isRetiredExerciseName(n)) return;
+                    if (!directoryMap.has(key)) directoryMap.set(key,{name:String(n).trim(),type:pr.types?.[i]||'strength',group:inferExerciseGroup(n,pr.types?.[i]||'strength')});
                 }));
-
-                repairCanonicalExerciseNames(data);
-                if (Array.isArray(data.exerciseDirectory)) data.exerciseDirectory.forEach(normalizeExerciseGuideContent);
+                (parsed.history || []).forEach(h => (h.exercises || []).forEach(ex => {
+                    const key = normalizeExerciseKey(ex.name); if (!key || archivedKeys.has(key) || isRetiredExerciseName(ex.name)) return;
+                    if (!directoryMap.has(key)) directoryMap.set(key,{name:String(ex.name).trim(),type:ex.type||'strength',group:inferExerciseGroup(ex.name,ex.type||'strength')});
+                }));
+                parsed.exerciseDirectory = [...directoryMap.values()];
+                parsed.exerciseDirectoryArchived = (parsed.exerciseDirectoryArchived||[]).filter(e=>e && e.name);
+                // Миграция старого механизма скрытых упражнений в новый архив.
+                const archivedNow = new Set(parsed.exerciseDirectoryArchived.map(e=>normalizeExerciseKey(e.name)));
+                (parsed.exerciseDirectoryHidden||[]).forEach(key=>{
+                    const k=normalizeExerciseKey(key); if(!k || archivedNow.has(k)) return;
+                    let found=null;
+                    for(const pr of (parsed.programs||[])){
+                        const i=(pr.exercises||[]).findIndex(n=>normalizeExerciseKey(n)===k);
+                        if(i>=0){ found={name:pr.exercises[i],type:pr.types?.[i]||'strength',group:inferExerciseGroup(pr.exercises[i],pr.types?.[i]||'strength')}; break; }
+                    }
+                    if(!found){ for(const h of (parsed.history||[])){ const ex=(h.exercises||[]).find(x=>normalizeExerciseKey(x?.name)===k); if(ex){ found={name:ex.name,type:ex.type||'strength',group:inferExerciseGroup(ex.name,ex.type||'strength')}; break; } } }
+                    if(found){ parsed.exerciseDirectoryArchived.push({...found, archivedAt:new Date().toISOString()}); archivedNow.add(k); }
+                });
+                parsed.foodDiary.entries = (parsed.foodDiary.entries || []).map(e => ({
+                    ...e,
+                    calories: parseFloat(e.calories) || 0,
+                    protein: parseFloat(e.protein) || 0,
+                    fat: parseFloat(e.fat) || 0,
+                    carbs: parseFloat(e.carbs) || 0,
+                    cal100: e.cal100 !== undefined ? parseFloat(e.cal100) : null,
+                    protein100: e.protein100 !== undefined ? parseFloat(e.protein100) : null,
+                    fat100: e.fat100 !== undefined ? parseFloat(e.fat100) : null,
+                    carbs100: e.carbs100 !== undefined ? parseFloat(e.carbs100) : null
+                }));
+                repairCanonicalExerciseNames(parsed);
+                if(Array.isArray(parsed.exerciseDirectory)){
+                  parsed.exerciseDirectory.forEach(normalizeExerciseGuideContent);
+                }
+                data = migrateFTrackerState(parsed);
             }
         }
-    } catch(e) {
-        // [FIX] Не затираем исходную запись при неизвестной ошибке: оставляем текущие данные по умолчанию.
-        console.error('FTracker loadData error', e);
-        recoveredCorruptState = true;
-    }
-
+    } catch(e) {}
     try { data = migrateFTrackerState(data); } catch(e) { console.warn('FTracker state migration skipped',e); }
-
-    try {
-        const lr = localStorage.getItem('strong_last_results');
-        if (lr) {
-            const parsedResults = JSON.parse(lr);
-            lastResults = parsedResults && typeof parsedResults === 'object' && !Array.isArray(parsedResults) ? parsedResults : {};
-        }
-    } catch(e) {
-        // [FIX] Повреждённые результаты не должны ломать запуск приложения.
-        console.warn('FTracker last results reset after parse error', e);
-        lastResults = {};
-        try { localStorage.removeItem('strong_last_results'); } catch(_) {}
-    }
-
+    try { const lr = localStorage.getItem('strong_last_results'); if (lr) lastResults = JSON.parse(lr); } catch(e) {}
     applyExerciseKnowledgeMigration();
-    const savedTheme = localStorage.getItem('strong_theme') || 'dark';
-    applyTheme(savedTheme);
-    renderHome();
-    checkDraft();
-    checkExportReminder();
-    if (recoveredCorruptState) {
-        setTimeout(() => showToast('Повреждённые локальные данные не были загружены. Проверь резервную копию.'), 0);
-    }
+    const savedTheme = localStorage.getItem('strong_theme') || 'dark'; applyTheme(savedTheme);
+    renderHome(); checkDraft(); checkExportReminder();
 }
 
 /* ---------- Automatic safety backups ----------
@@ -7845,56 +7842,21 @@ async function confirmAutoBackupRestore(){
 
 function saveData(showError=true, autoBackupReason='Изменение данных') {
   try {
-    // [FIX] Перед сохранением всегда нормализуем состояние и сериализуем его один раз.
-    data = migrateFTrackerState(data);
+    try { data = migrateFTrackerState(data); } catch(migrationError) { console.warn('FTracker save migration skipped',migrationError); }
     const serialized = JSON.stringify(data);
     localStorage.setItem(STORAGE_KEY, serialized);
     scheduleAutoBackup(autoBackupReason);
     return true;
   } catch(e) {
-    const quota = e && (e.name === 'QuotaExceededError' || e.code === 22);
-    if(showError) showToast(quota ? 'Недостаточно места для сохранения данных' : 'Ошибка сохранения');
+    if(showError) showToast('Ошибка сохранения');
     console.error('FTracker saveData error', e);
     return false;
   }
 }
-// [FIX] Черновик сохраняется с обработкой ошибок, чтобы переполненное хранилище не ломало тренировку.
-function saveDraft() {
-  if (currentProgram === null) return false;
-  try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime, exerciseSlots: workoutExerciseSlots, transientExercises: workoutTransientExercises, fscorePlanSnapshot: workoutPlanSnapshot }));
-    return true;
-  } catch(e) { console.error('FTracker saveDraft error', e); showToast('Не удалось сохранить черновик тренировки'); return false; }
-}
-function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch(e) { console.warn('FTracker clearDraft failed', e); } document.getElementById('draftBanner')?.classList.add('hidden'); }
-function checkDraft() {
-  let draft=null; try { draft=localStorage.getItem(DRAFT_KEY); } catch(e) { return; }
-  if (!draft) return;
-  try { const p=JSON.parse(draft); if (p && Number.isInteger(Number(p.programIndex))) document.getElementById('draftBanner')?.classList.remove('hidden'); else clearDraft(); }
-  catch(e) { console.warn('FTracker corrupted draft removed',e); clearDraft(); }
-}
-function resumeDraft() {
-  let draft=null; try { draft=localStorage.getItem(DRAFT_KEY); } catch(e) { return; }
-  if (!draft) return;
-  try {
-    const p=JSON.parse(draft);
-    const programIndex=Number(p.programIndex);
-    if (!Number.isInteger(programIndex) || !data.programs[programIndex]) throw new Error('Черновик ссылается на отсутствующую программу');
-    currentProgram=programIndex;
-    currentExerciseIndex=Math.max(0,Number.isInteger(Number(p.exerciseIndex)) ? Number(p.exerciseIndex) : 0);
-    workoutSets=p.sets && typeof p.sets==='object' ? p.sets : {};
-    workoutTransientExercises=Array.isArray(p.transientExercises) ? p.transientExercises : [];
-    workoutPlanSnapshot=Array.isArray(p.fscorePlanSnapshot) ? p.fscorePlanSnapshot : [];
-    const savedSlots=Array.isArray(p.exerciseSlots) ? p.exerciseSlots : [];
-    workoutExerciseSlots=savedSlots.length ? savedSlots.map(Number).filter(ref=>Number.isInteger(ref) && (ref>=0 ? !!data.programs[currentProgram]?.exercises?.[ref] : !!workoutTransientExercises[-ref-1])) : (data.programs[currentProgram]?.exercises||[]).map((_,i)=>i).filter(i=>data.programs[currentProgram].active?.[i]);
-    if (!workoutExerciseSlots.length) throw new Error('В черновике нет доступных упражнений');
-    currentExerciseIndex=Math.min(currentExerciseIndex,workoutExerciseSlots.length-1);
-    workoutStartTime=Number(p.startTime) || Date.now();
-    startTotalTimer(); showScreen('workoutScreen');
-    document.getElementById('workoutTitle').textContent=data.programs[currentProgram].name;
-    renderExerciseStrip(); renderExercise();
-  } catch(e) { console.warn('FTracker resumeDraft failed',e); clearDraft(); showToast('Повреждённый черновик тренировки был очищен'); }
-}
+function saveDraft() { if (currentProgram === null) return; localStorage.setItem(DRAFT_KEY, JSON.stringify({ programIndex: currentProgram, exerciseIndex: currentExerciseIndex, sets: workoutSets, startTime: workoutStartTime, exerciseSlots: workoutExerciseSlots, transientExercises: workoutTransientExercises, fscorePlanSnapshot: workoutPlanSnapshot })); }
+function clearDraft() { localStorage.removeItem(DRAFT_KEY); document.getElementById('draftBanner').classList.add('hidden'); }
+function checkDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (draft) { try { const p = JSON.parse(draft); if (p.programIndex !== undefined) document.getElementById('draftBanner').classList.remove('hidden'); } catch(e) {} } }
+function resumeDraft() { const draft = localStorage.getItem(DRAFT_KEY); if (!draft) return; try { const p = JSON.parse(draft); currentProgram = p.programIndex; currentExerciseIndex = p.exerciseIndex || 0; workoutSets = p.sets || {}; workoutTransientExercises = Array.isArray(p.transientExercises) ? p.transientExercises : []; workoutPlanSnapshot = Array.isArray(p.fscorePlanSnapshot) ? p.fscorePlanSnapshot : []; const savedSlots = Array.isArray(p.exerciseSlots) ? p.exerciseSlots : []; workoutExerciseSlots = savedSlots.length ? savedSlots.map(Number).filter(ref=>Number.isInteger(ref) && (ref>=0 ? !!data.programs[currentProgram]?.exercises?.[ref] : !!workoutTransientExercises[-ref-1])) : (data.programs[currentProgram]?.exercises||[]).map((_,i)=>i).filter(i=>data.programs[currentProgram].active?.[i]); workoutStartTime = p.startTime || Date.now(); startTotalTimer(); showScreen('workoutScreen'); document.getElementById('workoutTitle').textContent = data.programs[currentProgram].name; renderExerciseStrip(); renderExercise(); } catch(e) { clearDraft(); } }
 function checkExportReminder() { const lastExport = localStorage.getItem(LAST_EXPORT_KEY); if (lastExport && (Date.now() - parseInt(lastExport)) > 7*24*60*60*1000) document.getElementById('exportReminder').classList.remove('hidden'); }
 function closeExportReminder() { document.getElementById('exportReminder').classList.add('hidden'); }
 
@@ -8765,7 +8727,7 @@ window.showExerciseDuplicateModal=function(name,matches,exact,onAllow){
   modal.style.setProperty('z-index','2147483647','important');
   modal.style.setProperty('position','fixed','important');
   modal.querySelector('#exerciseDupTitle').textContent=exact?'Упражнение уже существует':'Найдено похожее упражнение';
-  modal.querySelector('#exerciseDupSub').textContent=exact?'Точную копию создать нельзя, включая перестановку слов в названии.':`В названии «${name}» найдено совпадение.`;
+  modal.querySelector('#exerciseDupSub').textContent=exact?'Точную копию создать нельзя.':`В названии «${name}» найдено совпадение.`;
   modal.querySelector('#exerciseDupList').innerHTML=matches.slice(0,6).map(x=>
     `<div class="exercise-dup-item"><div class="exercise-dup-name">${ftEsc(x.name)}</div>
      <div class="exercise-dup-meta">${ftEsc(x.group||'Другое')} · ${x.type==='cardio'?'Кардио':'Силовое'}</div>
@@ -8828,9 +8790,7 @@ function saveWorkoutNewExercise(){
         const ref=-(workoutTransientExercises.length);
         workoutExerciseSlots=getActiveExerciseIndices().concat([ref]);
         currentExerciseIndex=workoutExerciseSlots.length-1;
-        // [FIX] Не создаём подход автоматически: упражнение добавляется пустым,
-        // первый подход появляется только после явного нажатия «Добавить подход».
-        delete workoutSets[ref];
+        workoutSets[ref]=[{done:false}];
         saveDraft(); renderExerciseStrip(); renderExercise();
       }
       showToast('Упражнение добавлено');
@@ -8921,8 +8881,19 @@ function confirmReplaceExercise(){
     delete workoutSets[newRef];
 
     const previous=getPreviousExerciseResult(replacementName,new Date().toISOString());
-    // [FIX] При замене упражнения не создаём первый подход автоматически.
-    // История останется доступна как источник значений при ручном добавлении подхода.
+    if(previous?.sets?.length){
+        const source=previous.sets[previous.sets.length-1], row={done:false};
+        if(replacementType==='strength'){
+            row.weight=source.weight??'';
+            row.reps=source.reps??'';
+        }else if(replacementType==='cardio'){
+            row.time=source.time??source.minutes??'';
+            row.intensity=source.intensity??'';
+        }else{
+            row.reps=source.reps??'';
+        }
+        workoutSets[newRef]=[row];
+    }
 
     // Keep the original planned exercise in the same plan slot so F-Score
     // evaluates the replacement against what was actually planned.
@@ -9137,7 +9108,7 @@ function openNewMeasurementModal() {
         document.body.appendChild(modal);
     }
 
-    const today = localDateString(new Date()); // [FIX] Локальная календарная дата, без UTC-сдвига
+    const today = new Date().toISOString().slice(0,10);
     // Для нового замера автоматически подставляем последнее сохранённое
     // значение каждого параметра. Если в последнем замере параметр пустой,
     // берём самое свежее непустое значение из истории.
@@ -9217,7 +9188,7 @@ function openLastMeasurementEdit() {
         document.body.appendChild(modal);
     }
 
-    const dateValue = localDateString(new Date(last.date)); // [FIX] Локальная календарная дата
+    const dateValue = new Date(last.date).toISOString().slice(0,10);
 
     modal.innerHTML = `
         <div class="catalog-modal-content measurement-manager-modal-content">
@@ -9428,7 +9399,7 @@ function openHistoricalMeasurementEdit(index) {
         modal.onclick = function(e){ if(e.target===modal) closeHistoricalMeasurementEdit(); };
         document.body.appendChild(modal);
     }
-    const dateValue = localDateString(new Date(measurement.date)); // [FIX] Локальная календарная дата
+    const dateValue = new Date(measurement.date).toISOString().slice(0,10);
     modal.innerHTML = `<div class="catalog-modal-content measurement-manager-modal-content">
         <span class="close-btn" onclick="closeHistoricalMeasurementEdit()">&times;</span>
         <div style="font-size:21px;font-weight:800;margin-bottom:4px;">✏️ Изменить замер</div>
@@ -9571,8 +9542,7 @@ function startConfirmed() {
     workoutSets={};
     workoutExerciseSlots = data.programs[index].exercises.map((_,i)=>i).filter(i=>data.programs[index].active?.[i]);
     workoutPlanSnapshot = workoutExerciseSlots.map(ref=>{ const meta=getWorkoutExercise(ref); return { plannedName:meta?.name||'', plannedType:meta?.type||'strength', plannedGroup:fScoreExerciseGroup(meta?.name||'',meta?.type||'strength'), status:'pending' }; });
-    // [FIX] Не создаём первый подход автоматически: упражнение может быть пропущено без удаления пустого подхода.
-    // Первый подход создаётся только по явному нажатию «Добавить подход».
+    seedWorkoutSetsFromHistory();
     workoutStartTime=Date.now();
     startTotalTimer();
     showScreen('workoutScreen');
@@ -9766,10 +9736,27 @@ function getAutofillStrengthResult(exerciseName,programName,beforeDate){
 }
 
 function seedWorkoutSetsFromHistory(){
-    // [FIX] История больше не создаёт первый подход автоматически.
-    // Предыдущие результаты используются только как источник значений,
-    // когда пользователь сам нажимает «Добавить подход».
     if(currentProgram === null || !data.programs[currentProgram]) return;
+    const program=data.programs[currentProgram];
+    const today=new Date().toISOString();
+    program.exercises.forEach((exerciseName,realIdx)=>{
+        if(program.active?.[realIdx]===false) return;
+        const previous=getPreviousExerciseResult(exerciseName,today);
+        if(!previous || !previous.sets?.length) return;
+        const type=program.types?.[realIdx] || getExerciseTypeByName(exerciseName);
+        const row={done:false};
+        if(type==='strength'){
+            const source=getAutofillStrengthResult(exerciseName,program.name,today);
+            if(source){ row.weight=source.weight>=0.01 ? formatNum(source.weight) : ''; row.reps=source.reps>0 ? formatNum(source.reps) : ''; }
+        } else if(type==='cardio'){
+            const source=previous.sets[previous.sets.length-1];
+            row.time=source.time ?? source.minutes ?? ''; row.intensity=source.intensity ?? '';
+            if(source.reps!==undefined) row.reps=source.reps;
+        } else {
+            const source=previous.sets[previous.sets.length-1]; row.reps=source.reps ?? '';
+        }
+        workoutSets[realIdx]=[row];
+    });
     saveDraft();
 }
 
@@ -10006,56 +9993,31 @@ function addSet() {
             workoutScreen.scrollTop = savedScroll;
         }
         if (activeElement && activeElement.tagName === 'INPUT') {
-            try { activeElement.focus({preventScroll:true}); } catch(e) { console.warn('[FIX] Не удалось вернуть фокус после обновления подхода', e); }
+            try { activeElement.focus({preventScroll:true}); } catch(e) {}
         }
     });
 }
 function deleteSet(exIdx, setIdx) { if (!workoutSets[exIdx]?.[setIdx]) return; pendingDeleteType='workoutSet'; pendingDeleteIndex=exIdx; pendingDeleteDate=String(setIdx); showDeleteConfirm('Удалить этот подход?'); }
 function updateSet(exIdx, setIdx, field, value) { if (!workoutSets[exIdx] || !workoutSets[exIdx][setIdx]) return; workoutSets[exIdx][setIdx][field] = value; saveDraft(); }
-// [FIX] Единая валидация перед отметкой подхода выполненным.
-function validateSetForCompletion(exIdx, setIdx) {
-    const meta = getWorkoutExercise(exIdx);
-    const set = workoutSets?.[exIdx]?.[setIdx];
-    if (!meta || !set) return {ok:false, message:'Подход не найден'};
-    const type = meta.type || 'strength';
-    const number = value => Number(String(value ?? '').replace(',', '.'));
-    if (type === 'strength') {
-        const weight = number(set.weight), reps = number(set.reps);
-        if (!Number.isFinite(weight) || weight <= 0 || weight > 10000) return {ok:false, message:'Укажи корректный рабочий вес'};
-        if (!Number.isInteger(reps) || reps <= 0 || reps > 10000) return {ok:false, message:'Укажи корректное количество повторений'};
-    } else if (type === 'bodyweight') {
-        const reps = number(set.reps);
-        if (!Number.isInteger(reps) || reps <= 0 || reps > 10000) return {ok:false, message:'Укажи корректное количество повторений'};
-    } else if (type === 'cardio') {
-        const time = number(set.time);
-        const intensity = set.intensity === '' || set.intensity == null ? null : number(set.intensity);
-        if (!Number.isFinite(time) || time <= 0 || time > 1440) return {ok:false, message:'Укажи корректную длительность'};
-        if (intensity !== null && (!Number.isFinite(intensity) || intensity < 0 || intensity > 10000)) return {ok:false, message:'Укажи корректную интенсивность'};
-    }
-    return {ok:true};
-}
-
 function markSetDone(exIdx, setIdx) {
-    const set = workoutSets?.[exIdx]?.[setIdx];
+    const set = workoutSets[exIdx]?.[setIdx];
     if (!set) return;
 
-    // Снять отметку можно всегда; поставить — только после проверки данных.
-    if (!set.done) {
-        const validation = validateSetForCompletion(exIdx, setIdx);
-        if (!validation.ok) { showToast(validation.message); return; }
-        set.done = true;
-        checkPersonalRecord(exIdx, setIdx);
-    } else {
+    if (set.done) {
         set.done = false;
         stopRestTimer();
+    } else {
+        set.done = true;
+        checkPersonalRecord(exIdx, setIdx);
     }
 
     saveDraft();
-    const workoutScreen = document.getElementById('workoutScreen');
-    const savedScroll = workoutScreen ? workoutScreen.scrollTop : null;
 
-    // [FIX] Обновляем кнопку текущего подхода без пересоздания формы.
-    const row = document.querySelector(`#setsList .workout-set-row:nth-of-type(${Number(setIdx)+1})`) || document.querySelectorAll('#setsList .workout-set-row')[setIdx];
+    // Do not rebuild the workout DOM here. Re-rendering the whole exercise
+    // used to replace interactive controls after every tap and could leave
+    // stale overlays/listeners in the interaction path.
+    const rows = document.querySelectorAll('#setsList .workout-set-row');
+    const row = rows[setIdx];
     if (row) {
         const btn = row.querySelector('.set-done-btn');
         if (btn) {
@@ -10066,25 +10028,44 @@ function markSetDone(exIdx, setIdx) {
         }
     }
 
-    // [FIX] Синхронизируем карточку упражнения, сегменты, ленту и общий прогресс из одного источника состояния.
+    const workoutScreen = document.getElementById('workoutScreen');
+    const savedScroll = workoutScreen ? workoutScreen.scrollTop : null;
+
+    // Update the CURRENT exercise completion card immediately. The card is not
+    // rebuilt on every tap, so its static 0/1 (or 0/3) markup must be synchronized
+    // with the checkbox state here.
     const currentMeta = getWorkoutExercise(exIdx);
     const currentSets = workoutSets[exIdx] || [];
     const targetSets = (currentMeta?.type || 'strength') === 'strength' ? 3 : 1;
     const completedNow = currentSets.filter(s => s && s.done).length;
     const shownDone = Math.min(completedNow, targetSets);
+
     const completionStrong = document.querySelector('#exerciseContainer .workout-completion-head strong');
     if (completionStrong) completionStrong.textContent = `${shownDone}/${targetSets}`;
-    document.querySelectorAll('#exerciseContainer .completion-segment').forEach((segment, i) => segment.classList.toggle('filled', i < shownDone));
 
+    const completionSegments = document.querySelectorAll('#exerciseContainer .completion-segment');
+    completionSegments.forEach((segment, i) => {
+        segment.classList.toggle('filled', i < shownDone);
+    });
+
+    // Update the exercise strip state immediately as well.
     const activeIndicesForStrip = getActiveExerciseIndices();
     const stripPosition = activeIndicesForStrip.indexOf(exIdx);
     if (stripPosition >= 0) {
         const stripItem = document.querySelector(`#exerciseStrip .exercise-dot[data-step="${stripPosition + 1}"]`);
         if (stripItem) stripItem.classList.toggle('done', completedNow > 0);
     }
+
     updateWorkoutProgressUI();
 
-    requestAnimationFrame(() => { if (workoutScreen && savedScroll !== null) workoutScreen.scrollTop = savedScroll; });
+    // Keep the current workout position after marking a set complete.
+    // Updating the strip should not move the user in iOS PWA.
+    requestAnimationFrame(() => {
+        if (workoutScreen && savedScroll !== null) {
+            workoutScreen.scrollTop = savedScroll;
+        }
+    });
+
     if (set.done) startRestTimer(lastRestDuration);
 }
 
@@ -10173,7 +10154,7 @@ function startRestTimer(seconds) {
     const container=document.getElementById('restTimerContainer'); if(container) container.classList.remove('hidden');
     restTimerInterval=setInterval(updateRestTimerDisplay,200);
 }
-function setRestDuration(seconds){ lastRestDuration = seconds; try { localStorage.setItem('ftracker_rest_duration', String(seconds)); } catch(e) { console.warn('[FIX] Не удалось сохранить длительность отдыха', e); } startRestTimer(seconds); }
+function setRestDuration(seconds){ lastRestDuration = seconds; try { localStorage.setItem('ftracker_rest_duration', String(seconds)); } catch(e) {} startRestTimer(seconds); }
 function updateRestTimerDisplay(){
     if(!restEndTime) return;
     const remaining=Math.max(0,Math.ceil((restEndTime-Date.now())/1000));
@@ -10193,25 +10174,6 @@ function exitWorkoutWithoutSaving() { closeConfirmExit(); stopRestTimer(); stopT
 
 function finishWorkout() {
     try {
-    // [FIX] Заполненные, но не отмеченные ✓ подходы не должны молча исчезать из итоговой истории.
-    const unfinished = [];
-    (getActiveExerciseIndices?.() || []).forEach(ref => {
-        const meta = getWorkoutExercise(ref);
-        const type = meta?.type || 'strength';
-        (workoutSets?.[ref] || []).forEach((set, idx) => {
-            if (!set || set.done) return;
-            const hasData = type === 'cardio'
-                ? Number(set.time) > 0 || Number(set.durationSeconds) > 0 || Number(set.intensity) > 0
-                : type === 'bodyweight'
-                    ? Number(set.reps) > 0
-                    : Number(set.weight) > 0 || Number(set.reps) > 0;
-            if (hasData) unfinished.push({ref, idx});
-        });
-    });
-    if (unfinished.length) {
-        showToast(`Есть заполненные подходы без отметки «✓»: ${unfinished.length}. Отметь или удали их перед завершением.`);
-        return;
-    }
     // Validate the current draft before saving. Empty placeholder rows are not
     // meaningful workout data and must never enter history.
     if (currentProgram !== null && Array.isArray(workoutExerciseSlots)) {
@@ -10381,7 +10343,7 @@ function closeWorkoutSummary() {
 }
 function closeAchievements() { document.getElementById('achievementsModal').classList.add('hidden'); currentAchievements = {}; goHome(); }
 
-function editHistoryDate(index) { editingHistoryIndex = index; const entry = data.history[index]; document.getElementById('newDateInput').value = localDateString(new Date(entry.date)); /* [FIX] Не сдвигаем дату из-за UTC */ lockModalScroll(); document.getElementById('dateModal').classList.remove('hidden'); }
+function editHistoryDate(index) { editingHistoryIndex = index; const entry = data.history[index]; document.getElementById('newDateInput').value = new Date(entry.date).toISOString().slice(0,10); lockModalScroll(); document.getElementById('dateModal').classList.remove('hidden'); }
 function closeDateModal() { document.getElementById('dateModal').classList.add('hidden'); editingHistoryIndex = null; }
 function saveDateChange() { if (editingHistoryIndex === null) return; const newDate = document.getElementById('newDateInput').value; if (newDate) { data.history[editingHistoryIndex].date = new Date(newDate + 'T12:00:00').toISOString(); saveData(); showHistory(); showToast('Дата изменена'); } closeDateModal(); }
 
@@ -12042,7 +12004,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.3.18', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
+        navigator.serviceWorker.register('./sw.js?v=1.3.2', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -14010,7 +13972,7 @@ function adjustRestTime(delta){
   addSearchClear('progressExercisePickerSearch','v65ProgressSearchClear',clearProgressSearch);
 
   /* 3) Progress picker: count is next to the exercise name; selected card only gets a list affordance. */
-  function progressNamesV65(){
+  function progressNames(){
     if(typeof window.getProgressExerciseNames==='function')return window.getProgressExerciseNames();
     return [];
   }
@@ -14019,7 +13981,7 @@ function adjustRestTime(delta){
     if(!list)return;
     const q=String(input?.value||'').trim().toLocaleLowerCase('ru');
     const current=window.progressSelectedExercise||'';
-    const names=progressNamesV65().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
+    const names=progressNames().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
     if(!names.length){list.innerHTML='<div style="padding:22px;text-align:center;color:var(--subtext);">Упражнений с сохранёнными данными не найдено</div>';return;}
     list.innerHTML=names.map((name,i)=>{
       const rows=typeof window.getExerciseSeries==='function' ? (window.getExerciseSeries(name,window.getHistoryInPeriod?window.getHistoryInPeriod('all'):[])||[]) : [];
@@ -14033,7 +13995,7 @@ function adjustRestTime(delta){
     }).join('');
     $$('.progress-picker-row[data-v65-progress-index]',list).forEach((btn,index)=>btn.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();
-      const now=progressNamesV65().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
+      const now=progressNames().filter(n=>!q||String(n).toLocaleLowerCase('ru').includes(q));
       if(now[index] && typeof window.chooseProgressExercise==='function')window.chooseProgressExercise(now[index]);
     },{passive:false}));
   }
@@ -15106,203 +15068,230 @@ new MutationObserver(()=>bindAutosize(document)).observe(document.body,{childLis
 (function(){
 'use strict';
 const $=(id)=>document.getElementById(id);
+const esc=(v)=>typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'');
+const norm=(v)=>typeof normalizeExerciseKey==='function'?normalizeExerciseKey(v):String(v||'').toLocaleLowerCase('ru').replace(/[\s\p{P}\p{S}]+/gu,'');
 
-/* ===== FOOD CORE v1.3.19 =====
-   One source of truth for product identity and catalog synchronization.
-   No parallel duplicate rules for Catalog vs Today. */
-const foodCategoryFor=function(name,builtin=false){
-  const n=String(name||'').toLocaleLowerCase('ru').replace(/ё/g,'е');
-  if(/кур|индей|говя|свинин|фарш|тефтел|кордон|мяс/.test(n))return '🥩 Мясо и птица';
-  if(/лосос|тун|треск|рыб|кревет/.test(n))return '🐟 Рыба и морепродукты';
-  if(/яйц/.test(n))return '🥚 Яйца';
-  if(/творог|йогурт|молок|кефир|сыр|skyr/.test(n))return '🥛 Молочные продукты';
-  if(/рис|греч|макарон|картоф|овся|булгур|паст/.test(n))return '🍚 Крупы и гарниры';
-  if(/хлеб|лаваш|блин/.test(n))return '🍞 Хлеб и выпечка';
-  if(/огур|помидор|броккол|морков|перец|овощ/.test(n))return '🥦 Овощи';
-  if(/банан|яблок|апельсин|ягод|фрукт/.test(n))return '🍌 Фрукты';
-  if(/арахис|миндал|масло|орех/.test(n))return '🥜 Орехи и жиры';
-  if(/шоколад|мед|сахар|пикник|батон/.test(n))return '🍫 Перекусы и сладкое';
-  return builtin?'🍲 Блюда и другое':'⭐ Мои продукты';
-};
-window.foodCategoryFor=foodCategoryFor;
-
+/* ---------- Canonical food duplicate protection: exact = block, similar = user choice ---------- */
 function foodNorm(v){
   return String(v??'').normalize('NFKC').toLocaleLowerCase('ru')
-    .replace(/ё/g,'е').replace(/[\u2010-\u2015]/g,'-').replace(/[«»„“”"'`]/g,'')
-    .replace(/[^a-zа-я0-9]+/gi,' ').trim().replace(/\s+/g,' ');
+    .replace(/ё/g,'е')
+    .replace(/[\u2010-\u2015]/g,'-')
+    .replace(/[«»„“”"'`]/g,'')
+    .replace(/[^a-zа-я0-9]+/gi,' ')
+    .trim()
+    .replace(/\s+/g,' ');
 }
-function foodIdentityKey(v){return foodNorm(v).split(' ').filter(Boolean).sort((a,b)=>a.localeCompare(b,'ru')).join(' ');}
-function foodFullKey(v){return foodNorm(v).replace(/ /g,'');}
-function foodWords(v){return [...new Set(foodNorm(v).split(' ').filter(Boolean))];}
+function foodFullKey(v){ return foodNorm(v).replace(/ /g,''); }
+function foodWords(v){
+  return [...new Set(foodNorm(v).split(' ').filter(Boolean))];
+}
 function foodEditDistance(a,b){
-  a=String(a);b=String(b);if(a===b)return 0;if(!a)return b.length;if(!b)return a.length;
+  a=String(a);b=String(b);
+  if(a===b)return 0;
+  if(!a)return b.length;if(!b)return a.length;
   let prev=Array.from({length:b.length+1},(_,i)=>i);
-  for(let i=1;i<=a.length;i++){const cur=[i];for(let j=1;j<=b.length;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur;}
+  for(let i=1;i<=a.length;i++){
+    const cur=[i];
+    for(let j=1;j<=b.length;j++){
+      cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    }
+    prev=cur;
+  }
   return prev[b.length];
 }
-function ensureFoodStores(){
-  if(!Array.isArray(data.productCatalog))data.productCatalog=[];
-  if(!data.foodDiary||typeof data.foodDiary!=='object')data.foodDiary={entries:[]};
-  if(!Array.isArray(data.foodDiary.entries))data.foodDiary.entries=[];
+function foodCatalogList(){
+  const result=[],seen=new Set();
+  (data.productCatalog||[]).forEach((p,i)=>{
+    if(!p?.name)return;
+    const key=foodFullKey(p.name);
+    if(!key)return;
+    result.push({index:i,name:String(p.name).trim(),type:p.type||'per100',key});
+    seen.add(key);
+  });
+  return result;
 }
-function catalogRecords(){
-  ensureFoodStores();
-  return data.productCatalog.map((p,index)=>p?.name?{source:'catalog',index,item:p,name:String(p.name).trim(),identity:foodIdentityKey(p.name)}:null).filter(Boolean);
-}
-/* History is only a recovery source for old products that were previously logged but
-   were not synchronized to the catalog. It is NOT a second catalog. */
-function historyProductRecords(){
-  ensureFoodStores();
-  const catalogIds=new Set(catalogRecords().map(r=>r.identity));
-  const seen=new Set();
-  return data.foodDiary.entries.map((e,index)=>{
-    if(!e?.name)return null;const identity=foodIdentityKey(e.name);
-    if(!identity||catalogIds.has(identity)||seen.has(identity))return null;seen.add(identity);
-    return {source:'history',index,item:e,name:String(e.name).trim(),identity};
-  }).filter(Boolean);
-}
-function productRecords(){return [...catalogRecords(),...historyProductRecords()];}
-
 window.findFoodDuplicate=function(name,excludeIndex=null){
-  const identity=foodIdentityKey(name), full=foodFullKey(name), words=foodWords(name);
+  const inputKey=foodFullKey(name);
+  const inputWords=foodWords(name);
   const exact=[],similar=[];
-  for(const r of productRecords()){
-    if(r.source==='catalog'&&r.index===excludeIndex)continue;
-    const rFull=foodFullKey(r.name);
-    if(r.identity===identity||rFull===full){exact.push({...r,reason:'Совпадает название продукта: порядок слов, регистр, пробелы и е/ё не создают новый продукт.'});continue;}
-    let reason='';const rw=foodWords(r.name);
-    outer:for(const a of words)for(const b of rw){
-      if(a===b||(Math.min(a.length,b.length)>=4&&(a.includes(b)||b.includes(a)))){reason=`Похоже слово «${b}».`;break outer;}
-      if(Math.min(a.length,b.length)>=4&&foodEditDistance(a,b)<=1){reason=`Очень близкое слово «${b}».`;break outer;}
+  for(const item of foodCatalogList()){
+    if(item.index===excludeIndex)continue;
+    if(item.key===inputKey){
+      exact.push({...item,reason:'Название совпадает после приведения регистра, пробелов, знаков и е/ё.'});
+      continue;
     }
-    if(!reason){const min=Math.min(full.length,rFull.length),d=foodEditDistance(full,rFull);if(min>=5&&(d<=2||(min>=10&&d<=Math.floor(min*.2))))reason='Название очень похоже по написанию.';}
-    if(reason)similar.push({...r,reason});
+    let reason='';
+    const words=foodWords(item.name);
+    outer: for(const a of inputWords){
+      for(const b of words){
+        if(a===b || (Math.min(a.length,b.length)>=4 && (a.includes(b)||b.includes(a)))){
+          reason=`Совпадает или частично совпадает слово «${b}».`;break outer;
+        }
+        const min=Math.min(a.length,b.length);
+        if(min>=4 && foodEditDistance(a,b)<=1){
+          reason=`Найдено очень близкое по написанию слово «${b}».`;break outer;
+        }
+      }
+    }
+    if(!reason){
+      const min=Math.min(inputKey.length,item.key.length);
+      const d=foodEditDistance(inputKey,item.key);
+      if(min>=5 && (d<=2 || (min>=10 && d<=Math.floor(min*0.2)))) reason='Название очень похоже по написанию.';
+    }
+    if(reason)similar.push({...item,reason});
   }
   return {exact,similar};
 };
-function foodEsc(v){return typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function foodEsc(v){return typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&#39;'}[m]));}
 window.showFoodDuplicateModal=function(name,matches,exact,onAllow){
   let modal=$('foodDuplicateModal');
-  if(!modal){modal=document.createElement('div');modal.id='foodDuplicateModal';modal.className='hidden';modal.innerHTML=`<div class="exercise-dup-sheet"><button type="button" class="exercise-dup-close" id="foodDupClose">×</button><div id="foodDupTitle" class="exercise-dup-title"></div><div id="foodDupSub" class="exercise-dup-sub"></div><div id="foodDupList" class="exercise-dup-list"></div><div id="foodDupNote" class="exercise-dup-note"></div><div id="foodDupActions" class="exercise-dup-actions"><button type="button" class="dup-cancel gray" id="foodDupCancel"></button><button type="button" class="dup-add" id="foodDupAdd">Всё равно добавить</button></div></div>`;document.body.appendChild(modal);}
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='foodDuplicateModal';
+    modal.className='hidden';
+    modal.innerHTML=`<div class="exercise-dup-sheet">
+      <button type="button" class="exercise-dup-close" id="foodDupClose">×</button>
+      <div id="foodDupTitle" class="exercise-dup-title"></div>
+      <div id="foodDupSub" class="exercise-dup-sub"></div>
+      <div id="foodDupList" class="exercise-dup-list"></div>
+      <div id="foodDupNote" class="exercise-dup-note"></div>
+      <div id="foodDupActions" class="exercise-dup-actions">
+        <button type="button" class="dup-cancel gray" id="foodDupCancel"></button>
+        <button type="button" class="dup-add" id="foodDupAdd">Всё равно добавить</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+  }
   modal.querySelector('#foodDupTitle').textContent=exact?'Продукт уже существует':'Найдены похожие продукты';
-  modal.querySelector('#foodDupSub').textContent=exact?'Создать второй продукт с тем же названием нельзя.':`Для «${name}» найдены похожие названия.`;
-  modal.querySelector('#foodDupList').innerHTML=matches.slice(0,8).map(x=>`<div class="exercise-dup-item"><div class="exercise-dup-name">${foodEsc(x.name)}</div><div class="exercise-dup-meta">${x.source==='history'?'Есть в истории':(x.item?.type==='dish'?'Блюдо':'На 100 г')}</div><div class="exercise-dup-reason">${foodEsc(x.reason||'Похожее название.')}</div></div>`).join('');
-  modal.querySelector('#foodDupNote').textContent=exact?'Создание второй записи в каталог запрещено.':'Если это действительно другой продукт, его можно добавить.';
-  const cancel=modal.querySelector('#foodDupCancel'),add=modal.querySelector('#foodDupAdd');add.style.display=exact?'none':'';cancel.textContent=exact?'Закрыть':'Отмена';
-  const close=()=>{modal.classList.add('hidden');modal._onAllow=null;};modal.querySelector('#foodDupClose').onclick=close;cancel.onclick=close;modal.onclick=e=>{if(e.target===modal)close();};
-  add.onclick=exact?null:()=>{const fn=modal._onAllow;close();if(typeof fn==='function')fn();};modal._onAllow=onAllow;
-  if(typeof lockModalScroll==='function')lockModalScroll();modal.classList.remove('hidden');
+  modal.querySelector('#foodDupSub').textContent=exact?'Точную копию создать нельзя.':`Для «${name}» найдены похожие названия.`;
+  modal.querySelector('#foodDupList').innerHTML=matches.slice(0,8).map(x=>
+    `<div class="exercise-dup-item"><div class="exercise-dup-name">${foodEsc(x.name)}</div><div class="exercise-dup-meta">${x.type==='dish'?'Блюдо':'На 100 г'}</div><div class="exercise-dup-reason">${foodEsc(x.reason||'Похожее название.')}</div></div>`
+  ).join('');
+  modal.querySelector('#foodDupNote').textContent=exact
+    ?'Создание второй записи запрещено.'
+    :'Если это действительно другой продукт, его можно добавить отдельно.';
+  const actions=modal.querySelector('#foodDupActions');
+  const cancel=modal.querySelector('#foodDupCancel');
+  const add=modal.querySelector('#foodDupAdd');
+  actions.classList.toggle('single',!!exact);
+  add.style.display=exact?'none':'';
+  cancel.textContent=exact?'Закрыть':'Нет, отменить';
+  const close=()=>{modal.classList.add('hidden');modal._onAllow=null;};
+  modal.querySelector('#foodDupClose').onclick=close;
+  cancel.onclick=close;
+  modal.onclick=e=>{if(e.target===modal)close();};
+  if(!exact){
+    modal._onAllow=onAllow;
+    add.onclick=()=>{const fn=modal._onAllow;close();if(typeof fn==='function')fn();};
+  }else add.onclick=null;
+  lockModalScroll();modal.classList.remove('hidden');
+  modal.querySelector('.exercise-dup-sheet')?.scrollTo(0,0);
 };
 
-/* One and only catalog synchronization function. */
-function productFromHistoryEntry(entry){
-  if(entry?.cal100!=null)return {name:String(entry.name).trim(),type:'per100',category:foodCategoryFor(entry.name,false),cal100:Number(entry.cal100)||0,protein100:Number(entry.protein100)||0,fat100:Number(entry.fat100)||0,carbs100:Number(entry.carbs100)||0};
-  return {name:String(entry?.name||'').trim(),type:'dish',category:foodCategoryFor(entry?.name,false),calories:Number(entry?.calories)||0,protein:Number(entry?.protein)||0,fat:Number(entry?.fat)||0,carbs:Number(entry?.carbs)||0};
-}
-/* [FIX] One canonical identity owner: reordered words are the same product.
-   When an exact identity already exists in the catalog, Today must use that
-   catalog product instead of silently keeping a second spelling in the diary. */
-function findCanonicalCatalogProduct(name){
-  ensureFoodStores();
-  const identity=foodIdentityKey(name);
-  return data.productCatalog.find(p=>p?.name&&foodIdentityKey(p.name)===identity)||null;
-}
-function ensureCatalogProduct(product){
-  ensureFoodStores();
-  const existing=findCanonicalCatalogProduct(product.name);
-  if(existing)return {product:existing,created:false};
-  const clean={...product,name:String(product.name).trim().replace(/\s+/g,' ')};
-  data.productCatalog.push(clean);
-  return {product:clean,created:true};
-}
-function productTypeLabel(item){return item?.type==='dish'?'блюдо':'за 100 грамм';}
+/* ---------- Nutrition product picker ---------- */
+function productTypeLabel(item){return item?.type==='dish' ? 'блюдо' : 'за 100 грамм';}
 function getSavedFoodProducts(){
-  const map=new Map();productRecords().forEach(r=>{if(!map.has(r.identity)){const p=r.source==='catalog'?r.item:productFromHistoryEntry(r.item);map.set(r.identity,{...p,source:r.source});}});
+  const map=new Map();
+  (data.productCatalog||[]).forEach(p=>{
+    if(!p?.name)return;
+    const k=foodFullKey(p.name);if(!map.has(k))map.set(k,{...p,source:'catalog'});
+  });
+  (data.foodDiary?.entries||[]).forEach(e=>{
+    if(!e?.name)return;
+    const k=foodFullKey(e.name);if(map.has(k))return;
+    map.set(k,{...e,type:e.cal100!=null?'per100':'dish',source:'history'});
+  });
   return [...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru',{sensitivity:'base'}));
 }
 function renderFoodPresetList(){
-  const input=$('foodName'),list=$('foodPresetList');if(!input||!list)return;const q=foodNorm(input.value);
+  const input=$('foodName'), list=$('foodPresetList');if(!input||!list)return;
+  const q=foodNorm(input.value);
   if(!q){list.innerHTML='';list.classList.add('hidden');return;}
-  const items=getSavedFoodProducts().filter(x=>foodNorm(x.name).includes(q));
-  list.innerHTML=items.length?items.map(x=>`<div class="food-preset-item" data-food-preset-name="${foodEsc(x.name)}" role="button" tabindex="0"><span style="min-width:0;overflow-wrap:anywhere;">${foodEsc(x.name)}</span><span style="margin-left:auto;padding-left:10px;color:var(--subtext);font-size:12px;white-space:nowrap;">(${productTypeLabel(x)})</span></div>`).join(''):'<div class="food-preset-item food-preset-empty">Ничего не найдено</div>';
+  const items=getSavedFoodProducts().filter(item=>foodNorm(item.name).includes(q));
+  if(!items.length){list.innerHTML='<div class="food-preset-item food-preset-empty" aria-live="polite">Ничего не найдено</div>';list.classList.remove('hidden');return;}
+  list.innerHTML=items.map(item=>`<div class="food-preset-item" data-food-preset-name="${foodEsc(item.name)}" role="button" tabindex="0"><span style="min-width:0;overflow-wrap:anywhere;">${foodEsc(item.name)}</span><span style="margin-left:auto;padding-left:10px;color:var(--subtext);font-size:12px;white-space:nowrap;">(${productTypeLabel(item)})</span></div>`).join('');
   list.classList.remove('hidden');
 }
 window.filterFoodPresets=renderFoodPresetList;
-window.hideFoodPresetList=function(){const list=$('foodPresetList');if(list){list.innerHTML='';list.classList.add('hidden');}};
-
-/* Close suggestions by state transition, not z-index tricks. */
-function closeSuggestionsBeforeTypeChange(){window.hideFoodPresetList();}
-const nativeSwitch=window.switchFoodMode;
-window.switchFoodMode=function(mode){closeSuggestionsBeforeTypeChange();return typeof nativeSwitch==='function'?nativeSwitch.apply(this,arguments):undefined;};
-
 window.openAddFoodModal=function(){
-  editingFoodEntryIndex=null;const modal=$('addFoodModal');if(!modal)return;if(typeof lockModalScroll==='function')lockModalScroll();modal.classList.remove('hidden');
-  ['foodName','foodPortion','foodCalories','foodProtein','foodFat','foodCarbs','foodWeight','foodCal100','foodProtein100','foodFat100','foodCarbs100'].forEach(id=>{if($(id))$(id).value='';});if($('calcResult'))$('calcResult').textContent='';window.hideFoodPresetList();window.switchFoodMode('portion');setTimeout(()=>$('foodName')?.focus(),50);
+  editingFoodEntryIndex=null;
+  const modal=$('addFoodModal');if(!modal)return;
+  lockModalScroll();modal.classList.remove('hidden');
+  ['foodName','foodPortion','foodCalories','foodProtein','foodFat','foodCarbs','foodWeight','foodCal100','foodProtein100','foodFat100','foodCarbs100'].forEach(id=>{if($(id))$(id).value='';});
+  if($('calcResult'))$('calcResult').textContent='';
+  switchFoodMode('portion');renderFoodPresetList();setTimeout(()=>$('foodName')?.focus(),50);
 };
-window.clearFoodSearch=function(){const i=$('foodName');if(i){i.value='';window.hideFoodPresetList();i.focus();}};
+window.clearFoodSearch=function(){const i=$('foodName');if(i){i.value='';renderFoodPresetList();i.focus();}};
+function ensureFoodSearchClear(){
+  const input=$('foodName');if(!input||$('v66FoodSearchClear'))return;
+  const parent=input.parentElement;if(!parent)return;
+  parent.classList.add('v66-search-wrap');
+  const b=document.createElement('button');b.id='v66FoodSearchClear';b.type='button';b.className='v66-search-clear hidden';b.textContent='×';b.setAttribute('aria-label','Очистить поиск');
+  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.clearFoodSearch();});parent.appendChild(b);
+  const sync=()=>b.classList.toggle('hidden',!String(input.value||'').trim());input.addEventListener('input',sync);sync();
+}
+ensureFoodSearchClear();
 
-function foodNumber(value,max=100000){const n=Number(String(value??'').trim().replace(',','.'));return Number.isFinite(n)&&n>=0&&n<=max?n:null;}
-function makeCatalogProduct(name){
-  if(currentFoodMode==='100')return {name,type:'per100',category:foodCategoryFor(name,false),cal100:foodNumber($('foodCal100')?.value),protein100:foodNumber($('foodProtein100')?.value),fat100:foodNumber($('foodFat100')?.value),carbs100:foodNumber($('foodCarbs100')?.value)};
-  return {name,type:'dish',category:foodCategoryFor(name,false),calories:foodNumber($('foodCalories')?.value),protein:foodNumber($('foodProtein')?.value),fat:foodNumber($('foodFat')?.value),carbs:foodNumber($('foodCarbs')?.value)};
-}
-function validateCatalogProduct(product){
-  const vals=product.type==='dish'?[product.calories,product.protein,product.fat,product.carbs]:[product.cal100,product.protein100,product.fat100,product.carbs100];
-  return vals.every(v=>v!==null)&&vals[0]>0;
-}
+/* ---------- Catalog creation: exact block, similar = explicit choice ---------- */
 window.saveCatalogProduct=function(){
-  ensureFoodStores();const name=String($('catalogName')?.value||'').trim().replace(/\s+/g,' ');if(!name){showToast('Введите название');return;}
-  const type=$('catalogType')?.value||'per100';const product={name,type,category:foodCategoryFor(name,false)};
-  if(type==='dish'){product.calories=foodNumber($('catalogDishCalories')?.value);product.protein=foodNumber($('catalogDishProtein')?.value);product.fat=foodNumber($('catalogDishFat')?.value);product.carbs=foodNumber($('catalogDishCarbs')?.value);}else{product.cal100=foodNumber($('catalogCal100')?.value);product.protein100=foodNumber($('catalogProtein100')?.value);product.fat100=foodNumber($('catalogFat100')?.value);product.carbs100=foodNumber($('catalogCarbs100')?.value);}
-  const vals=type==='dish'?[product.calories,product.protein,product.fat,product.carbs]:[product.cal100,product.protein100,product.fat100,product.carbs100];if(vals.some(v=>v===null)||vals[0]<=0){showToast(type==='dish'?'Введите корректные КБЖУ блюда':'Введите корректные КБЖУ на 100 г');return;}
-  const commit=()=>{if(editingCatalogProduct!==null)data.productCatalog[editingCatalogProduct]=product;else ensureCatalogProduct(product);saveData();closeCatalogEdit();renderCatalogList();showToast('Продукт сохранён в каталоге');};
-  const dup=window.findFoodDuplicate(name,editingCatalogProduct);if(dup.exact.length){window.showFoodDuplicateModal(name,dup.exact,true);return;}if(dup.similar.length){window.showFoodDuplicateModal(name,dup.similar,false,commit);return;}commit();
-};
-
-window.addFoodEntry=function(){
-  ensureFoodStores();const date=$('foodDate')?.value,name=String($('foodName')?.value||'').trim().replace(/\s+/g,' ');if(!name){showToast('Введите название');return;}
-  let entry,product;
-  if(currentFoodMode==='100'){
-    const weight=foodNumber($('foodWeight')?.value),cal100=foodNumber($('foodCal100')?.value),protein100=foodNumber($('foodProtein100')?.value),fat100=foodNumber($('foodFat100')?.value),carbs100=foodNumber($('foodCarbs100')?.value);
-    if(weight===null||weight<=0||cal100===null||cal100<=0||protein100===null||fat100===null||carbs100===null){showToast('Введите корректный вес и КБЖУ на 100 г');return;}
-    const r=n=>Math.round(n*10)/10;entry={date,name,portion:weight+' г',calories:Math.round(cal100*weight/100),protein:r(protein100*weight/100),fat:r(fat100*weight/100),carbs:r(carbs100*weight/100),cal100,protein100,fat100,carbs100};product={name,type:'per100',category:foodCategoryFor(name,false),cal100,protein100,fat100,carbs100};
+  const name=String($('catalogName')?.value||'').trim().replace(/\s+/g,' ');
+  if(!name){showToast('Введите название');return;}
+  const type=$('catalogType')?.value||'per100';let product={name,type};
+  if(type==='dish'){
+    product.calories=parseFloat($('catalogDishCalories')?.value)||0;product.protein=parseFloat($('catalogDishProtein')?.value)||0;product.fat=parseFloat($('catalogDishFat')?.value)||0;product.carbs=parseFloat($('catalogDishCarbs')?.value)||0;
+    if(!product.calories){showToast('Введите калории блюда');return;}
   }else{
-    const portion=$('foodPortion')?.value.trim()||'—',calories=foodNumber($('foodCalories')?.value),protein=foodNumber($('foodProtein')?.value),fat=foodNumber($('foodFat')?.value),carbs=foodNumber($('foodCarbs')?.value);
-    if(calories===null||calories<=0||protein===null||fat===null||carbs===null){showToast('Введите корректные КБЖУ');return;}
-    entry={date,name,portion,calories,protein,fat,carbs,cal100:null,protein100:null,fat100:null,carbs100:null};product={name,type:'dish',category:foodCategoryFor(name,false),calories,protein,fat,carbs};
-  }
-  const exactCatalog=findCanonicalCatalogProduct(name);
-  /* [FIX] Exact identity in the catalog is not a new product. Reuse the
-     canonical catalog spelling everywhere so «Йогурт греческий» cannot become
-     a hidden second identity next to «Греческий йогурт». */
-  if(exactCatalog){
-    entry.name=String(exactCatalog.name).trim();
-    product={...exactCatalog};
+    product.cal100=parseFloat($('catalogCal100')?.value)||0;product.protein100=parseFloat($('catalogProtein100')?.value)||0;product.fat100=parseFloat($('catalogFat100')?.value)||0;product.carbs100=parseFloat($('catalogCarbs100')?.value)||0;
+    if(!product.cal100){showToast('Введите калории на 100 г');return;}
   }
   const commit=()=>{
-    /* Atomic logical flow: catalog synchronization first, then today's entry. */
-    const sync=ensureCatalogProduct(product);
-    if(editingFoodEntryIndex!==null){data.foodDiary.entries[editingFoodEntryIndex]=entry;showToast('Запись обновлена');}
-    else {data.foodDiary.entries.push(entry);showToast(exactCatalog?'Использован существующий продукт из каталога':(sync.created?'Продукт добавлен сегодня и в каталог':'Продукт добавлен сегодня'));}
-    saveData();closeAddFoodModal();editingFoodEntryIndex=null;renderFoodDiary();if(typeof renderCatalogList==='function')renderCatalogList();
+    if(editingCatalogProduct!==null)data.productCatalog[editingCatalogProduct]=product;else data.productCatalog.push(product);
+    saveData();closeCatalogEdit();renderCatalogList();showToast('Продукт сохранён в каталоге');
   };
-  if(editingFoodEntryIndex!==null){commit();return;}
-  const dup=window.findFoodDuplicate(name);
-  if(dup.exact.length){
-    /* [FIX] Exact duplicate: never keep a second spelling. If a canonical
-       catalog item exists, it is reused; otherwise an old history-only item is
-       repaired into the catalog through ensureCatalogProduct. */
-    commit();return;
-  }
+  const dup=window.findFoodDuplicate(name,editingCatalogProduct);
+  if(dup.exact.length){window.showFoodDuplicateModal(name,dup.exact,true);return;}
   if(dup.similar.length){window.showFoodDuplicateModal(name,dup.similar,false,commit);return;}
   commit();
 };
 
-/* One clean picker click binding after all legacy handlers have loaded. */
-const oldList=$('foodPresetList');
-if(oldList&&!oldList.dataset.v1318Bound){oldList.dataset.v1318Bound='1';oldList.addEventListener('click',e=>{const item=e.target.closest('.food-preset-item[data-food-preset-name]');if(!item)return;e.preventDefault();window.hideFoodPresetList();if(typeof window.selectFoodPreset==='function')window.selectFoodPreset(item.getAttribute('data-food-preset-name'));});}
-const typeSelect=$('foodType');
-if(typeSelect&&!typeSelect.dataset.v1318Bound){typeSelect.dataset.v1318Bound='1';['pointerdown','mousedown','touchstart','focus','change'].forEach(ev=>typeSelect.addEventListener(ev,window.hideFoodPresetList,true));}
+/* ---------- Day entries: unified catalog identity ---------- */
+window.addFoodEntry=function(){
+  const date=$('foodDate')?.value,name=String($('foodName')?.value||'').trim().replace(/\s+/g,' ');
+  if(!name){showToast('Введите название');return;}
+  let portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100;
+  if(currentFoodMode==='portion'){
+    portion=$('foodPortion')?.value.trim()||'—';calories=parseFloat($('foodCalories')?.value)||0;protein=parseFloat($('foodProtein')?.value)||0;fat=parseFloat($('foodFat')?.value)||0;carbs=parseFloat($('foodCarbs')?.value)||0;cal100=protein100=fat100=carbs100=null;
+    if(!calories){showToast('Введите калории');return;}
+  }else{
+    const weight=parseFloat($('foodWeight')?.value)||0;cal100=parseFloat($('foodCal100')?.value)||0;protein100=parseFloat($('foodProtein100')?.value)||0;fat100=parseFloat($('foodFat100')?.value)||0;carbs100=parseFloat($('foodCarbs100')?.value)||0;
+    if(!weight||!cal100){showToast('Введите вес порции и калории на 100 г');return;}
+    portion=weight+' г';calories=Math.round(cal100*weight/100);protein=Math.round(protein100*weight/100);fat=Math.round(fat100*weight/100);carbs=Math.round(carbs100*weight/100);
+  }
+  const entryData={date,name,portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100};
+  const commit=(catalogProduct=null)=>{
+    if(editingFoodEntryIndex!==null){data.foodDiary.entries[editingFoodEntryIndex]=entryData;showToast('Запись обновлена');}
+    else{
+      if(!catalogProduct){
+        const product=currentFoodMode==='100'
+          ? {name,type:'per100',cal100,protein100,fat100,carbs100}
+          : {name,type:'dish',calories,protein,fat,carbs};
+        data.productCatalog.push(product);
+      }
+      data.foodDiary.entries.push(entryData);showToast('Продукт добавлен и сохранён в каталог');
+    }
+    saveData();closeAddFoodModal();editingFoodEntryIndex=null;renderFoodDiary();if($('foodTabCatalog')?.classList.contains('active'))renderCatalogList();
+  };
+  if(editingFoodEntryIndex!==null){commit();return;}
+  const dup=typeof window.findFoodDuplicate==='function'?window.findFoodDuplicate(name):{exact:[],similar:[]};
+  if(dup.exact?.length){
+    /* Exact identity already exists: do not create a second catalog card, add only today's entry. */
+    commit(dup.exact[0]);return;
+  }
+  if(dup.similar?.length){
+    window.showFoodDuplicateModal(name,dup.similar,false,()=>commit());return;
+  }
+  commit();
+};
 
 /* ---------- Confirmation when adding exercise to a split ---------- */
 let v66PendingProgramAdd=null;
@@ -16107,12 +16096,12 @@ const foodList=$('foodPresetList');if(foodList&&!foodList.dataset.v66Bound){food
 
       if(!saveData(false)) throw new Error('Не удалось сохранить объединённые данные в localStorage');
 
-      try{renderHome();}catch(e){console.warn('FTracker import renderHome failed',e);}
-      try{if(typeof renderExerciseDirectory==='function')renderExerciseDirectory();}catch(e){console.warn('FTracker import exercise directory render failed',e);}
-      try{if(typeof renderFoodDiary==='function')renderFoodDiary();}catch(e){console.warn('FTracker import food diary render failed',e);}
-      try{if(typeof renderProgressDashboard==='function')renderProgressDashboard();}catch(e){console.warn('FTracker import progress render failed',e);}
-      try{if(typeof renderMeasurements==='function')renderMeasurements();}catch(e){console.warn('FTracker import measurements render failed',e);}
-      try{if(typeof renderSettings==='function')renderSettings();}catch(e){console.warn('FTracker import settings render failed',e);}
+      try{renderHome();}catch(e){}
+      try{if(typeof renderExerciseDirectory==='function')renderExerciseDirectory();}catch(e){}
+      try{if(typeof renderFoodDiary==='function')renderFoodDiary();}catch(e){}
+      try{if(typeof renderProgressDashboard==='function')renderProgressDashboard();}catch(e){}
+      try{if(typeof renderMeasurements==='function')renderMeasurements();}catch(e){}
+      try{if(typeof renderSettings==='function')renderSettings();}catch(e){}
 
       closeImportConfirm();
       const suffix=failed.length ? ` (пропущены повреждённые разделы: ${failed.join(', ')})` : '';
@@ -16342,21 +16331,12 @@ window.exportData=async function(){
   }
 };
 
-// [FIX] Phase 3: prevent overlapping imports and reject obviously invalid files before parsing.
-let __ftrackerImportBusy=false;
-const __FTRACKER_MAX_IMPORT_BYTES=50*1024*1024;
-
 window.importData=function(event){
   const file=event?.target?.files?.[0]; if(!file)return;
-  if(__ftrackerImportBusy){ fbToast('Импорт уже выполняется — дождитесь завершения'); event.target.value=''; return; }
-  if(file.size<=0){ fbToast('Импорт отменён: выбран пустой файл'); event.target.value=''; return; }
-  if(file.size>__FTRACKER_MAX_IMPORT_BYTES){ fbToast('Импорт отменён: файл слишком большой'); event.target.value=''; return; }
   const reader=new FileReader();
   reader.onload=function(e){
     try{
       const raw=JSON.parse(e.target.result);
-      // [FIX] A backup must be a plain object; arrays/primitives cannot be valid app state.
-      if(!raw || typeof raw!=='object' || Array.isArray(raw)) throw new Error('Неверная структура JSON-бэкапа');
       if(raw?._backupMeta?.format===FB_FORMAT && raw.data && Array.isArray(raw.media)){
         if(Number(raw._backupMeta.mediaCount)!==raw.media.length)
           throw new Error('Количество медиа не совпадает с метаданными');
@@ -16375,7 +16355,7 @@ window.importData=function(event){
     }catch(err){ fbToast('Импорт отменён: '+fbErr(err)); }
     finally{event.target.value='';}
   };
-  reader.onerror=()=>{ pendingImportData=null; fbToast('Не удалось прочитать файл бэкапа'); };
+  reader.onerror=()=>fbToast('Не удалось прочитать файл бэкапа');
   reader.readAsText(file);
 };
 
@@ -16412,8 +16392,6 @@ async function fbUpsert(media){
 window.confirmImport=async function(){
   const p=pendingImportData;
   if(!p?.__backupKind) return;
-  if(__ftrackerImportBusy){ fbToast('Импорт уже выполняется — дождитесь завершения'); return; }
-  __ftrackerImportBusy=true;
   let oldState=null, oldMedia=null;
   try{
     oldState=fbClone(data);
@@ -16468,9 +16446,6 @@ window.confirmImport=async function(){
     fbToast('Импорт не выполнен: текущие данные сохранены без изменений. Причина: '+fbErr(e));
     pendingImportData=null;
     document.getElementById('importConfirmModal')?.classList.add('hidden');
-  } finally {
-    // [FIX] Always release the import lock, including rollback/error paths.
-    __ftrackerImportBusy=false;
   }
 };
 
@@ -16752,41 +16727,39 @@ window.closeImportConfirm=function(){
 .catalog-section-title{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;background:var(--card-bg);color:var(--text);padding:14px!important;margin:0!important;min-height:52px!important}
 .catalog-section-items{padding:0 8px 8px}.catalog-section-items.hidden{display:none!important}
 .catalog-empty{color:var(--subtext);text-align:center;padding:18px 8px}
-
-/* [FIX v1.3.19] Suggestions are part of the form flow and never cover the type selector. */
-#addFoodModal #foodPresetList{
-  position:relative!important;
-  top:auto!important;
-  left:auto!important;
-  right:auto!important;
-  width:100%!important;
-  margin:6px 0 8px!important;
-  max-height:min(30vh,240px)!important;
-  overflow-y:auto!important;
-  pointer-events:auto!important;
-  z-index:0!important;
-}
 </style>
 <script>
 /* ===== CANONICAL FOOD CATALOG + WORKOUT PROGRESS ===== */
 (function(){
   'use strict';
-  const categoryFor=function(product){
-    if(product?.category)return product.category;
-    return window.foodCategoryFor?window.foodCategoryFor(product?.name,!!product?.builtin):(product?.builtin?'🍲 Блюда и другое':'⭐ Мои продукты');
-  };  renderCatalogList=function(){
+  const categoryFor=function(name,builtin){
+    const n=String(name||'').toLowerCase();
+    if(/кур|индей|говя|свинин|фарш|тефтел|кордон|мяс/.test(n))return '🥩 Мясо и птица';
+    if(/лосос|тун|треск|рыб|кревет/.test(n))return '🐟 Рыба и морепродукты';
+    if(/яйц/.test(n))return '🥚 Яйца';
+    if(/творог|йогурт|молок|кефир|сыр|skyr/.test(n))return '🥛 Молочные продукты';
+    if(/рис|греч|макарон|картоф|овся|булгур|паст/.test(n))return '🍚 Крупы и гарниры';
+    if(/хлеб|лаваш|блин/.test(n))return '🍞 Хлеб и выпечка';
+    if(/огур|помидор|броккол|морков|перец|овощ/.test(n))return '🥦 Овощи';
+    if(/банан|яблок|апельсин|ягод|фрукт/.test(n))return '🍌 Фрукты';
+    if(/арахис|миндал|масло|орех/.test(n))return '🥜 Орехи и жиры';
+    if(/шоколад|мёд|сахар|пикник|батон/.test(n))return '🍫 Перекусы и сладкое';
+    if(builtin)return '🍲 Блюда и другое';
+    return '⭐ Мои продукты';
+  };
+  renderCatalogList=function(){
     const c=document.getElementById('catalogContainer');if(!c)return;
     const q=String(document.getElementById('catalogSearch')?.value||'').trim().toLowerCase();
     const items=(data.productCatalog||[]).map((p,i)=>({...p,_idx:i})).filter(p=>!q||String(p.name||'').toLowerCase().includes(q));
     if(!items.length){c.innerHTML='<div class="catalog-empty">Ничего не найдено</div>';return;}
     const groups={};
-    items.forEach(p=>{const g=categoryFor(p);(groups[g]||(groups[g]=[])).push(p);});
+    items.forEach(p=>{const g=categoryFor(p.name,!!p.builtin);(groups[g]||(groups[g]=[])).push(p);});
     const order=['⭐ Мои продукты','🥩 Мясо и птица','🐟 Рыба и морепродукты','🥚 Яйца','🥛 Молочные продукты','🍚 Крупы и гарниры','🍞 Хлеб и выпечка','🥦 Овощи','🍌 Фрукты','🥜 Орехи и жиры','🍫 Перекусы и сладкое','🍲 Блюда и другое'];
     c.innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<div class="catalog-section"><div class="catalog-section-title"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span></div><div class="catalog-section-items">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
   };
   // Search is bound once to the actual input and calls the canonical renderer.
-  // [FIX] Поиск вызывается одним механизмом через существующий inline oninput="renderCatalogList()".
-  // Дополнительный addEventListener удалён, чтобы один ввод не запускал двойной рендер.
+  function bind(){const input=document.getElementById('catalogSearch');if(!input||input.dataset.catalogBound)return;input.dataset.catalogBound='1';input.addEventListener('input',renderCatalogList);input.addEventListener('search',renderCatalogList);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
   // The existing markSetDone is the checkbox handler; it already calls updateWorkoutProgressUI after toggling.
   // Keep one progress implementation and make its calculation explicitly based on completed checkbox states.
   updateWorkoutProgressUI=function(){
@@ -16806,8 +16779,6 @@ window.closeImportConfirm=function(){
   window.addFoodEntry=addFoodEntry;
   window.updateWorkoutProgressUI=updateWorkoutProgressUI;
 })();
-
-
 </script>
 
 </body>
