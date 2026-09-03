@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <!-- FTracker duplicate system rewritten as one canonical creation-time flow. -->
+<!-- [FIX] v1.3.15: product category is stored explicitly for new/edited catalog entries; legacy entries safely fall back without data migration. -->
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -8764,7 +8765,7 @@ window.showExerciseDuplicateModal=function(name,matches,exact,onAllow){
   modal.style.setProperty('z-index','2147483647','important');
   modal.style.setProperty('position','fixed','important');
   modal.querySelector('#exerciseDupTitle').textContent=exact?'Упражнение уже существует':'Найдено похожее упражнение';
-  modal.querySelector('#exerciseDupSub').textContent=exact?'Точную копию создать нельзя.':`В названии «${name}» найдено совпадение.`;
+  modal.querySelector('#exerciseDupSub').textContent=exact?'Точную копию создать нельзя, включая перестановку слов в названии.':`В названии «${name}» найдено совпадение.`;
   modal.querySelector('#exerciseDupList').innerHTML=matches.slice(0,6).map(x=>
     `<div class="exercise-dup-item"><div class="exercise-dup-name">${ftEsc(x.name)}</div>
      <div class="exercise-dup-meta">${ftEsc(x.group||'Другое')} · ${x.type==='cardio'?'Кардио':'Силовое'}</div>
@@ -12041,7 +12042,7 @@ function showToast(msg) { const toast = document.createElement('div'); toast.cla
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.3.14', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
+        navigator.serviceWorker.register('./sw.js?v=1.3.18', {updateViaCache:'none'}) // [FIX] единая версия сборки PWA/SW
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -15105,235 +15106,203 @@ new MutationObserver(()=>bindAutosize(document)).observe(document.body,{childLis
 (function(){
 'use strict';
 const $=(id)=>document.getElementById(id);
-const esc=(v)=>typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'');
-const norm=(v)=>typeof normalizeExerciseKey==='function'?normalizeExerciseKey(v):String(v||'').toLocaleLowerCase('ru').replace(/[\s\p{P}\p{S}]+/gu,'');
 
-/* ---------- Canonical food duplicate protection: exact = block, similar = user choice ---------- */
+/* ===== FOOD CORE v1.3.19 =====
+   One source of truth for product identity and catalog synchronization.
+   No parallel duplicate rules for Catalog vs Today. */
+const foodCategoryFor=function(name,builtin=false){
+  const n=String(name||'').toLocaleLowerCase('ru').replace(/ё/g,'е');
+  if(/кур|индей|говя|свинин|фарш|тефтел|кордон|мяс/.test(n))return '🥩 Мясо и птица';
+  if(/лосос|тун|треск|рыб|кревет/.test(n))return '🐟 Рыба и морепродукты';
+  if(/яйц/.test(n))return '🥚 Яйца';
+  if(/творог|йогурт|молок|кефир|сыр|skyr/.test(n))return '🥛 Молочные продукты';
+  if(/рис|греч|макарон|картоф|овся|булгур|паст/.test(n))return '🍚 Крупы и гарниры';
+  if(/хлеб|лаваш|блин/.test(n))return '🍞 Хлеб и выпечка';
+  if(/огур|помидор|броккол|морков|перец|овощ/.test(n))return '🥦 Овощи';
+  if(/банан|яблок|апельсин|ягод|фрукт/.test(n))return '🍌 Фрукты';
+  if(/арахис|миндал|масло|орех/.test(n))return '🥜 Орехи и жиры';
+  if(/шоколад|мед|сахар|пикник|батон/.test(n))return '🍫 Перекусы и сладкое';
+  return builtin?'🍲 Блюда и другое':'⭐ Мои продукты';
+};
+window.foodCategoryFor=foodCategoryFor;
+
 function foodNorm(v){
   return String(v??'').normalize('NFKC').toLocaleLowerCase('ru')
-    .replace(/ё/g,'е')
-    .replace(/[\u2010-\u2015]/g,'-')
-    .replace(/[«»„“”"'`]/g,'')
-    .replace(/[^a-zа-я0-9]+/gi,' ')
-    .trim()
-    .replace(/\s+/g,' ');
+    .replace(/ё/g,'е').replace(/[\u2010-\u2015]/g,'-').replace(/[«»„“”"'`]/g,'')
+    .replace(/[^a-zа-я0-9]+/gi,' ').trim().replace(/\s+/g,' ');
 }
-function foodFullKey(v){ return foodNorm(v).replace(/ /g,''); }
-function foodWords(v){
-  return [...new Set(foodNorm(v).split(' ').filter(Boolean))];
-}
+function foodIdentityKey(v){return foodNorm(v).split(' ').filter(Boolean).sort((a,b)=>a.localeCompare(b,'ru')).join(' ');}
+function foodFullKey(v){return foodNorm(v).replace(/ /g,'');}
+function foodWords(v){return [...new Set(foodNorm(v).split(' ').filter(Boolean))];}
 function foodEditDistance(a,b){
-  a=String(a);b=String(b);
-  if(a===b)return 0;
-  if(!a)return b.length;if(!b)return a.length;
+  a=String(a);b=String(b);if(a===b)return 0;if(!a)return b.length;if(!b)return a.length;
   let prev=Array.from({length:b.length+1},(_,i)=>i);
-  for(let i=1;i<=a.length;i++){
-    const cur=[i];
-    for(let j=1;j<=b.length;j++){
-      cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
-    }
-    prev=cur;
-  }
+  for(let i=1;i<=a.length;i++){const cur=[i];for(let j=1;j<=b.length;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur;}
   return prev[b.length];
 }
-function foodCatalogList(){
-  const result=[],seen=new Set();
-  (data.productCatalog||[]).forEach((p,i)=>{
-    if(!p?.name)return;
-    const key=foodFullKey(p.name);
-    if(!key)return;
-    result.push({index:i,name:String(p.name).trim(),type:p.type||'per100',key});
-    seen.add(key);
-  });
-  return result;
+function ensureFoodStores(){
+  if(!Array.isArray(data.productCatalog))data.productCatalog=[];
+  if(!data.foodDiary||typeof data.foodDiary!=='object')data.foodDiary={entries:[]};
+  if(!Array.isArray(data.foodDiary.entries))data.foodDiary.entries=[];
 }
+function catalogRecords(){
+  ensureFoodStores();
+  return data.productCatalog.map((p,index)=>p?.name?{source:'catalog',index,item:p,name:String(p.name).trim(),identity:foodIdentityKey(p.name)}:null).filter(Boolean);
+}
+/* History is only a recovery source for old products that were previously logged but
+   were not synchronized to the catalog. It is NOT a second catalog. */
+function historyProductRecords(){
+  ensureFoodStores();
+  const catalogIds=new Set(catalogRecords().map(r=>r.identity));
+  const seen=new Set();
+  return data.foodDiary.entries.map((e,index)=>{
+    if(!e?.name)return null;const identity=foodIdentityKey(e.name);
+    if(!identity||catalogIds.has(identity)||seen.has(identity))return null;seen.add(identity);
+    return {source:'history',index,item:e,name:String(e.name).trim(),identity};
+  }).filter(Boolean);
+}
+function productRecords(){return [...catalogRecords(),...historyProductRecords()];}
+
 window.findFoodDuplicate=function(name,excludeIndex=null){
-  const inputKey=foodFullKey(name);
-  const inputWords=foodWords(name);
+  const identity=foodIdentityKey(name), full=foodFullKey(name), words=foodWords(name);
   const exact=[],similar=[];
-  for(const item of foodCatalogList()){
-    if(item.index===excludeIndex)continue;
-    if(item.key===inputKey){
-      exact.push({...item,reason:'Название совпадает после приведения регистра, пробелов, знаков и е/ё.'});
-      continue;
+  for(const r of productRecords()){
+    if(r.source==='catalog'&&r.index===excludeIndex)continue;
+    const rFull=foodFullKey(r.name);
+    if(r.identity===identity||rFull===full){exact.push({...r,reason:'Совпадает название продукта: порядок слов, регистр, пробелы и е/ё не создают новый продукт.'});continue;}
+    let reason='';const rw=foodWords(r.name);
+    outer:for(const a of words)for(const b of rw){
+      if(a===b||(Math.min(a.length,b.length)>=4&&(a.includes(b)||b.includes(a)))){reason=`Похоже слово «${b}».`;break outer;}
+      if(Math.min(a.length,b.length)>=4&&foodEditDistance(a,b)<=1){reason=`Очень близкое слово «${b}».`;break outer;}
     }
-    let reason='';
-    const words=foodWords(item.name);
-    outer: for(const a of inputWords){
-      for(const b of words){
-        if(a===b || (Math.min(a.length,b.length)>=4 && (a.includes(b)||b.includes(a)))){
-          reason=`Совпадает или частично совпадает слово «${b}».`;break outer;
-        }
-        const min=Math.min(a.length,b.length);
-        if(min>=4 && foodEditDistance(a,b)<=1){
-          reason=`Найдено очень близкое по написанию слово «${b}».`;break outer;
-        }
-      }
-    }
-    if(!reason){
-      const min=Math.min(inputKey.length,item.key.length);
-      const d=foodEditDistance(inputKey,item.key);
-      if(min>=5 && (d<=2 || (min>=10 && d<=Math.floor(min*0.2)))) reason='Название очень похоже по написанию.';
-    }
-    if(reason)similar.push({...item,reason});
+    if(!reason){const min=Math.min(full.length,rFull.length),d=foodEditDistance(full,rFull);if(min>=5&&(d<=2||(min>=10&&d<=Math.floor(min*.2))))reason='Название очень похоже по написанию.';}
+    if(reason)similar.push({...r,reason});
   }
   return {exact,similar};
 };
-function foodEsc(v){return typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&#39;'}[m]));}
+function foodEsc(v){return typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 window.showFoodDuplicateModal=function(name,matches,exact,onAllow){
   let modal=$('foodDuplicateModal');
-  if(!modal){
-    modal=document.createElement('div');
-    modal.id='foodDuplicateModal';
-    modal.className='hidden';
-    modal.innerHTML=`<div class="exercise-dup-sheet">
-      <button type="button" class="exercise-dup-close" id="foodDupClose">×</button>
-      <div id="foodDupTitle" class="exercise-dup-title"></div>
-      <div id="foodDupSub" class="exercise-dup-sub"></div>
-      <div id="foodDupList" class="exercise-dup-list"></div>
-      <div id="foodDupNote" class="exercise-dup-note"></div>
-      <div id="foodDupActions" class="exercise-dup-actions">
-        <button type="button" class="dup-cancel gray" id="foodDupCancel"></button>
-        <button type="button" class="dup-add" id="foodDupAdd">Всё равно добавить</button>
-      </div>
-    </div>`;
-    document.body.appendChild(modal);
-  }
+  if(!modal){modal=document.createElement('div');modal.id='foodDuplicateModal';modal.className='hidden';modal.innerHTML=`<div class="exercise-dup-sheet"><button type="button" class="exercise-dup-close" id="foodDupClose">×</button><div id="foodDupTitle" class="exercise-dup-title"></div><div id="foodDupSub" class="exercise-dup-sub"></div><div id="foodDupList" class="exercise-dup-list"></div><div id="foodDupNote" class="exercise-dup-note"></div><div id="foodDupActions" class="exercise-dup-actions"><button type="button" class="dup-cancel gray" id="foodDupCancel"></button><button type="button" class="dup-add" id="foodDupAdd">Всё равно добавить</button></div></div>`;document.body.appendChild(modal);}
   modal.querySelector('#foodDupTitle').textContent=exact?'Продукт уже существует':'Найдены похожие продукты';
-  modal.querySelector('#foodDupSub').textContent=exact?'Точную копию создать нельзя.':`Для «${name}» найдены похожие названия.`;
-  modal.querySelector('#foodDupList').innerHTML=matches.slice(0,8).map(x=>
-    `<div class="exercise-dup-item"><div class="exercise-dup-name">${foodEsc(x.name)}</div><div class="exercise-dup-meta">${x.type==='dish'?'Блюдо':'На 100 г'}</div><div class="exercise-dup-reason">${foodEsc(x.reason||'Похожее название.')}</div></div>`
-  ).join('');
-  modal.querySelector('#foodDupNote').textContent=exact
-    ?'Создание второй записи запрещено.'
-    :'Если это действительно другой продукт, его можно добавить отдельно.';
-  const actions=modal.querySelector('#foodDupActions');
-  const cancel=modal.querySelector('#foodDupCancel');
-  const add=modal.querySelector('#foodDupAdd');
-  actions.classList.toggle('single',!!exact);
-  add.style.display=exact?'none':'';
-  cancel.textContent=exact?'Закрыть':'Нет, отменить';
-  const close=()=>{modal.classList.add('hidden');modal._onAllow=null;};
-  modal.querySelector('#foodDupClose').onclick=close;
-  cancel.onclick=close;
-  modal.onclick=e=>{if(e.target===modal)close();};
-  if(!exact){
-    modal._onAllow=onAllow;
-    add.onclick=()=>{const fn=modal._onAllow;close();if(typeof fn==='function')fn();};
-  }else add.onclick=null;
-  lockModalScroll();modal.classList.remove('hidden');
-  modal.querySelector('.exercise-dup-sheet')?.scrollTo(0,0);
+  modal.querySelector('#foodDupSub').textContent=exact?'Создать второй продукт с тем же названием нельзя.':`Для «${name}» найдены похожие названия.`;
+  modal.querySelector('#foodDupList').innerHTML=matches.slice(0,8).map(x=>`<div class="exercise-dup-item"><div class="exercise-dup-name">${foodEsc(x.name)}</div><div class="exercise-dup-meta">${x.source==='history'?'Есть в истории':(x.item?.type==='dish'?'Блюдо':'На 100 г')}</div><div class="exercise-dup-reason">${foodEsc(x.reason||'Похожее название.')}</div></div>`).join('');
+  modal.querySelector('#foodDupNote').textContent=exact?'Создание второй записи в каталог запрещено.':'Если это действительно другой продукт, его можно добавить.';
+  const cancel=modal.querySelector('#foodDupCancel'),add=modal.querySelector('#foodDupAdd');add.style.display=exact?'none':'';cancel.textContent=exact?'Закрыть':'Отмена';
+  const close=()=>{modal.classList.add('hidden');modal._onAllow=null;};modal.querySelector('#foodDupClose').onclick=close;cancel.onclick=close;modal.onclick=e=>{if(e.target===modal)close();};
+  add.onclick=exact?null:()=>{const fn=modal._onAllow;close();if(typeof fn==='function')fn();};modal._onAllow=onAllow;
+  if(typeof lockModalScroll==='function')lockModalScroll();modal.classList.remove('hidden');
 };
 
-/* ---------- Nutrition product picker ---------- */
-function productTypeLabel(item){return item?.type==='dish' ? 'блюдо' : 'за 100 грамм';}
+/* One and only catalog synchronization function. */
+function productFromHistoryEntry(entry){
+  if(entry?.cal100!=null)return {name:String(entry.name).trim(),type:'per100',category:foodCategoryFor(entry.name,false),cal100:Number(entry.cal100)||0,protein100:Number(entry.protein100)||0,fat100:Number(entry.fat100)||0,carbs100:Number(entry.carbs100)||0};
+  return {name:String(entry?.name||'').trim(),type:'dish',category:foodCategoryFor(entry?.name,false),calories:Number(entry?.calories)||0,protein:Number(entry?.protein)||0,fat:Number(entry?.fat)||0,carbs:Number(entry?.carbs)||0};
+}
+/* [FIX] One canonical identity owner: reordered words are the same product.
+   When an exact identity already exists in the catalog, Today must use that
+   catalog product instead of silently keeping a second spelling in the diary. */
+function findCanonicalCatalogProduct(name){
+  ensureFoodStores();
+  const identity=foodIdentityKey(name);
+  return data.productCatalog.find(p=>p?.name&&foodIdentityKey(p.name)===identity)||null;
+}
+function ensureCatalogProduct(product){
+  ensureFoodStores();
+  const existing=findCanonicalCatalogProduct(product.name);
+  if(existing)return {product:existing,created:false};
+  const clean={...product,name:String(product.name).trim().replace(/\s+/g,' ')};
+  data.productCatalog.push(clean);
+  return {product:clean,created:true};
+}
+function productTypeLabel(item){return item?.type==='dish'?'блюдо':'за 100 грамм';}
 function getSavedFoodProducts(){
-  const map=new Map();
-  (data.productCatalog||[]).forEach(p=>{
-    if(!p?.name)return;
-    const k=foodFullKey(p.name);if(!map.has(k))map.set(k,{...p,source:'catalog'});
-  });
-  (data.foodDiary?.entries||[]).forEach(e=>{
-    if(!e?.name)return;
-    const k=foodFullKey(e.name);if(map.has(k))return;
-    map.set(k,{...e,type:e.cal100!=null?'per100':'dish',source:'history'});
-  });
+  const map=new Map();productRecords().forEach(r=>{if(!map.has(r.identity)){const p=r.source==='catalog'?r.item:productFromHistoryEntry(r.item);map.set(r.identity,{...p,source:r.source});}});
   return [...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru',{sensitivity:'base'}));
 }
 function renderFoodPresetList(){
-  const input=$('foodName'), list=$('foodPresetList');if(!input||!list)return;
-  const q=foodNorm(input.value);
+  const input=$('foodName'),list=$('foodPresetList');if(!input||!list)return;const q=foodNorm(input.value);
   if(!q){list.innerHTML='';list.classList.add('hidden');return;}
-  const items=getSavedFoodProducts().filter(item=>foodNorm(item.name).includes(q));
-  if(!items.length){list.innerHTML='<div class="food-preset-item food-preset-empty" aria-live="polite">Ничего не найдено</div>';list.classList.remove('hidden');return;}
-  list.innerHTML=items.map(item=>`<div class="food-preset-item" data-food-preset-name="${foodEsc(item.name)}" role="button" tabindex="0"><span style="min-width:0;overflow-wrap:anywhere;">${foodEsc(item.name)}</span><span style="margin-left:auto;padding-left:10px;color:var(--subtext);font-size:12px;white-space:nowrap;">(${productTypeLabel(item)})</span></div>`).join('');
+  const items=getSavedFoodProducts().filter(x=>foodNorm(x.name).includes(q));
+  list.innerHTML=items.length?items.map(x=>`<div class="food-preset-item" data-food-preset-name="${foodEsc(x.name)}" role="button" tabindex="0"><span style="min-width:0;overflow-wrap:anywhere;">${foodEsc(x.name)}</span><span style="margin-left:auto;padding-left:10px;color:var(--subtext);font-size:12px;white-space:nowrap;">(${productTypeLabel(x)})</span></div>`).join(''):'<div class="food-preset-item food-preset-empty">Ничего не найдено</div>';
   list.classList.remove('hidden');
 }
 window.filterFoodPresets=renderFoodPresetList;
-window.openAddFoodModal=function(){
-  editingFoodEntryIndex=null;
-  const modal=$('addFoodModal');if(!modal)return;
-  lockModalScroll();modal.classList.remove('hidden');
-  ['foodName','foodPortion','foodCalories','foodProtein','foodFat','foodCarbs','foodWeight','foodCal100','foodProtein100','foodFat100','foodCarbs100'].forEach(id=>{if($(id))$(id).value='';});
-  if($('calcResult'))$('calcResult').textContent='';
-  switchFoodMode('portion');renderFoodPresetList();setTimeout(()=>$('foodName')?.focus(),50);
-};
-window.clearFoodSearch=function(){const i=$('foodName');if(i){i.value='';renderFoodPresetList();i.focus();}};
-function ensureFoodSearchClear(){
-  const input=$('foodName');if(!input||$('v66FoodSearchClear'))return;
-  const parent=input.parentElement;if(!parent)return;
-  parent.classList.add('v66-search-wrap');
-  const b=document.createElement('button');b.id='v66FoodSearchClear';b.type='button';b.className='v66-search-clear hidden';b.textContent='×';b.setAttribute('aria-label','Очистить поиск');
-  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.clearFoodSearch();});parent.appendChild(b);
-  const sync=()=>b.classList.toggle('hidden',!String(input.value||'').trim());input.addEventListener('input',sync);sync();
-}
-ensureFoodSearchClear();
+window.hideFoodPresetList=function(){const list=$('foodPresetList');if(list){list.innerHTML='';list.classList.add('hidden');}};
 
-/* ---------- Catalog creation: exact block, similar = explicit choice ---------- */
-// [FIX] Единая точечная проверка числовых значений КБЖУ: NaN, отрицательные и чрезмерные значения не сохраняются.
-function foodNumber(value, max=100000){
-  const n=Number(String(value ?? '').trim().replace(',', '.'));
-  return Number.isFinite(n) && n >= 0 && n <= max ? n : null;
+/* Close suggestions by state transition, not z-index tricks. */
+function closeSuggestionsBeforeTypeChange(){window.hideFoodPresetList();}
+const nativeSwitch=window.switchFoodMode;
+window.switchFoodMode=function(mode){closeSuggestionsBeforeTypeChange();return typeof nativeSwitch==='function'?nativeSwitch.apply(this,arguments):undefined;};
+
+window.openAddFoodModal=function(){
+  editingFoodEntryIndex=null;const modal=$('addFoodModal');if(!modal)return;if(typeof lockModalScroll==='function')lockModalScroll();modal.classList.remove('hidden');
+  ['foodName','foodPortion','foodCalories','foodProtein','foodFat','foodCarbs','foodWeight','foodCal100','foodProtein100','foodFat100','foodCarbs100'].forEach(id=>{if($(id))$(id).value='';});if($('calcResult'))$('calcResult').textContent='';window.hideFoodPresetList();window.switchFoodMode('portion');setTimeout(()=>$('foodName')?.focus(),50);
+};
+window.clearFoodSearch=function(){const i=$('foodName');if(i){i.value='';window.hideFoodPresetList();i.focus();}};
+
+function foodNumber(value,max=100000){const n=Number(String(value??'').trim().replace(',','.'));return Number.isFinite(n)&&n>=0&&n<=max?n:null;}
+function makeCatalogProduct(name){
+  if(currentFoodMode==='100')return {name,type:'per100',category:foodCategoryFor(name,false),cal100:foodNumber($('foodCal100')?.value),protein100:foodNumber($('foodProtein100')?.value),fat100:foodNumber($('foodFat100')?.value),carbs100:foodNumber($('foodCarbs100')?.value)};
+  return {name,type:'dish',category:foodCategoryFor(name,false),calories:foodNumber($('foodCalories')?.value),protein:foodNumber($('foodProtein')?.value),fat:foodNumber($('foodFat')?.value),carbs:foodNumber($('foodCarbs')?.value)};
+}
+function validateCatalogProduct(product){
+  const vals=product.type==='dish'?[product.calories,product.protein,product.fat,product.carbs]:[product.cal100,product.protein100,product.fat100,product.carbs100];
+  return vals.every(v=>v!==null)&&vals[0]>0;
 }
 window.saveCatalogProduct=function(){
-  const name=String($('catalogName')?.value||'').trim().replace(/\s+/g,' ');
-  if(!name){showToast('Введите название');return;}
-  const type=$('catalogType')?.value||'per100';let product={name,type};
-  if(type==='dish'){
-    product.calories=foodNumber($('catalogDishCalories')?.value);product.protein=foodNumber($('catalogDishProtein')?.value);product.fat=foodNumber($('catalogDishFat')?.value);product.carbs=foodNumber($('catalogDishCarbs')?.value);
-    if(product.calories===null||product.protein===null||product.fat===null||product.carbs===null||product.calories<=0){showToast('Введите корректные неотрицательные КБЖУ блюда');return;}
+  ensureFoodStores();const name=String($('catalogName')?.value||'').trim().replace(/\s+/g,' ');if(!name){showToast('Введите название');return;}
+  const type=$('catalogType')?.value||'per100';const product={name,type,category:foodCategoryFor(name,false)};
+  if(type==='dish'){product.calories=foodNumber($('catalogDishCalories')?.value);product.protein=foodNumber($('catalogDishProtein')?.value);product.fat=foodNumber($('catalogDishFat')?.value);product.carbs=foodNumber($('catalogDishCarbs')?.value);}else{product.cal100=foodNumber($('catalogCal100')?.value);product.protein100=foodNumber($('catalogProtein100')?.value);product.fat100=foodNumber($('catalogFat100')?.value);product.carbs100=foodNumber($('catalogCarbs100')?.value);}
+  const vals=type==='dish'?[product.calories,product.protein,product.fat,product.carbs]:[product.cal100,product.protein100,product.fat100,product.carbs100];if(vals.some(v=>v===null)||vals[0]<=0){showToast(type==='dish'?'Введите корректные КБЖУ блюда':'Введите корректные КБЖУ на 100 г');return;}
+  const commit=()=>{if(editingCatalogProduct!==null)data.productCatalog[editingCatalogProduct]=product;else ensureCatalogProduct(product);saveData();closeCatalogEdit();renderCatalogList();showToast('Продукт сохранён в каталоге');};
+  const dup=window.findFoodDuplicate(name,editingCatalogProduct);if(dup.exact.length){window.showFoodDuplicateModal(name,dup.exact,true);return;}if(dup.similar.length){window.showFoodDuplicateModal(name,dup.similar,false,commit);return;}commit();
+};
+
+window.addFoodEntry=function(){
+  ensureFoodStores();const date=$('foodDate')?.value,name=String($('foodName')?.value||'').trim().replace(/\s+/g,' ');if(!name){showToast('Введите название');return;}
+  let entry,product;
+  if(currentFoodMode==='100'){
+    const weight=foodNumber($('foodWeight')?.value),cal100=foodNumber($('foodCal100')?.value),protein100=foodNumber($('foodProtein100')?.value),fat100=foodNumber($('foodFat100')?.value),carbs100=foodNumber($('foodCarbs100')?.value);
+    if(weight===null||weight<=0||cal100===null||cal100<=0||protein100===null||fat100===null||carbs100===null){showToast('Введите корректный вес и КБЖУ на 100 г');return;}
+    const r=n=>Math.round(n*10)/10;entry={date,name,portion:weight+' г',calories:Math.round(cal100*weight/100),protein:r(protein100*weight/100),fat:r(fat100*weight/100),carbs:r(carbs100*weight/100),cal100,protein100,fat100,carbs100};product={name,type:'per100',category:foodCategoryFor(name,false),cal100,protein100,fat100,carbs100};
   }else{
-    product.cal100=foodNumber($('catalogCal100')?.value);product.protein100=foodNumber($('catalogProtein100')?.value);product.fat100=foodNumber($('catalogFat100')?.value);product.carbs100=foodNumber($('catalogCarbs100')?.value);
-    if(product.cal100===null||product.protein100===null||product.fat100===null||product.carbs100===null||product.cal100<=0){showToast('Введите корректные неотрицательные КБЖУ на 100 г');return;}
+    const portion=$('foodPortion')?.value.trim()||'—',calories=foodNumber($('foodCalories')?.value),protein=foodNumber($('foodProtein')?.value),fat=foodNumber($('foodFat')?.value),carbs=foodNumber($('foodCarbs')?.value);
+    if(calories===null||calories<=0||protein===null||fat===null||carbs===null){showToast('Введите корректные КБЖУ');return;}
+    entry={date,name,portion,calories,protein,fat,carbs,cal100:null,protein100:null,fat100:null,carbs100:null};product={name,type:'dish',category:foodCategoryFor(name,false),calories,protein,fat,carbs};
+  }
+  const exactCatalog=findCanonicalCatalogProduct(name);
+  /* [FIX] Exact identity in the catalog is not a new product. Reuse the
+     canonical catalog spelling everywhere so «Йогурт греческий» cannot become
+     a hidden second identity next to «Греческий йогурт». */
+  if(exactCatalog){
+    entry.name=String(exactCatalog.name).trim();
+    product={...exactCatalog};
   }
   const commit=()=>{
-    if(editingCatalogProduct!==null)data.productCatalog[editingCatalogProduct]=product;else data.productCatalog.push(product);
-    saveData();closeCatalogEdit();renderCatalogList();showToast('Продукт сохранён в каталоге');
+    /* Atomic logical flow: catalog synchronization first, then today's entry. */
+    const sync=ensureCatalogProduct(product);
+    if(editingFoodEntryIndex!==null){data.foodDiary.entries[editingFoodEntryIndex]=entry;showToast('Запись обновлена');}
+    else {data.foodDiary.entries.push(entry);showToast(exactCatalog?'Использован существующий продукт из каталога':(sync.created?'Продукт добавлен сегодня и в каталог':'Продукт добавлен сегодня'));}
+    saveData();closeAddFoodModal();editingFoodEntryIndex=null;renderFoodDiary();if(typeof renderCatalogList==='function')renderCatalogList();
   };
-  const dup=window.findFoodDuplicate(name,editingCatalogProduct);
-  if(dup.exact.length){window.showFoodDuplicateModal(name,dup.exact,true);return;}
+  if(editingFoodEntryIndex!==null){commit();return;}
+  const dup=window.findFoodDuplicate(name);
+  if(dup.exact.length){
+    /* [FIX] Exact duplicate: never keep a second spelling. If a canonical
+       catalog item exists, it is reused; otherwise an old history-only item is
+       repaired into the catalog through ensureCatalogProduct. */
+    commit();return;
+  }
   if(dup.similar.length){window.showFoodDuplicateModal(name,dup.similar,false,commit);return;}
   commit();
 };
 
-/* ---------- Day entries: unified catalog identity ---------- */
-window.addFoodEntry=function(){
-  const date=$('foodDate')?.value,name=String($('foodName')?.value||'').trim().replace(/\s+/g,' ');
-  if(!name){showToast('Введите название');return;}
-  let portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100;
-  if(currentFoodMode==='portion'){
-    portion=$('foodPortion')?.value.trim()||'—';calories=foodNumber($('foodCalories')?.value);protein=foodNumber($('foodProtein')?.value);fat=foodNumber($('foodFat')?.value);carbs=foodNumber($('foodCarbs')?.value);cal100=protein100=fat100=carbs100=null;
-    if(calories===null||protein===null||fat===null||carbs===null||calories<=0){showToast('Введите корректные неотрицательные КБЖУ');return;}
-  }else{
-    const weight=foodNumber($('foodWeight')?.value);cal100=foodNumber($('foodCal100')?.value);protein100=foodNumber($('foodProtein100')?.value);fat100=foodNumber($('foodFat100')?.value);carbs100=foodNumber($('foodCarbs100')?.value);
-    if(weight===null||cal100===null||protein100===null||fat100===null||carbs100===null||weight<=0||cal100<=0){showToast('Введите корректный вес и неотрицательные КБЖУ на 100 г');return;}
-    portion=weight+' г';calories=Math.round(cal100*weight/100);const roundMacro=n=>Math.round(n*10)/10;protein=roundMacro(protein100*weight/100);fat=roundMacro(fat100*weight/100);carbs=roundMacro(carbs100*weight/100); // [FIX] Ккал целые, Б/Ж/У до 0.1
-  }
-  const entryData={date,name,portion,calories,protein,fat,carbs,cal100,protein100,fat100,carbs100};
-  const commit=(catalogProduct=null)=>{
-    if(editingFoodEntryIndex!==null){data.foodDiary.entries[editingFoodEntryIndex]=entryData;showToast('Запись обновлена');}
-    else{
-      if(!catalogProduct){
-        const product=currentFoodMode==='100'
-          ? {name,type:'per100',cal100,protein100,fat100,carbs100}
-          : {name,type:'dish',calories,protein,fat,carbs};
-        data.productCatalog.push(product);
-      }
-      data.foodDiary.entries.push(entryData);showToast('Продукт добавлен и сохранён в каталог');
-    }
-    saveData();closeAddFoodModal();editingFoodEntryIndex=null;renderFoodDiary();if($('foodTabCatalog')?.classList.contains('active'))renderCatalogList();
-  };
-  if(editingFoodEntryIndex!==null){commit();return;}
-  const dup=typeof window.findFoodDuplicate==='function'?window.findFoodDuplicate(name):{exact:[],similar:[]};
-  if(dup.exact?.length){
-    /* Exact identity already exists: do not create a second catalog card, add only today's entry. */
-    commit(dup.exact[0]);return;
-  }
-  if(dup.similar?.length){
-    window.showFoodDuplicateModal(name,dup.similar,false,()=>commit());return;
-  }
-  commit();
-};
+/* One clean picker click binding after all legacy handlers have loaded. */
+const oldList=$('foodPresetList');
+if(oldList&&!oldList.dataset.v1318Bound){oldList.dataset.v1318Bound='1';oldList.addEventListener('click',e=>{const item=e.target.closest('.food-preset-item[data-food-preset-name]');if(!item)return;e.preventDefault();window.hideFoodPresetList();if(typeof window.selectFoodPreset==='function')window.selectFoodPreset(item.getAttribute('data-food-preset-name'));});}
+const typeSelect=$('foodType');
+if(typeSelect&&!typeSelect.dataset.v1318Bound){typeSelect.dataset.v1318Bound='1';['pointerdown','mousedown','touchstart','focus','change'].forEach(ev=>typeSelect.addEventListener(ev,window.hideFoodPresetList,true));}
 
 /* ---------- Confirmation when adding exercise to a split ---------- */
 let v66PendingProgramAdd=null;
@@ -16783,33 +16752,35 @@ window.closeImportConfirm=function(){
 .catalog-section-title{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;background:var(--card-bg);color:var(--text);padding:14px!important;margin:0!important;min-height:52px!important}
 .catalog-section-items{padding:0 8px 8px}.catalog-section-items.hidden{display:none!important}
 .catalog-empty{color:var(--subtext);text-align:center;padding:18px 8px}
+
+/* [FIX v1.3.19] Suggestions are part of the form flow and never cover the type selector. */
+#addFoodModal #foodPresetList{
+  position:relative!important;
+  top:auto!important;
+  left:auto!important;
+  right:auto!important;
+  width:100%!important;
+  margin:6px 0 8px!important;
+  max-height:min(30vh,240px)!important;
+  overflow-y:auto!important;
+  pointer-events:auto!important;
+  z-index:0!important;
+}
 </style>
 <script>
 /* ===== CANONICAL FOOD CATALOG + WORKOUT PROGRESS ===== */
 (function(){
   'use strict';
-  const categoryFor=function(name,builtin){
-    const n=String(name||'').toLowerCase();
-    if(/кур|индей|говя|свинин|фарш|тефтел|кордон|мяс/.test(n))return '🥩 Мясо и птица';
-    if(/лосос|тун|треск|рыб|кревет/.test(n))return '🐟 Рыба и морепродукты';
-    if(/яйц/.test(n))return '🥚 Яйца';
-    if(/творог|йогурт|молок|кефир|сыр|skyr/.test(n))return '🥛 Молочные продукты';
-    if(/рис|греч|макарон|картоф|овся|булгур|паст/.test(n))return '🍚 Крупы и гарниры';
-    if(/хлеб|лаваш|блин/.test(n))return '🍞 Хлеб и выпечка';
-    if(/огур|помидор|броккол|морков|перец|овощ/.test(n))return '🥦 Овощи';
-    if(/банан|яблок|апельсин|ягод|фрукт/.test(n))return '🍌 Фрукты';
-    if(/арахис|миндал|масло|орех/.test(n))return '🥜 Орехи и жиры';
-    if(/шоколад|мёд|сахар|пикник|батон/.test(n))return '🍫 Перекусы и сладкое';
-    if(builtin)return '🍲 Блюда и другое';
-    return '⭐ Мои продукты';
-  };
-  renderCatalogList=function(){
+  const categoryFor=function(product){
+    if(product?.category)return product.category;
+    return window.foodCategoryFor?window.foodCategoryFor(product?.name,!!product?.builtin):(product?.builtin?'🍲 Блюда и другое':'⭐ Мои продукты');
+  };  renderCatalogList=function(){
     const c=document.getElementById('catalogContainer');if(!c)return;
     const q=String(document.getElementById('catalogSearch')?.value||'').trim().toLowerCase();
     const items=(data.productCatalog||[]).map((p,i)=>({...p,_idx:i})).filter(p=>!q||String(p.name||'').toLowerCase().includes(q));
     if(!items.length){c.innerHTML='<div class="catalog-empty">Ничего не найдено</div>';return;}
     const groups={};
-    items.forEach(p=>{const g=categoryFor(p.name,!!p.builtin);(groups[g]||(groups[g]=[])).push(p);});
+    items.forEach(p=>{const g=categoryFor(p);(groups[g]||(groups[g]=[])).push(p);});
     const order=['⭐ Мои продукты','🥩 Мясо и птица','🐟 Рыба и морепродукты','🥚 Яйца','🥛 Молочные продукты','🍚 Крупы и гарниры','🍞 Хлеб и выпечка','🥦 Овощи','🍌 Фрукты','🥜 Орехи и жиры','🍫 Перекусы и сладкое','🍲 Блюда и другое'];
     c.innerHTML=order.filter(g=>groups[g]?.length).map(g=>`<div class="catalog-section"><div class="catalog-section-title"><span>${g} <small style="color:var(--subtext)">(${groups[g].length})</small></span></div><div class="catalog-section-items">${groups[g].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ru')).map(p=>`<div class="food-item"><div style="flex:1"><div style="font-weight:600">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--subtext)">${p.type==='dish'?`Блюдо: ${p.calories} ккал, Б ${p.protein}, Ж ${p.fat}, У ${p.carbs}`:`на 100 г: ${p.cal100} ккал, Б ${p.protein100}, Ж ${p.fat100}, У ${p.carbs100}`}</div></div><button class="small-btn gray" onclick="editCatalogProduct(${p._idx})">✏️</button><button class="small-btn gray" onclick="deleteCatalogProduct(${p._idx})">🗑️</button></div>`).join('')}</div></div>`).join('');
   };
@@ -16835,6 +16806,8 @@ window.closeImportConfirm=function(){
   window.addFoodEntry=addFoodEntry;
   window.updateWorkoutProgressUI=updateWorkoutProgressUI;
 })();
+
+
 </script>
 
 </body>
