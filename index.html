@@ -64,46 +64,11 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .comparison .positive { color: var(--positive); } .comparison .negative { color: var(--negative); }
 .theme-toggle-btn { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; }
 .close-workout-btn { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 20px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; border: none; color: var(--text); }
-/* Unified modal architecture: every modal uses the same safe-area viewport. */
-#deleteConfirmModal { z-index: 2001; }
-#deleteConfirmModal .confirm-modal-content { position: relative; }
-.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal,
-.modal-stack-root {
-  position: fixed;
-  inset: 0;
-  padding:
-    calc(env(safe-area-inset-top, 0px) + 12px)
-    12px
-    calc(env(safe-area-inset-bottom, 0px) + 12px);
-  box-sizing: border-box;
-  background: var(--modal-overlay);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-}
-.theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden,
-.modal-stack-root.hidden { display: none !important; }
-.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content,
-.modal-stack-content {
-  background: var(--card-bg);
-  border-radius: 22px;
-  padding: 24px;
-  width: min(100%, 760px);
-  max-width: 760px;
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
-  box-sizing: border-box;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-/* Compact confirmation dialogs keep their natural height while still respecting the same viewport. */
-.confirm-modal-content { width: min(100%, 560px); max-height: 100%; }
-.modal-stack-inactive { pointer-events: none !important; }
-.modal-stack-active { pointer-events: auto !important; }
+#deleteConfirmModal { z-index: 2001 !important; }
+#deleteConfirmModal .confirm-modal-content { position: relative; z-index: 1001; }
+.theme-modal, .exercise-modal, .date-modal, .confirm-modal, .workout-detail-modal, .manual-workout-modal, .achievements-modal, .food-modal, .catalog-modal { position: fixed; inset: 0; padding-top: 47px; padding-bottom: 34px; box-sizing: border-box; background: var(--modal-overlay); display: flex; align-items: center; justify-content: center; z-index: 2001; overscroll-behavior: contain; }
+.theme-modal.hidden, .exercise-modal.hidden, .date-modal.hidden, .confirm-modal.hidden, .workout-detail-modal.hidden, .manual-workout-modal.hidden, .achievements-modal.hidden, .food-modal.hidden, .catalog-modal.hidden { display: none; }
+.theme-modal-content, .exercise-modal-content, .date-modal-content, .confirm-modal-content, .workout-detail-content, .manual-workout-content, .achievements-content, .food-modal-content, .catalog-modal-content { background: var(--card-bg); border-radius: 20px; padding: 24px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; /* [FIX] separated CSS declarations so the safe-area rule is parsed correctly */ padding-top: env(safe-area-inset-top, 20px); padding-bottom: env(safe-area-inset-bottom, 20px); box-sizing: border-box; }
 /* [FIX] v1.3.10: visible build information inside the gear/settings sheet. */
 #themeModal .app-version-info{margin:0 34px 14px 0;color:var(--subtext);font-size:12px;font-weight:700;line-height:1.2;letter-spacing:.1px;}
 .close-btn, .modal-close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--subtext); cursor: pointer; background: none; border: none; }
@@ -172,7 +137,7 @@ input, select { width: 100%; padding: 10px; border-radius: 10px; border: 0; back
 .field-label { display: block; font-size: 12px; color: var(--subtext); margin: 6px 0 2px; }
 
 /* --- Refined charts / body parameters UI --- */
-.chart-modal-content { max-height: 88vh; padding: 20px; border-radius: 24px; }
+.chart-modal-content { max- max-height: 88vh; padding: 20px; border-radius: 24px; }
 .chart-modal-header { display:flex; align-items:center; gap:12px; padding-right:28px; margin-bottom:18px; }
 .chart-modal-icon { width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); font-size:22px; }
 .chart-modal-title { font-size:21px; font-weight:800; }
@@ -1119,7 +1084,7 @@ body { padding-top: env(safe-area-inset-top); }
 /* ===== Мышцы и техника v3: модальная карточка, статичные фазы ===== */
 .technique-modal{position:fixed;inset:0;background:var(--modal-overlay);display:flex;align-items:center;justify-content:center;z-index:2001;overscroll-behavior:contain;}
 .technique-modal.hidden{display:none;}
-.technique-modal-content{background:var(--card-bg);border-radius:20px;padding:20px;max-height:86vh;overflow-y:auto;position:relative;-webkit-overflow-scrolling:touch;}
+.technique-modal-content{background:var(--card-bg);border-radius:20px;padding:20px;max-max-height:86vh;overflow-y:auto;position:relative;-webkit-overflow-scrolling:touch;}
 .technique-modal-sub{font-size:13px;font-weight:700;color:var(--button-green);margin:-12px 0 14px;}
 /* Кликабельное название упражнения в тренировке */
 .workout-exercise-title{cursor:pointer;}
@@ -6694,7 +6659,7 @@ body{
 <div id="themeModal" class="theme-modal hidden" onclick="if(event.target === this) closeThemeModal()">
     <div class="theme-modal-content">
         <span class="close-btn" onclick="closeThemeModal()">&times;</span>
-        <div class="app-version-info" aria-label="Версия приложения">v. 1.4.29 от 04.09.26</div>
+        <div class="app-version-info" aria-label="Версия приложения">v. 1.4.19 от 04.09.26</div>
         <div style="font-size:20px; font-weight:600; margin-bottom:16px;">Выберите тему</div>
         <button onclick="setTheme('dark')">🌙 Тёмная</button>
         <button onclick="setTheme('light')" style="background: var(--accent-gradient);">☀️ Светлая</button>
@@ -6730,7 +6695,7 @@ body{
     </div>
 </div>
 <div id="renameExerciseModal" class="catalog-modal hidden" onclick="if(event.target===this)closeRenameExerciseModal()">
-  <div class="catalog-modal-content">
+  <div class="catalog-modal-content" style="max-width:520px;">
     <span class="close-btn" onclick="closeRenameExerciseModal()">&times;</span>
     <div style="font-size:21px;font-weight:800;margin-bottom:14px;padding-right:30px;">Изменить название</div>
     <input type="hidden" id="renameExerciseOld">
@@ -6741,7 +6706,7 @@ body{
   </div>
 </div>
 <div id="directoryNewExerciseModal" class="catalog-modal hidden" onclick="if(event.target===this)closeNewDirectoryExerciseModal()">
-  <div class="catalog-modal-content">
+  <div class="catalog-modal-content" style="max-width:520px;">
     <span class="close-btn" onclick="closeNewDirectoryExerciseModal()">&times;</span>
     <div style="font-size:21px;font-weight:800;margin-bottom:14px;padding-right:30px;">Новое упражнение</div>
     <label class="field-label">Название</label><input id="directoryNewName" maxlength="80" placeholder="Например, Жим в тренажёре">
@@ -7066,7 +7031,7 @@ body{
 
 
 <div id="exercisePickerModal" class="date-modal hidden" onclick="if(event.target===this)closeExercisePicker()">
-  <div class="date-modal-content" style="display:flex;flex-direction:column;">
+  <div class="date-modal-content" style="max-height:86vh;display:flex;flex-direction:column;">
     <span class="close-btn" onclick="closeExercisePicker()">&times;</span>
     <div id="exercisePickerTitle" style="font-size:20px;font-weight:800;margin-bottom:5px;padding-right:30px;">Добавить упражнение</div>
     <div style="font-size:13px;color:var(--subtext);margin-bottom:10px;">Выбери упражнение из справочника или воспользуйся поиском.</div>
@@ -7075,7 +7040,7 @@ body{
   </div>
 </div>
 <div id="progressExercisePickerModal" class="date-modal hidden" onclick="if(event.target===this)closeProgressExercisePicker()">
-  <div class="date-modal-content" style="display:flex;flex-direction:column;">
+  <div class="date-modal-content" style="max-height:82vh;display:flex;flex-direction:column;">
     <span class="close-btn" onclick="closeProgressExercisePicker()">&times;</span>
     <div style="font-size:20px;font-weight:700;margin-bottom:5px;">Упражнения с прогрессом</div>
     <div style="font-size:13px;color:var(--subtext);margin-bottom:12px;">Выбери упражнение, по которому уже есть сохранённые данные.</div>
@@ -7084,7 +7049,7 @@ body{
   </div>
 </div>
 <div id="exerciseOrderModal" class="date-modal hidden" onclick="if(event.target===this)closeExerciseOrderModal()">
-  <div class="date-modal-content" style="display:flex;flex-direction:column;">
+  <div class="date-modal-content" style="max-height:82vh;display:flex;flex-direction:column;">
     <span class="close-btn" onclick="closeExerciseOrderModal()">&times;</span>
     <div id="exerciseOrderTitle" style="font-size:20px;font-weight:700;margin-bottom:5px;">Порядок упражнений</div>
     <div style="font-size:13px;color:var(--subtext);margin-bottom:12px;">Для каждого упражнения выбери новую позицию. Изменения применятся только после «Сохранить порядок».</div>
@@ -7242,15 +7207,7 @@ function isModalElement(el) {
 }
 
 function getModalRoots() {
-  /* Modals can be opened from inside another modal. Search the whole document,
-     otherwise nested windows are pruned from the stack and clicks leak through. */
-  const selectors = [
-    '[id$="Modal"]',
-    '.theme-modal', '.exercise-modal', '.date-modal', '.confirm-modal',
-    '.workout-detail-modal', '.manual-workout-modal', '.achievements-modal',
-    '.food-modal', '.catalog-modal', '.technique-modal'
-  ].join(',');
-  return Array.from(document.querySelectorAll(selectors)).filter(isModalElement);
+  return Array.from(document.body.children).filter(isModalElement);
 }
 
 function isConfirmationModal(modal) {
@@ -7284,67 +7241,10 @@ function ensureModalCloseButton(modal) {
   content.appendChild(button);
 }
 
-
-function applyAuthoritativeModalGeometry(modal) {
-  if (!modal || isConfirmationModal(modal)) return;
-  modal.classList.add('ft-fullscreen-modal');
-  modal.classList.remove('ft-compact-modal');
-  const content = getModalContent(modal);
-  if (!content) return;
-  content.classList.add('fullscreen-modal-content');
-
-  // Root always covers the physical viewport.
-  Object.assign(modal.style, {
-    position: 'fixed',
-    inset: '0',
-    top: '0',
-    right: '0',
-    bottom: '0',
-    left: '0',
-    width: '100%',
-    height: '100dvh',
-    minHeight: '100dvh',
-    margin: '0',
-    padding: '0',
-    display: 'block',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-    borderRadius: '0'
-  });
-
-  // The actual modal surface is a full-screen screen, not a centered card.
-  Object.assign(content.style, {
-    position: 'fixed',
-    inset: '0',
-    top: '0',
-    right: '0',
-    bottom: '0',
-    left: '0',
-    width: '100%',
-    height: '100dvh',
-    minHeight: '100dvh',
-    maxWidth: 'none',
-    maxHeight: 'none',
-    margin: '0',
-    borderRadius: '0',
-    boxSizing: 'border-box',
-    overflowX: 'hidden',
-    overflowY: 'auto',
-    WebkitOverflowScrolling: 'touch',
-    overscrollBehavior: 'contain',
-    touchAction: 'pan-y',
-    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 16px)',
-    paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
-    paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 16px)'
-  });
-}
-
 function prepareModalRoot(modal) {
   if (!modal) return;
   modal.classList.add('modal-stack-root');
   modal.setAttribute('aria-modal', 'true');
-  applyAuthoritativeModalGeometry(modal);
   const content = getModalContent(modal);
   if (content) {
     content.classList.add('modal-stack-content');
@@ -7381,7 +7281,6 @@ function updateModalStackState() {
   }
   openRoots.forEach(modal => {
     prepareModalRoot(modal);
-    applyAuthoritativeModalGeometry(modal);
     if (!modalStack.includes(modal)) modalStack.push(modal);
   });
 
@@ -7403,7 +7302,7 @@ function updateModalStackState() {
       content.style.overflowX = 'hidden';
       content.style.overscrollBehavior = 'contain';
       content.style.webkitOverflowScrolling = 'touch';
-      if (!modal.classList.contains('ft-fullscreen-modal')) content.style.maxHeight = '100%';
+      content.style.maxHeight = 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 28px)';
       content.style.boxSizing = 'border-box';
     }
   });
@@ -12595,7 +12494,7 @@ function showToast(msg) {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=1.4.24', {updateViaCache:'none'})
+        navigator.serviceWorker.register('./sw.js?v=1.4.19', {updateViaCache:'none'})
             .then(reg => console.log('SW registered', reg.scope))
             .catch(err => console.log('SW failed', err));
     });
@@ -17377,8 +17276,8 @@ window.closeImportConfirm=function(){
 #importConfirmModal .confirm-modal-content>div[style*="color:var(--subtext)"]{font-size:14px!important;line-height:1.5!important;margin-bottom:16px!important;}
 #importConfirmModal button{min-height:48px!important;margin:8px 0 0!important;width:100%!important;}
 </style>
-
-
+</body>
+</html>
 
 <style id="ftracker-v1416-final-ui">
 /* v1.4.17: full-width top system notifications */
@@ -17452,8 +17351,8 @@ window.closeImportConfirm=function(){
 </script>
 
 
-<style id="ftracker-v1420-modal-stack">
-/* v1.4.20 — unified safe-area modal stack and neutral system notifications */
+<style id="ftracker-v1419-neutral-notifications">
+/* v1.4.19 — neutral system notifications, keeping the v1.4.18 safe-area architecture */
 .toast{
   background:rgba(28,28,30,.98)!important;
   color:#f5f5f7!important;
@@ -17468,155 +17367,3 @@ body.light-mode .toast{
   box-shadow:0 8px 24px rgba(0,0,0,.14)!important;
 }
 </style>
-
-<!-- FTracker v1.4.27 — unified fullscreen modal architecture -->
-
-
-<style id="ftracker-v1426-canonical-modal-system">
-/* FTRACKER v1.4.26 — SINGLE CANONICAL FULLSCREEN MODAL SYSTEM
-   Modal Stack controls layering only. Geometry is defined here exactly once. */
-:root { --ft-modal-safe-top: env(safe-area-inset-top, 0px); --ft-modal-safe-bottom: env(safe-area-inset-bottom, 0px); --ft-modal-safe-left: env(safe-area-inset-left, 0px); --ft-modal-safe-right: env(safe-area-inset-right, 0px); }
-
-/* FULLSCREEN ROOT: never centered, never vh-limited */
-.ft-modal-fullscreen-root,
-.modal-stack-root.ft-modal-fullscreen-root {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  min-height: 100dvh !important;
-  max-width: none !important;
-  max-height: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  align-items: initial !important;
-  justify-content: initial !important;
-  overflow: hidden !important;
-  overscroll-behavior: contain !important;
-  box-sizing: border-box !important;
-}
-.ft-modal-fullscreen-root.hidden { display: none !important; }
-
-/* THE ONLY SCROLLING VIEWPORT */
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content,
-.ft-modal-fullscreen-root > .fullscreen-modal-content,
-.ft-modal-fullscreen-root > .modal-stack-content.ft-modal-fullscreen-content {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  max-width: none !important;
-  max-height: none !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-  box-sizing: border-box !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior: contain !important;
-  padding-top: calc(var(--ft-modal-safe-top) + 14px) !important;
-  padding-right: calc(var(--ft-modal-safe-right) + 16px) !important;
-  padding-bottom: calc(var(--ft-modal-safe-bottom) + 24px) !important;
-  padding-left: calc(var(--ft-modal-safe-left) + 16px) !important;
-  scroll-padding-top: calc(var(--ft-modal-safe-top) + 14px) !important;
-  scroll-padding-bottom: calc(var(--ft-modal-safe-bottom) + 24px) !important;
-}
-
-/* Neutralize EVERY historical geometry limiter for canonical fullscreen windows. */
-.ft-modal-fullscreen-root .ft-modal-fullscreen-content,
-.ft-modal-fullscreen-root .modal-stack-content,
-.ft-modal-fullscreen-root .theme-modal-content,
-.ft-modal-fullscreen-root .exercise-modal-content,
-.ft-modal-fullscreen-root .date-modal-content,
-.ft-modal-fullscreen-root .food-modal-content,
-.ft-modal-fullscreen-root .catalog-modal-content,
-.ft-modal-fullscreen-root .workout-detail-content,
-.ft-modal-fullscreen-root .manual-workout-content,
-.ft-modal-fullscreen-root .achievements-content,
-.ft-modal-fullscreen-root .chart-modal-content,
-.ft-modal-fullscreen-root .technique-modal-content,
-.ft-modal-fullscreen-root .measurement-manager-modal-content,
-.ft-modal-fullscreen-root .body-history-modal-content,
-.ft-modal-fullscreen-root .body-graph-modal-content,
-.ft-modal-fullscreen-root .workout-new-exercise-sheet,
-.ft-modal-fullscreen-root .replace-exercise-sheet,
-.ft-modal-fullscreen-root .exercise-card-unified {
-  max-width: none !important;
-  max-height: none !important;
-}
-
-/* Stack behavior: only top modal is interactive. */
-.ft-modal-fullscreen-root.is-stack-inactive { pointer-events: none !important; }
-.ft-modal-fullscreen-root.is-stack-active { pointer-events: auto !important; }
-
-/* Close controls always live below Dynamic Island. */
-.ft-modal-fullscreen-root .modal-close-btn,
-.ft-modal-fullscreen-root .close-btn,
-.ft-modal-fullscreen-root .exercise-card-close {
-  position: fixed !important;
-  top: calc(var(--ft-modal-safe-top) + 8px) !important;
-  right: calc(var(--ft-modal-safe-right) + 10px) !important;
-  z-index: 2147483000 !important;
-}
-
-/* Common positioned modal headers must never start under the Dynamic Island. */
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content > .modal-header,
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content > .chart-modal-header,
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content > .replace-sheet-head,
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content > .body-history-modal-head,
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content > .measurement-modal-header,
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content > [class$="-header"],
-.ft-modal-fullscreen-root > .ft-modal-fullscreen-content > [class$="-head"] {
-  scroll-margin-top: calc(var(--ft-modal-safe-top) + 14px) !important;
-}
-
-/* Compact confirmations are deliberately NOT fullscreen. */
-.ft-modal-compact-root { position: fixed !important; inset: 0 !important; }
-</style>
-
-<script id="ftracker-v1427-modal-runtime">
-/* v1.4.27 — TOUCH-SAFE modal runtime. Only real modal roots are normalized. */
-(function(){
-  'use strict';
-  const compactIds=new Set(['autoBackupRestoreConfirmModal','confirmExitModal','finishWorkoutConfirmModal','deleteConfirmModal','importConfirmModal','foodCopyConfirmModal','measurementSaveConfirmModal']);
-  function isRealModalRoot(el){
-    if(!(el instanceof HTMLElement)) return false;
-    const id=el.id||'';
-    if(/Modal$/i.test(id)) return true;
-    return ['theme-modal','exercise-modal','date-modal','catalog-modal','food-modal','workout-detail-modal','manual-workout-modal','achievements-modal','technique-modal'].some(cls=>el.classList.contains(cls));
-  }
-  function isCompact(root){return compactIds.has(root.id)||root.classList.contains('confirm-modal');}
-  function getDirectContent(root){return Array.from(root.children).find(child=>child instanceof HTMLElement&&!child.classList.contains('modal-close-btn')&&!child.classList.contains('close-btn'))||null;}
-  function normalizeRoot(root){
-    if(!isRealModalRoot(root)||isCompact(root)) return;
-    const content=getDirectContent(root); if(!content) return;
-    root.classList.add('modal-stack-root','ft-modal-fullscreen-root');
-    content.classList.add('modal-stack-content','fullscreen-modal-content','ft-modal-fullscreen-content');
-    root.style.removeProperty('max-height'); root.style.removeProperty('max-width');
-    content.style.removeProperty('max-height'); content.style.removeProperty('max-width');
-  }
-  function normalizeExisting(){
-    document.querySelectorAll('div[id$="Modal"]').forEach(normalizeRoot);
-    document.querySelectorAll('.theme-modal,.exercise-modal,.date-modal,.catalog-modal,.food-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.technique-modal').forEach(normalizeRoot);
-  }
-  function watchNewModals(){
-    const observer=new MutationObserver(records=>{
-      for(const record of records) for(const node of record.addedNodes){
-        if(!(node instanceof HTMLElement)) continue;
-        if(isRealModalRoot(node)) normalizeRoot(node);
-        node.querySelectorAll?.('div[id$="Modal"],.theme-modal,.exercise-modal,.date-modal,.catalog-modal,.food-modal,.workout-detail-modal,.manual-workout-modal,.achievements-modal,.technique-modal').forEach(normalizeRoot);
-      }
-    });
-    observer.observe(document.body,{childList:true,subtree:true});
-  }
-  function start(){normalizeExisting();watchNewModals();}
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
-})();
-</script>
-<!-- build: ftracker-v1.4.27-touch-safe-modal-runtime -->
-
-</body>
-</html>

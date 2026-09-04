@@ -26,6 +26,6 @@
       "purpose": "any maskable"
     }
   ],
-  "_build": "ftracker-v1.4.29-touch-restoration-only",
-  "version": "1.4.29"
+  "_build": "ftracker-v1.4.19-neutral-notifications",
+  "version": "1.4.19"
 }

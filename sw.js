@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ftracker-v1.4.29-touch-restoration-only';
+const CACHE_VERSION = 'ftracker-v1.4.19-neutral-notifications';
 const CACHE_NAME = CACHE_VERSION;
 const APP_SHELL = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const c=await caches.open(CACHE_NAME);await c.addAll(APP_SHELL);await self.skipWaiting();})()));
