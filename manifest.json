@@ -26,6 +26,6 @@
       "purpose": "any maskable"
     }
   ],
-  "_build": "ftracker-v1.3.8-workout-checkbox-catalog-global-fix",
-  "version": "1.3.8"
+  "_build": "ftracker-v1.4.29-touch-restoration-only",
+  "version": "1.4.29"
 }
